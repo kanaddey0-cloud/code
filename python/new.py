@@ -664,30 +664,204 @@
 # hello()
 # print(add(2, 3))
 
-from functools import wraps
+# from functools import wraps
 
-def star(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        print("***** before star *****")
-        result = func(*args, **kwargs)
-        print("***** after star *****")
-        return result
-    return wrapper
+# def star(func):
+#     @wraps(func)
+#     def wrapper(*args, **kwargs):
+#         print("***** before star *****")
+#         result = func(*args, **kwargs)
+#         print("***** after star *****")
+#         return result
+#     return wrapper
 
-def plus(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        print("+++++ before plus +++++")
-        result = func(*args, **kwargs)
-        print("+++++ after plus +++++")
-        return result
-    return wrapper
+# def plus(func):
+#     @wraps(func)
+#     def wrapper(*args, **kwargs):
+#         print("+++++ before plus +++++")
+#         result = func(*args, **kwargs)
+#         print("+++++ after plus +++++")
+#         return result
+#     return wrapper
 
-@star   # applied last (outer wrapper)
-@plus   # applied first (inner wrapper)
-def greet():
-    print("Hello!")
+# @star   # applied last (outer wrapper)
+# @plus   # applied first (inner wrapper)
+# def greet():
+#     print("Hello!")
 
-greet()
+# greet()
 
+
+# f = open(r"C:\Users\kanad\OneDrive\Desktop\Android Development\Code\python\Demo.txt", "w")  # Open a file for writing
+
+# f.write("Hello, this is the first line.\n")  # Write some data
+# f.write("Python file I/O is very simple!\n")
+# f.write("Hello\n")  # Writes a single string
+# f.writelines(["One\n", "Two\n", "Three\n"])  # Writes line by line
+# f.close()
+# print("Writing File \n"+"-"*16)
+# f = open(r"C:\Users\kanad\OneDrive\Desktop\Android Development\Code\python\Demo.txt", "r")
+# data = f.read()          # Reads the entire file
+# print(data)
+# print(f.read(5))       # Read first 5 chars
+# print(f.readline())    # Read one line
+# print(f.readlines())   # Read remaining lines as list
+# f.close()
+# print("-"*16)
+# f = open(r"C:\Users\kanad\OneDrive\Desktop\Android Development\Code\python\Demo.txt", "r")
+# print(f.tell())     # → 0 (beginning)
+# f.read(5)
+# print(f.tell())     # → 5
+# f.seek(0)           # Go back to start
+# print(f.read())     # Read again
+# f.close()
+
+# with open(r"C:\Users\kanad\OneDrive\Desktop\Android Development\Code\python\Demo.txt", "r") as f:
+#     data = f.read()
+
+# letters = digits = spaces = others = 0
+
+# for ch in data:
+#     if ch.isalpha():
+#         letters += 1
+#     elif ch.isdigit():
+#         digits += 1
+#     elif ch.isspace():
+#         spaces += 1
+#     else:
+#         others += 1
+
+# print("Letters:", letters)
+# print("Digits:", digits)
+# print("Spaces:", spaces)
+# print("Others:", others)
+
+
+# with open(r"C:\Users\kanad\OneDrive\Desktop\Android Development\Code\python\Demo.txt", "r") as f:
+#     data = f.read()
+
+# data_upper = ""
+# for ch in data:
+#     if ch.isalpha():
+#         data_upper += ch.upper()
+#     else:
+#         data_upper += ch
+
+# with open(r"C:\Users\kanad\OneDrive\Desktop\Android Development\Code\python\Demo.txt", "w") as f:
+#     f.write(data_upper)
+# print("-"*16)
+
+# with open(r"C:\Users\kanad\OneDrive\Desktop\Android Development\Code\python\Demo.txt", "r") as f:
+#     words = f.read().split()
+# print("Shortest word:",min(words, key=len))
+
+# print("Longest word:", max(words, key=len))
+# print("Average word length:", sum(len(w) for w in words) / len(words))
+
+# x = 10
+# print(type(x))          # <class 'int'>
+
+# y = 3.14
+# print(type(y))          # <class 'float'>
+
+# z = "Hello"
+# print(type(z))          # <class 'str'>
+
+# a = [1, 2, 3]
+# print(type(a))          # <class 'list'>
+
+# MyClass = type('MyClass', (), {"x": 10})
+# obj = MyClass()
+# print(obj.x)            # 10
+# print(type(obj)) 
+
+# x = 10; y = 2.5
+# print(isinstance(x, int))         # True
+# print(isinstance(x, float))       # False
+# print(isinstance(y, float))       # False
+
+# x = 10.5
+# print(isinstance(x, (int, float)))  # True
+
+# x = 5
+# print(id(x))
+# y = x
+# print(id(y),"\nnew ",id(x))   # same id → same object
+# x=x+1
+# print(id(x))
+
+# x = [1, 2, 3]
+# print(dir(x))  # shows all methods in applicable in here
+# print("-"*32)
+# class Student:
+#     def __init__(self, name, age):
+#         self.name = name
+#         self.age = age
+# s = Student("Kanad", 20)
+# print(vars(s))    # {'name': 'Kanad', 'age': 20}
+# print("-"*32)
+# # help(str)
+# # help(print)
+# # print("-"*32)
+# x = "Hello"
+# print(str(x))    # Hello
+# print(repr(x))   # 'Hello'
+
+print("""Helloworld""")
+# print(""Helloworld"")
+print("Helloworld")
+print('''Helloworld''')
+# print(''Helloworld'')
+print('Helloworld')
+print('------------------')
+print(" ' ")   # prints single quote
+print(' " ')   # prints double quote
+print('------------------')
+print(r"C:\new\folder")    # Output: C:\new\folder
+print("C:\new\folder")
+print("C:\\new")        # Prints a single backslash (\) → Output: C:\new
+print('------------------')
+print('It\'s ok')       # Escapes single quote → Output: It's ok
+print('------------------')
+
+print("He said \"Hi\"") # Escapes double quotes → Output: He said "Hi"
+print('------------------')
+
+print("Hello\nWorld")   # \n inserts a newline → Output:
+                        # Hello
+                        # World
+print('------------------')
+
+print("Name\tAge")      # \t inserts a tab space → Output: Name    Age
+print('------------------')
+
+print("Hello\rHi")      # \r moves cursor to line start, overwrites → Output: Hi
+print('------------------')
+
+print("Helloo\b")       # \b backspace deletes previous character → Output: Hello
+print('------------------')
+
+print("Hello\fWorld")   # \f form feed (new page / vertical space) → Output:
+                        # Hello
+                        #       World  (may look like a newline)
+print('------------------')
+
+print("\a")             # \a bell sound (alert) – makes a beep (if terminal supports)
+print('------------------')
+
+print("A\vB")           # \v vertical tab → Output:
+                        # A
+                        #   B
+print('------------------')
+
+print("Hello\0World")   # \0 null character (invisible) → Output: HelloWorld
+
+"""
+This is also a comment
+using triple double-quotes.
+Python will ignore it.
+"""
+print("Hello")
+
+'''You can also use triple single quotes
+for the same purpose.'''
