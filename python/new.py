@@ -807,61 +807,64 @@
 # print(str(x))    # Hello
 # print(repr(x))   # 'Hello'
 
-print("""Helloworld""")
-# print(""Helloworld"")
-print("Helloworld")
-print('''Helloworld''')
-# print(''Helloworld'')
-print('Helloworld')
-print('------------------')
-print(" ' ")   # prints single quote
-print(' " ')   # prints double quote
-print('------------------')
-print(r"C:\new\folder")    # Output: C:\new\folder
-print("C:\new\folder")
-print("C:\\new")        # Prints a single backslash (\) → Output: C:\new
-print('------------------')
-print('It\'s ok')       # Escapes single quote → Output: It's ok
-print('------------------')
+# print("""Helloworld""")
+# # print(""Helloworld"")
+# print("Helloworld")
+# print('''Helloworld''')
+# # print(''Helloworld'')
+# print('Helloworld')
+# print('------------------')
+# print(" ' ")   # prints single quote
+# print(' " ')   # prints double quote
+# print('------------------')
+# print(r"C:\new\folder")    # Output: C:\new\folder
+# print("C:\new\folder")
+# print("C:\\new")        # Prints a single backslash (\) → Output: C:\new
+# print('------------------')
+# print('It\'s ok')       # Escapes single quote → Output: It's ok
+# print('------------------')
 
-print("He said \"Hi\"") # Escapes double quotes → Output: He said "Hi"
-print('------------------')
+# print("He said \"Hi\"") # Escapes double quotes → Output: He said "Hi"
+# print('------------------')
 
-print("Hello\nWorld")   # \n inserts a newline → Output:
-                        # Hello
-                        # World
-print('------------------')
+# print("Hello\nWorld")   # \n inserts a newline → Output:
+#                         # Hello
+#                         # World
+# print('------------------')
 
-print("Name\tAge")      # \t inserts a tab space → Output: Name    Age
-print('------------------')
+# print("Name\tAge")      # \t inserts a tab space → Output: Name    Age
+# print('------------------')
 
-print("Hello\rHi")      # \r moves cursor to line start, overwrites → Output: Hi
-print('------------------')
+# print("Hello\rHi")      # \r moves cursor to line start, overwrites → Output: Hi
+# print('------------------')
 
-print("Helloo\b")       # \b backspace deletes previous character → Output: Hello
-print('------------------')
+# print("Helloo\b")       # \b backspace deletes previous character → Output: Hello
+# print('------------------')
 
-print("Hello\fWorld")   # \f form feed (new page / vertical space) → Output:
-                        # Hello
-                        #       World  (may look like a newline)
-print('------------------')
+# print("Hello\fWorld")   # \f form feed (new page / vertical space) → Output:
+#                         # Hello
+#                         #       World  (may look like a newline)
+# print('------------------')
 
-print("\a")             # \a bell sound (alert) – makes a beep (if terminal supports)
-print('------------------')
+# print("\a")             # \a bell sound (alert) – makes a beep (if terminal supports)
+# print('------------------')
 
-print("A\vB")           # \v vertical tab → Output:
-                        # A
-                        #   B
-print('------------------')
+# print("A\vB")           # \v vertical tab → Output:
+#                         # A
+#                         #   B
+# print('------------------')
 
-print("Hello\0World")   # \0 null character (invisible) → Output: HelloWorld
+# print("Hello\0World")   # \0 null character (invisible) → Output: HelloWorld
 
-"""
-This is also a comment
-using triple double-quotes.
-Python will ignore it.
-"""
-print("Hello")
+# """
+# This is also a comment
+# using triple double-quotes.
+# Python will ignore it.
+# """
+# print("Hello")
 
-'''You can also use triple single quotes
-for the same purpose.'''
+# '''You can also use triple single quotes
+# for the same purpose.'''
+
+
+
