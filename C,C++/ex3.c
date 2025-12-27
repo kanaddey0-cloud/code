@@ -17,7 +17,7 @@ void lcm_clac(int n){
 }
 int range(){
     int index=0,count=0;
-    while(lcm[index] != 0 && count != 23){
+    while(lcm[index]){
         count ++; index++;
     }
     return count;
@@ -180,19 +180,19 @@ struct middle middle_tearm(){
 void ppp(void);
 int main(){
 
-    printf("The expression is ax%c+bx+c\n",-3);
+    printf("The expression is = ax%c bx c\n",-3);
     printf("input a=");
     scanf("%d",&cx2);
     printf("input b=");
     scanf("%d",&cx);
     printf("input c=");
     scanf("%d",&c);
-    printf("\n %dx%c%c%dx%c%d\n",cx2,-3,p_m__char(minus_plus(cx)),unSign(cx),p_m__char(minus_plus(c)),unSign(c));
+    printf("\n %dx%c%c%dx%d\n",cx2,-3,p_m__char(minus_plus(cx)),unSign(cx),c);
 
     // ppp();
     result=middle_tearm();
     if(flag)
-        printf("= %dx%c%c%dx%c%dx%c%d\n\n",cx2,-3,result.f_op,result.f_num,result.s_op,result.s_num,p_m__char(minus_plus(cx2)),unSign(c));
+        printf("= %dx%c%c%dx%c%dx%d\n\n",cx2,-3,result.f_op,result.f_num,result.s_op,result.s_num,c);
 
 return 0;
 }

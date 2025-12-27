@@ -3,7 +3,7 @@
 int lcm[N]={0};
 int range(){
     int index=0,count=0;
-    while(lcm[index] != 0 && count != 23){
+    while(lcm[index]){
         count ++; index++;
     }
     return count;
