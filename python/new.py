@@ -867,4 +867,902 @@
 # for the same purpose.'''
 
 
+# class ClassName:
+#     class_var = 100        # class variable
+
+#     # 1️⃣ Constructor (has self)
+#     def __init__(self, x):
+#         print(self)        # ✔ self
+#         print(ClassName)   # ✔ cls (through class name)
+
+#     # 2️⃣ Instance Method (has self)
+#     def inst_method(self, a):
+#         print(self)        # ✔ self
+#         print(ClassName)   # ✔ cls (through class name)
+
+#     # 3️⃣ Class Method (has cls)
+#     @classmethod
+#     def cls_method(cls, b):
+#         print(cls)         # ✔ cls
+#         # print(self)      # ❌ ERROR (no self)
+
+#     # 4️⃣ Static Method (no self, no cls)
+#     @staticmethod
+#     def static_method(c):
+#         # print(self)      # ❌ no self
+#         # print(cls)       # ❌ no cls
+#         print(c)
+
+#     # 5️⃣ Destructor (has self)
+#     def __del__(self):
+#         print("called")        # ✔ self
+#         print(ClassName)   # ✔ cls (through class name)
+
+# obj = ClassName(10)
+# obj2 = ClassName.cls_method(20)
+# # obj.inst_method(5)
+# # ClassName.static_method(4)
+# del obj
+# del obj2
+
+# print(_)   # prints 15
+
+# class Demo:
+#     # 1. __new__
+#     def __new__(cls, *args, **kwargs):
+#         print("__new__ called")
+#         return super().__new__(cls)
+
+#     # 2. __init__
+#     def __init__(self, value):
+#         print("__init__ called")
+#         self.value = value
+
+#     # 3. __del__
+#     def __del__(self):
+#         print("__del__ called (destructor)")
+
+#     # 4. __str__
+#     def __str__(self):
+#         return f"Demo(value={self.value})"
+
+#     # 5. __repr__
+#     def __repr__(self):
+#         return f"Demo({self.value})"
+
+#     # 6. __call__
+#     def __call__(self, x):
+#         print("__call__ executed")
+#         return self.value + x
+
+#     # 7. __add__
+#     def __add__(self, other):
+#         print("__add__ called")
+#         return self.value + other.value
+
+#     # 8. __len__
+#     def __len__(self):
+#         return self.value
+
+#     # 9. __getitem__
+#     def __getitem__(self, index):
+#         print("__getitem__ called")
+#         return f"Index = {index}"
+
+#     # 10. __setitem__
+#     def __setitem__(self, index, val):
+#         print("__setitem__ called")
+#         print(f"Setting index {index} = {val}")
+
+#     # 11. __contains__
+#     def __contains__(self, item):
+#         print("__contains__ called")
+#         return item == self.value
+
+
+# # ---------------------------------------
+# # Using the class
+# # ---------------------------------------
+
+# obj = Demo(10)
+
+# print(obj)              # __str__
+# print(repr(obj))        # __repr__
+
+# obj(5)                   # __call__
+
+# obj2 = Demo(20)
+# print(obj + obj2)       # __add__
+
+# print(len(obj))         # __len__
+
+# print(obj[0])           # __getitem__
+
+# obj[1] = 100            # __setitem__
+
+# print(10 in obj)        # __contains__
+
+# del obj                 # __del__
+# del obj2
+
+# import copy
+
+# a = [1, [2, 3]]
+# b = copy.deepcopy(a); c = copy.copy(a)
+# print(a); b[1][0] = 999
+# print(a); c[1][0] = 777
+# print(a); print(b); print(c)
+
+
+# ls=[[1,2,3],[4,5,6]]
+# tp=((1,2,3),(4,5,6))
+# tup = ([1,2], [3,4], [1,2], [5,6], [3,4], [3,4])
+# tup = ([[1, 2], [3, 4]],
+#        [[1, 2], [3, 4]],
+#        [[5, 6]],
+#        [[1, 2], [3, 4], [5, 6]],
+#        [[5, 6]])
+# tmp=[]
+# c=0
+# for i in tup:
+#     if i not in tmp:
+#         tmp.append(i)
+#         for j in tmp:
+#             if i == j: c+=1
+#         print(i," : ",c)
+
+
+# tup = ([1, 1], [2, 2], [1, 1], [3, 3], [2, 2], [4, 4])
+# ls=[]
+# for i in tup:
+#     if i not in ls:
+#         ls.append(i)
+# ls=tuple(ls)
+# print(type(ls),"\n",ls)
+
+
+# tup = ([1,2], [3,4], [1,2], [5,6], [3,4], [3,4])
+# tmp=[[],[]]; 
+# for i in tup:
+#     if i not in tmp: 
+#         tmp.append(i)
+#         for j in tup:
+#             if i == j: 
+#                 tmp[0].append(j)
+#         tmp[1].append(list(tmp[0])); 
+#         del tmp[0][:]
+# print(tmp[1])
+            
+
+# from collections import Counter
+
+# tup = (1,2,3,4,1,2,5,6,3,4,3,4)
+# print(Counter(tup))  # return Dict
+
+
+# tup = ([1],
+#        [2,3],
+#        [4,5,6],
+#        [7],
+#        [8,9],
+#        [10,11,12])
+# tmp=[[],[]]; 
+# for i in tup:
+#     if len(i) not in tmp: 
+#         tmp.append(len(i))
+#         for j in tup:
+#             if len(i) == len(j): 
+#                 tmp[0].append(j)
+#         tmp[1].append(list(tmp[0])); 
+#         del tmp[0][:]
+# for i in tmp[1]:
+#     print(i)
+
+
+# tup = ([1],
+#        [2,3],
+#        [4,5,6],
+#        [7],
+#        [8,9],
+#        [10,11,12])
+# a = [1, [2, [3]]]
+# def printContainer(container):
+#     for i in container:
+#         if type(i)==tuple or type(i)==set or type(i)==list or type(i)==dict:
+#             printContainer(i)
+#         else:
+#             print(i)
+# printContainer(tup)
+
+
+# d1 = {'a':1, 'b':2}
+# d2 = {'b':20, 'c':3}
+
+# d3 = {**d1, **d2}
+# d4 = {*d1, *d2}
+# print(d3,d4)    # {'a':1, 'b':20, 'c':3}
+
+# LIST + LIST
+# print([1, 2] + [3, 4])
+
+# # LIST * INT
+# print([10, 20] * 3)
+
+# # TUPLE + TUPLE
+# print((1, 2) + (3, 4))
+
+# # TUPLE * INT
+# print((5, 6) * 4)
+
+# results = []   # store all outputs here
+
+# # LIST + LIST
+# a = [1, 2] + [3, 4]
+# results.append(a)
+
+# # LIST * INT
+# b = [10, 20] * 3
+# results.append(b)
+
+# # TUPLE + TUPLE
+# c = (1, 2) + (3, 4)
+# results.append(c)
+
+# # TUPLE * INT
+# d = (5, 6) * 4
+# results.append(d)
+
+# # PRINT ALL RESULTS WITH TYPE
+# for item in results:
+#     print(item, " --> ", type(item))
+
+# n = int(input("Enter number: "))
+# s = 0
+
+# while n > 0:
+#     s += n % 10
+#     n //= 10
+
+# print("Sum of digits:", s)
+
+# tup = ((1, 2), (3, 4), (5, 6))
+
+# x = int(input("Enter element to search: "))
+# found = False
+
+# for inner in tup:
+#     if x in inner:
+#         found = True
+#         break
+
+# if found:
+#     print(x, "is present")
+# else:
+#     print(x, "is NOT present")
+
+# tup = ([1,2], [3,4], [1,2], [5,6], [3,4], [3,4])
+
+# count = {}
+
+# for lst in tup:
+#     key = tuple(lst)
+#     if key in count:
+#         count[key] += 1
+#     else:
+#         count[key] = 1
+
+# for k in count:
+#     print(list(k), ":", count[k])
+
+# lst = [(1,2), (3,4), (1,2), (5,6), (3,4)]
+
+# unique = []
+
+# for t in lst:
+#     found = False
+    
+#     # check if t already exists in unique
+#     for u in unique:
+#         if len(t) == len(u):              
+#             same = True
+#             for i in range(len(t)):      
+#                 if t[i] != u[i]:
+#                     same = False
+#                     break
+#             if same:
+#                 found = True
+#                 break
+    
+#     if not found:
+#         unique.append(t)
+
+# print("After removing duplicates:", unique)
+
+# tup = ([3,4], [1,2], [5,6], [2,3])
+
+# lst = []
+# for x in tup:
+#     lst.append(x)
+
+# n = len(lst)
+# for i in range(n):
+#     for j in range(0, n-i-1):
+        
+#         a = lst[j]
+#         b = lst[j+1]
+
+#         k = 0
+#         smaller = False
+#         greater = False
+        
+#         while k < len(a) and k < len(b):
+#             if a[k] < b[k]:
+#                 smaller = True
+#                 break
+#             elif a[k] > b[k]:
+#                 greater = True
+#                 break
+#             k += 1
+        
+#         if k == len(a) or k == len(b):
+#             if len(a) > len(b):
+#                 greater = True
+
+#         # swap if greater
+#         if greater:
+#             lst[j], lst[j+1] = lst[j+1], lst[j]
+
+# tup_sorted = tuple(lst)
+# print("Sorted tuple of lists:", tup_sorted)
+
+
+# tup = ([8,4], [2], [3,4,5,1,2], [6,5], [4,3,6], [3,0], [6], [6,2,3])
+# def _1(arr):
+#     ln=len(arr)
+#     for i in range(0,ln):
+#         for j in range(i+1,ln):
+#             if arr[j]<arr[i]: arr[i],arr[j] = arr[j],arr[i]
+#     return arr
+# def _2(arr):
+#     ln=len(arr)
+#     for i in range(0,ln):
+#         for j in range(i+1,ln):
+#             if len(arr[j])<len(arr[i]): arr[i],arr[j] = arr[j],arr[i]
+#     return arr
+# def _3(arr):
+#     ln=len(arr)
+#     for i in range(0,ln):
+#         for j in range(i+1,ln):
+#             if len(arr[i])==len(arr[j]) and arr[j][0]<arr[i][len(arr[i])-1]: 
+#                 arr[i],arr[j] = arr[j],arr[i]
+#     return arr
+# for x in tup: x=_1(x)
+# print(tup)
+# print('---------------------------------------')
+# tup=tuple(_2(list(tup)))
+# print(tup)
+# print('---------------------------------------')
+# tup=tuple(_3(list(tup)))
+# print(tup)
+
+# A = {1, 2, 3, 4}
+# B = {3, 4, 5, 6}
+
+# print("Union:", A | B)    # print(A.union(B))
+# print("Intersection:", A & B)    # print(A.intersection(B))
+# print("Difference (A - B):", A - B)      # print(B.diAerence(A))
+# print("Symmetric Difference (A ∪ B) – (A ∩ B):", A ^ B) 
+# # print(A.symmetric_diAerence(B))
+
+
+# class Singleton:
+#     _instance = None
+
+#     def __new__(cls, *args, **kwargs):
+#         if cls._instance is None:
+#             cls._instance = super().__new__(cls)
+#         return cls._instance
+
+#     def __init__(self, value):
+#         self.value = value
+
+# a = Singleton(10)
+# b = Singleton(20)
+
+# print(a.value)
+# print(b.value)
+# print(a is b)   # True
+
+
+# from functools import singledispatch
+
+# @singledispatch
+# def display(value):
+#     print("Default:", value)
+
+# @display.register(int)
+# def _(value):
+#     print("Integer:", value)
+
+# @display.register(str)
+# def _(value):
+#     print("String:", value)
+
+# display(10)
+# display("Hello")
+
+
+# class GrandParent:
+#     def __init__(self):
+#         self.a = 10        # Public
+#         self._b = 20       # Protected
+#         self.__c = 30      # Private
+
+#     def show_gp(self):
+#         print("GrandParent:", self.a, self._b, self.__c)
+
+# class Parent(GrandParent):
+#     def __init__(self):
+#         super().__init__()
+
+#     def show_p(self):
+#         print("Parent accessing:")
+#         print(self.a)      # ✅ Public
+#         print(self._b)     # ✅ Protected
+#         # print(self.__c)  # ❌ Private (ERROR)
+
+# class Child(Parent):
+#     def __init__(self):
+#         super().__init__()
+
+#     def show_c(self):
+#         print("Child accessing:")
+#         print(self.a)      # ✅ Public
+#         print(self._b)     # ✅ Protected
+#         # print(self.__c)  # ❌ Private (ERROR)
+
+# obj = Child()
+# obj.show_gp()
+# obj.show_p()
+# obj.show_c()
+
+
+# Base classes
+# class A:
+#     pass
+
+# class B:
+#     pass
+
+# # Level 1
+# class C(A):
+#     pass
+
+# class D(B):
+#     pass
+
+# class E(A):
+#     pass
+
+# class F(B):
+#     pass
+
+# class G(A):
+#     pass
+
+# # Level 2
+# class H(C, E, D):
+#     pass
+
+# class J(F, E, G):
+#     pass
+
+# class K(F, C):
+#     pass
+
+# # Top level
+# class S(H, J, K):
+#     pass
+
+
+
+# class A:
+#     def show(self):
+#         print("A")
+
+# class B(A):
+#     pass
+
+# class C(B, A): 
+#     def show(self):
+#         print("C")
+
+# obj = C() 
+# obj.show()
+
+
+# class A:
+#     x = 10
+#     y = 100
+#     def show(self):
+#         print("A")
+
+# class B(A):
+#     x = 20
+#     def show(self):
+#         print("B")
+
+# class C(B):
+#     x = 30
+
+# obj = C()
+# print(obj.x, "\n", obj.y)
+# obj.show()
+
+
+# class A:
+#     x = 10
+
+# class B(A):
+#     pass
+
+# class C(B):
+#     pass
+
+# obj = C()
+# obj.x = 50   # creates instance variable
+# print(obj.x)
+
+# class A:
+#     def __show(self):    
+#         print("A")
+
+# class B(A):
+#     pass
+
+# obj = B()
+# # obj.__show() ❌
+# obj._A__show() 
+
+
+# class GrandParent:
+#     def __init__(self):
+#         self.a = 10        # Public
+#         self._b = 20       # Protected
+#         self.__c = 30      # Private
+
+#     def show_gp(self):
+#         print("GrandParent:", self.a, self._b, self.__c)
+
+# class Parent(GrandParent):
+#     def __init__(self):
+#         super().__init__()
+
+#     def show_p(self):
+#         print("Parent accessing:")
+#         print(self.a)      # ✅ Public
+#         print(self._b)     # ✅ Protected
+#         # print(self.__c)  # ❌ Private (ERROR)
+
+# class Child(Parent):
+#     def __init__(self):
+#         super().__init__()
+
+#     def show_c(self):
+#         print("Child accessing:")
+#         print(self.a)      # ✅ Public
+#         print(self._b)     # ✅ Protected
+#         # print(self.__c)  # ❌ Private (ERROR)
+
+# obj = Child()
+# obj.show_gp()
+# obj.show_p()
+# obj.show_c()
+# # print(obj._Parent__c)  # AttributeError: 'Child' object has no attribute '_Parent__c'
+
+# class A:
+#     __class_var = 100        # private class variable
+
+#     def __init__(self):
+#         self.__inst_var = 200   # private instance variable
+
+#     def __show(self):        # private method
+#         print("Private method of A")
+
+#     def access_inside(self):
+#         print(self.__class_var)
+#         print(self.__inst_var)
+#         self.__show()
+
+# class B(A): pass
+
+# class C(B):
+#     def access_child(self):
+#         # Access using name-mangling ✅
+#         print(self._A__class_var)
+#         print(self._A__inst_var)
+#         self._A__show()
+
+# obj = C()
+
+# print("Access from A method:")
+# obj.access_inside()
+
+# print("\nAccess from C method:")
+# obj.access_child()
+
+# # print(obj._B__class_var)
+# # print(obj._B__inst_var)    
+# # obj._B__show()
+# print()
+# print(obj._A__class_var)   # 
+# print(obj._A__inst_var)    # 200
+# obj._A__show()             # Private method of A
+
+# In Python, private members (__name) are not truly private, but they are name-mangled.
+# __something  →  _ClassName__something
+
+
+# def add(a, b): return a+b
+# def add(a, b, c): return a+b+c
+# print(add(5,5,5))
+
+# class A:
+#     def a(self):
+#         print("Class A")
+
+# class B:
+#     def b(self):
+#         print("Class B")
+
+# class C(A, B):
+#     pass
+
+# obj = C()
+# obj.a()
+# obj.b()
+
+
+# class A:
+#     x = 10;   y = 100
+#     def show(self):
+#         print("A")
+
+# class B(A):
+#     x = 20
+#     def show(self):
+#         print("B",self.x)
+
+# class C(B):
+#     x = 30
+
+# obj = C()
+# print(obj.x, "\n", obj.y)
+# obj.show()
+
+# x = -5
+# assert x > 0, "x must be positive"
+
+# x = 10
+# assert x < 0
+# print("OK")
+
+
+# # 1️⃣What is a String?
+# s1 = "hello"          # string using double quotes
+# s2 = 'world'          # string using single quotes
+# s3 = """multi
+# line"""               # multi-line string using triple quotes
+# # Strings are immutable (cannot be changed after creation)
+
+# # 2️⃣String creation
+# s = "Python"          # direct string creation
+# s_num = str(123)      # integer to string -> "123"
+# s_float = str(12.5)    # float to string -> "12.5"
+
+# # 3️⃣Immutability (VERY IMPORTANT)
+# s = "hello"
+# s = s + " world"   # creates a NEW string object
+#                                    # old string "hello" is NOT modified
+
+# # 4️⃣String operators
+# concat = "a" + "b"        # concatenation -> 'ab'
+# repeat = "a" * 3          # repetition -> 'aaa'
+# check1 = "a" in "cat"     # membership test -> True
+# check2 = "a" not in "cat" # membership test -> False
+
+# # 5️⃣String comparison (ASCII / Unicode value based)
+# compare1 = "a" == "A"     # False (case-sensitive)
+# compare2 = "a" < "b"      # True ('a' comes before 'b')
+
+# # Printing results
+# print(s1, s2)
+# print(s3)
+# print(s_num, s_float)
+# print(s)
+# print(concat, repeat)
+# print(check1, check2)
+# print(compare1, compare2)
+
+
+# s = "Education" # Common interview questions, Also Palindrome
+# count = sum(1 for c in s if c in "aeiouAEIOU")  
+# print("Number of Vowels",count)
+# print("--------------------------------------")
+# # 9️⃣ STRING FORMATTING (IMPORTANT)
+
+# # Old style formatting (% operator)
+# print("%s is %d" % ("Age", 20))
+# # format() method
+# print("{} is {}".format("Age", 20))
+# age = 20  # f-string (BEST & modern)
+# print(f"Age is {age}")
+# # A raw string treats backslashes (\) as normal characters and does NOT process escape sequences.
+# print(r"C:\new\test")
+# print("--------------------------------------")
+
+# # 🔟 ESCAPE CHARACTERS
+# print("Hello\nWorld")   # \n -> new line
+# print("Hello\tWorld")   # \t -> tab space
+# print("Backslash: \\")  # \\ -> backslash
+# print("Single quote: \'Python\'")  # \' -> single quote
+# print("--------------------------------------")
+
+# # 1️⃣2️⃣ STRING ITERATION
+# for ch in "abc":
+#     print(ch)           # prints each character
+# print("--------------------------------------")
+
+# # 1️⃣4️⃣ STRING LENGTH
+# print(len("Python"))    # 6
+# print("--------------------------------------")
+
+# # 1️⃣6️⃣ UNICODE & ord / chr
+# print(ord('A'))         # 65 -> Unicode value of character
+# print(chr(65))          # 'A' -> character from Unicode value
+# print("--------------------------------------")
+
+# # String memory & interning (ADVANCED)
+# a = "hello"
+# b = "hello"
+# print(id(a), id(b))
+# print(a == b)   # True  (values are same)
+# print(a is b)   # True  (same memory due to interning)
+
+# s = "Python Programming"
+# print(s.lower())       
+# print(s.upper())       
+# print(s.title())       
+# print(s.strip())       
+# print(s.replace("Python", "Java"))
+# print(s.find("gram"))  # index or -1
+# print(s.count("m"))    # count occurrences
+# print(s.startswith("  Py"))
+# print(s.endswith("  "))
+
+# s = "Python Programming"; print(s) 
+
+# print(s.lower())       
+# # converts all characters to lowercase
+# print(s.upper())       
+# # converts all characters to uppercase
+# print(s.title())       
+# # capitalizes first letter of each word
+# print(s.strip())       
+# # removes leading and trailing spaces (no spaces here, so unchanged)
+
+# print(s.replace("Python", "Java"))
+# # replaces "Python" with "Java"
+
+# print(s.find("gram"))  
+# # returns starting index of "gram", or -1 if not found
+# print(s.count("m"))    
+# # counts how many times 'm' appears in the string
+
+# print(s.startswith("  Py"))
+# # checks if string starts with given substring (returns True/False)
+# print(s.endswith("  "))
+# # checks if string ends with given substring (returns True/False)
+
+
+# # String example
+# s = "Hello World";  print(s)
+# print("--------------------------------------")
+
+# # Basic string methods
+# print(s.capitalize())       # 'Hello world' → first character uppercase, rest lowercase
+# print(s.casefold())         # 'hello world' → converts all characters to lowercase (better than lower() for caseless comparisons)
+# print(s.count("o"))         # 2 → counts how many times 'o' appears
+# print(s.find("World"))      # 6 → returns starting index of substring, -1 if not found
+# print(s.index("Hello"))     # 0 → returns index of substring, raises ValueError if not found
+# print(s.isalnum())          # False → contains non-alphanumeric characters (space)
+# print(s.isalpha())          # False → contains non-alphabet characters (space)
+# print(s.isascii())          # True → all characters are ASCII
+# print(s.isdecimal())        # False → not all characters are decimal numbers
+# print(s.isdigit())          # False → not all characters are digits
+# print(s.isidentifier())     # False → not a valid identifier in Python
+# print("hello world".islower())  # True → all letters are lowercase
+# print(s.isnumeric())        # False → not all characters are numeric
+# print(s.isprintable())      # True → all characters are printable
+
+# print("--------------------------------------")
+
+# # Find vs Index
+# s = "python"
+# print(s.find("z"))          # -1 → returns -1 because 'z' is NOT found
+# # print(s.index("z"))       # ValueError → raises error if 'z' is NOT found
+
+# print("--------------------------------------")
+
+# # Checking types of characters
+# print("123".isdigit())        # True → contains only digits
+# print("abc".isalpha())        # True → contains only alphabets
+# print("abc123".isalnum())     # True → contains alphabets + digits (no spaces)
+
+# print("--------------------------------------")
+
+# # Encoding and Decoding
+# s = "hello"
+# b = s.encode();  print(b)     # b'hello' → converts string to bytes
+# s2 = b.decode();  print(s2)   # 'hello' → converts bytes back to string
+
+# print("--------------------------------------")
+
+# # Changing case and removing spaces
+# s = "Python Programming";  print(s)
+# print(s.lower())    # 'python programming' → all lowercase
+# print(s.upper())    # 'PYTHON PROGRAMMING' → all uppercase
+# print(s.title())    # 'Python Programming' → capitalize first letter of each word
+# print(s.strip())    # 'Python Programming' → removes leading/trailing spaces (none here)
+
+# print("--------------------------------------")
+
+# # Replace and find/count
+# print(s.replace("Python", "Java"))  # 'Java Programming' → replace substring
+# print(s.find("gram"))                # 10 → starting index of 'gram', -1 if not found
+# print(s.count("m"))                  # 2 → count of character 'm'
+
+# print("--------------------------------------")
+
+# # Checking start and end of string
+# print(s.startswith("Py"))    # True → checks if string starts with given substring
+# print(s.endswith("  "))      # False → checks if string ends with given substring
+
+
+# table = str.maketrans("aeiou", "12345");  print(table)  
+# # creates mapping: a→1, e→2, i→3, o→4, u→5
+# print("apple".translate(table))   
+# # replaces vowels using mapping → '1ppl2'
+
+
+s = " Python Programming ";  print(s)
+print(s.find("z"))          # -1 → returns -1 because 'z' is NOT found
+# print(s.index("z"))       # ValueError → raises error if 'z' is NOT found
+print("--------------------------------------")
+print(s.replace("Python", "Java"))  # 'Java Programming' → replace substring
+print(s.find("gram"))                # 10 → starting index of 'gram', -1 if not found
+print(s.count("m"))                  # 2 → count of character 'm'
+print("--------------------------------------")
+s = "hello"
+b = s.encode();  print(b)     # b'hello' → converts string to bytes
+s2 = b.decode();  print(s2)   # 'hello' → converts bytes back to string
+print("--------------------------------------")
+s = "python"
+# Checking start and end of string
+print(s.startswith("Py"))    # True → checks if string starts with given substring
+print(s.endswith("  "))      # False → checks if string ends with given substring
+print("--------------------------------------")
+table = str.maketrans("aeiou", "12345");  print(table)  
+# creates mapping: {'a'→'1',   'e'→'2',     'i'→'3',      'o'→'4',     'u'→'5'}
+                                      # {97: 49, 101: 50, 105: 51, 111: 52, 117: 53}
+# When you print table, Python shows it as Unicode numbers:
+print("apple".translate(table))    # replaces vowels using mapping 1ppl2
+# If character exists in the table → replace it    If not → keep it unchanged
+# | Character  |            Action          |
+# | -------------- | --------------------- |
+# |         `a`        | replaced by `1` |
+# |         `p`        | unchanged           |
+# |         `p`        | unchanged           |
+# |         `l`         | unchanged           |
+# |         `e`        | replaced by `2` |
 

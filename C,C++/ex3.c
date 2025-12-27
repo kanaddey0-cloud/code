@@ -79,7 +79,7 @@ int min(int a, int b){ return a<=b? a:b; }
 int oddEven(int num){ return num%2? 0:1; }
 int minus_plus(int num){ return num<0? 1:0; }
 char p_m__char(int p_m){ return p_m? '-':'+'; }
-int unSign(int number){ return number<0? (number*-2)/2 : number; }
+int unSign(int number){ return number<0? number*-1 : number; }
 struct middle{ int f_num,s_num; char f_op,s_op; } result;
 void write(int f, int s,int operation, int target, int p_m){
     if(p_m && operation){
@@ -104,15 +104,33 @@ void write(int f, int s,int operation, int target, int p_m){
         result.s_op=p_m__char(p_m);
     }else{ printf("\n ERROR! \n"); }
 }
+int _divide(int n, int upto){
+    if(n==upto) return upto;
+    while(++upto != n && n%upto){}
+    return upto;
+}
+int comm_divisor(int n1, int n2){
+    int n1_rem=_divide(n1,1), n2_rem=_divide(n2,1);
+    do{
+        if(n1_rem == n2_rem) break;
+        if(n1_rem < n2_rem) n1_rem=_divide(n1,n1_rem);
+        if(n1_rem > n2_rem) n2_rem=_divide(n2,n2_rem);
+    } while (n1_rem<n1 || n2_rem<n2); 
+    return n1_rem==n2_rem? n1_rem : 0;
+}
 int cx2, cx, c;
 int valid_tearm(int f, int s){
     int us_cx2=unSign(cx2), us_c=unSign(c);
     if( !(max(us_cx2,f)%min(us_cx2,f)) && !(max(us_c,s)%min(us_c,s)) ){
         if((max(us_cx2,f)/min(us_cx2,f)) == (max(us_c,s)/min(us_c,s))) { return 1; }
     }
-    if( !(max(cx2,s)%min(cx2,s)) && !(max(c,f)%min(c,f)) ){
-        if((max(cx2,s)/min(cx2,s)) == (max(c,f)/min(c,f))) { return 1; }
+    if( !(max(us_cx2,s)%min(us_cx2,s)) && !(max(us_c,f)%min(us_c,f)) ){
+        if((max(us_cx2,s)/min(us_cx2,s)) == (max(us_c,f)/min(us_c,f))) { return 1; }
     }
+    int c_d_left=comm_divisor(us_cx2,f), c_d_right=comm_divisor(us_c,s);
+    if(c_d_left && c_d_right) return 1;
+    c_d_left=comm_divisor(us_cx2,s); c_d_right=comm_divisor(us_c,f);
+    if(c_d_left && c_d_right) return 1;
     return 0;
 }
 int find(int f, int s, int target){
@@ -183,5 +201,5 @@ void ppp(){
     int i=0,j=range();
     while(j--){
         printf("%d\n",lcm[i++]);
-    }4
+    }
 }
