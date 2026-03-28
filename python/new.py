@@ -1735,34 +1735,319 @@
 # # replaces vowels using mapping → '1ppl2'
 
 
-s = " Python Programming ";  print(s)
-print(s.find("z"))          # -1 → returns -1 because 'z' is NOT found
-# print(s.index("z"))       # ValueError → raises error if 'z' is NOT found
-print("--------------------------------------")
-print(s.replace("Python", "Java"))  # 'Java Programming' → replace substring
-print(s.find("gram"))                # 10 → starting index of 'gram', -1 if not found
-print(s.count("m"))                  # 2 → count of character 'm'
-print("--------------------------------------")
-s = "hello"
-b = s.encode();  print(b)     # b'hello' → converts string to bytes
-s2 = b.decode();  print(s2)   # 'hello' → converts bytes back to string
-print("--------------------------------------")
-s = "python"
-# Checking start and end of string
-print(s.startswith("Py"))    # True → checks if string starts with given substring
-print(s.endswith("  "))      # False → checks if string ends with given substring
-print("--------------------------------------")
-table = str.maketrans("aeiou", "12345");  print(table)  
-# creates mapping: {'a'→'1',   'e'→'2',     'i'→'3',      'o'→'4',     'u'→'5'}
-                                      # {97: 49, 101: 50, 105: 51, 111: 52, 117: 53}
-# When you print table, Python shows it as Unicode numbers:
-print("apple".translate(table))    # replaces vowels using mapping 1ppl2
-# If character exists in the table → replace it    If not → keep it unchanged
-# | Character  |            Action          |
-# | -------------- | --------------------- |
-# |         `a`        | replaced by `1` |
-# |         `p`        | unchanged           |
-# |         `p`        | unchanged           |
-# |         `l`         | unchanged           |
-# |         `e`        | replaced by `2` |
+# s = " Python Programming ";  print(s)
+# print(s.find("z"))          # -1 → returns -1 because 'z' is NOT found
+# # print(s.index("z"))       # ValueError → raises error if 'z' is NOT found
+# print("--------------------------------------")
+# print(s.replace("Python", "Java"))  # 'Java Programming' → replace substring
+# print(s.find("gram"))                # 10 → starting index of 'gram', -1 if not found
+# print(s.count("m"))                  # 2 → count of character 'm'
+# print("--------------------------------------")
+# s = "hello"
+# b = s.encode();  print(b)     # b'hello' → converts string to bytes
+# s2 = b.decode();  print(s2)   # 'hello' → converts bytes back to string
+# print("--------------------------------------")
+# s = "python"
+# # Checking start and end of string
+# print(s.startswith("Py"))    # True → checks if string starts with given substring
+# print(s.endswith("  "))      # False → checks if string ends with given substring
+# print("--------------------------------------")
+# table = str.maketrans("aeiou", "12345");  print(table)  
+# # creates mapping: {'a'→'1',   'e'→'2',     'i'→'3',      'o'→'4',     'u'→'5'}
+#                                       # {97: 49, 101: 50, 105: 51, 111: 52, 117: 53}
+# # When you print table, Python shows it as Unicode numbers:
+# print("apple".translate(table))    # replaces vowels using mapping 1ppl2
+# # If character exists in the table → replace it    If not → keep it unchanged
+# # | Character  |            Action          |
+# # | -------------- | --------------------- |
+# # |         `a`        | replaced by `1` |
+# # |         `p`        | unchanged           |
+# # |         `p`        | unchanged           |
+# # |         `l`         | unchanged           |
+# # |         `e`        | replaced by `2` |
 
+# ls = [1, 2, 3, 4]; [print(i) for i in ls if i % 2] 
+# print(*[i for i in ls if i % 2])   # 1 3
+
+# a = [1, 2, 3]; b = [*a, 4, 5];   
+# print(*a)  # 1 2 3
+# print(*[6,7,8])  # same as print(6,7,8)
+# print(b)  # [1, 2, 3, 4, 5]
+
+# def fun(*args):
+#     print(args)   # (1, 2, 3)
+
+# fun(1, 2, 3)
+
+# def add(a, b, c):
+#     print(a + b + c)   # 60
+
+# nums = [10, 20, 30]
+# add(*nums)    
+
+# class myclass:
+#     x = 10        # Public
+#     _y = 20       # Protected 
+#     __z = 20      # Private 
+
+#     def __init__(self, a, b, c):
+#         self.x = a         # Public instance variable
+#         self._y = b        # Protected instance variable
+#         self.__z = c       # Private instance variable
+
+#     # 'self' refers to the current object, so show() can access all public, protected, and private members
+#     def show(self):
+#         print(self.x, self._y, self.__z)
+
+
+# # Object creation
+# obj = myclass(10, 20, 30)
+
+# # show() works because private variables are accessible **inside** the class
+# obj.show()
+
+# # Accessing members outside class
+# print(obj.x)      # Public → accessible everywhere
+
+# # print(obj.y)      # Error: no attribute named 'y' (actual name is _y)
+# print(obj._y)
+
+# # print(obj.z)      # ERROR → '__z' becomes name-mangled internally.
+#                     # The real name becomes _myclass__z, so 'z' does not exist.
+# print(obj._myclass__z)      
+
+
+
+# f = lambda n: [0,1] + [None]*(n-2)
+# def fib_lambda(n):
+#     arr = f(n)  # dinamic lenth
+#     for i in range(2, n):
+#         arr[i] = arr[i-1] + arr[i-2]
+#     return arr
+
+# print("Lambda Fibonacci:", fib_lambda(10))
+
+
+# fib = lambda n: (
+#     [0] if n == 1 else
+#     [0, 1] if n == 2 else
+#     __import__("builtins").list(   # trick to allow loop inside lambda
+#         (lambda a: [a.append(a[-1] + a[-2]) or a for _ in range(n-2)] )
+#         ([0, 1])
+#     )[0]
+# )
+# print("Lambda Fibonacci:", fib(10))
+
+
+# from functools import reduce
+# # A lambda function to generate the Fibonacci sequence up to 'n' terms
+# fib_numbers = lambda n: reduce(
+#     lambda x, _: x + [x[-1] + x[-2]],  # x + [newValue]
+#     range(n - 2), # for _ in range(n - 2): n-2 times Call
+#     [0, 1]   # x = [0, 1]
+# )
+# print(f"Fibonacci series up to 10 terms: {fib_numbers(10)}")
+# # Output: Fibonacci series up to 10 terms: [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+
+# from functools import reduce
+# fib = lambda n: reduce(
+#     lambda x, _: x + [x[-1] + x[-2]],  # x + [newValue]
+#     range(n - 2), # for _ in range(n - 2): n-2 times Call
+#     [0, 1]   # x = [0, 1]
+# )
+# print(f"Fibonacci up to 10 terms:\n{fib(10)}")
+
+# fib = lambda n : n if n<2 else fib(n-1)+fib(n-2)
+# gcd = lambda a,b : a if b==0 else gcd(b,a%b)
+# print("Fibonachi =",fib(10) )
+# print("GCD =",gcd(180,48))
+
+# class GrandParent:
+#     def show_gp(self):
+#         print("I am GrandParent")
+
+# class Parent(GrandParent):
+#     def show_p(self):
+#         print("I am Parent")
+
+# class Child(Parent):
+#     def show_c(self):
+#         print("I am Child")
+
+# obj = Child()
+# obj.show_gp()
+# obj.show_p()
+# obj.show_c()
+
+# class Parent:
+#     def show(self):
+#         print("This is Parent class")
+
+# class Child1(Parent):
+#     def c1(self):
+#         print("This is Child1")
+
+# class Child2(Parent):
+#     def c2(self):
+#         print("This is Child2")
+
+# obj1 = Child1()
+# obj2 = Child2()
+
+# obj1.show()
+# obj1.c1()
+
+# obj2.show()
+# obj2.c2()
+
+# class A:
+#     def show(self):
+#         print("Class A")
+
+# class B(A):
+#     def show(self):
+#         print("Class B")
+
+# class C(A):
+#     def show(self):
+#         print("Class C")
+
+# class D(B, C):
+#     pass
+
+# obj = D()
+# obj.show()
+
+# print(D.mro())
+
+
+
+# import pandas as pd
+
+# name = pd.Series(["Amit", "Rina", "Sohan"],index=["Mth", "Sci", "Eng"])
+# age = pd.Series([21, 22, 20],index=["Mth", "Sci", "Eng"])
+# marks = pd.Series([85, 90, 78],index=["Mth", "Sci", "Eng"])
+
+# df = pd.DataFrame({
+#     "Name": name,
+#     "Age": age,
+#     "Marks": marks
+# });  print(df)
+# s = pd.Series([85, 90, 78], index=["Math", "Science", "English"])
+
+
+# df = pd.DataFrame({
+#     "Name": ["Amit", "Rina", "Sohan"],
+#     "Marks": [85, 90, 78]
+# }, index=["a", "b", "c"])
+# print(df)
+# print("-" * 30)
+
+# print(df.loc["b"])
+# print("-" * 30)
+
+# print(df.loc["b", "Marks"])
+# print("-" * 30)
+
+# print(df.loc[["a","c"], ["Name","Marks"]])
+# print("-" * 30)
+
+# print(df.loc["a":"c"])
+# print("-" * 30)
+# print("-" * 30)
+
+# print(df.iloc[1])
+# print("-" * 30)
+
+# print(df.iloc[1, 1])
+# print("-" * 30)
+
+# print(df.iloc[[0,2], [0,1]])
+# print("-" * 30)
+
+# print(df.iloc[0:2])
+
+
+
+# import pandas as pd
+
+# # Do the row indexation as 'row1','row2','row3','row4','row5','row6'
+# data = {
+#     "Name": ["Rhived","Jishnu","Rup","Guddu","Suvam","Swastika"],
+#     "Roll": [1,2,3,4,5,6],  "Marks": [85,45,98,26,63,99],
+#     "City": ["Kolkata","Delhi","Mumbai","Kolkata","Mumbai","Kochi"]
+# }
+# df = pd.DataFrame(data, index=["row1","row2","row3","row4","row5","row6"])
+
+# print("Full DataFrame:");  
+# print(df);  print()
+
+# # Select rows with index labels 'row2' and 'row4'
+# print("Rows row2 and row4:");  
+# print(df.loc[["row2","row4"]]);  print()
+
+# # Select rows from 'row1' to 'row3'
+# print("Rows from row1 to row3:");  
+# print(df.loc["row1":"row3"]);  print()
+
+# # Select rows where Marks > 50
+# print("Rows where Marks > 50:");  
+# print(df[df["Marks"] > 50]);  print()
+
+# # Select all rows and only Name and City columns
+# print("Name and City columns:");  
+# print(df[["Name","City"]]);  print()
+
+# # Select maximum values in each column
+# print("Maximum values in each column:");  
+# print(df.max());  print()
+
+# # Print name of the student with maximum marks
+# print("Student with maximum marks:")
+# print(df.loc[df["Marks"].idxmax(), "Name"]);  print()
+
+ 
+# import matplotlib.pyplot as plt
+
+# # Draw plot Name vs Marks
+# plt.plot(df["Name"], df["Marks"], marker='o')
+# plt.xlabel("Name")
+# plt.ylabel("Marks")
+# plt.ylim(0, 100)
+# plt.title("Student_Marks")
+# plt.show()
+
+# import re
+# str='anvie run 58g 5  475gn 397 f   n34'
+# print(re.sub('5','_',str))
+
+
+# import numpy as np
+
+# # np.array(object) → converts list/tuple into NumPy array
+# a1 = np.array([1, 2, 3, 4])  
+# a2 = np.array((5, 6, 7))  
+# a3 = np.arange(0, 10, 2)  # start, stop, step
+# a4 = np.arange(9).reshape(3, 3)   # 3 Rows, 3 Column 0 to 8  
+# a5 = np.linspace(0, 1, 5)  # 5 values between 0 and 1
+# a6 = np.zeros((3, 3))  # all zeros (rows, columns)
+# a7 = np.ones((2, 4))  # all ones (rows, columns)
+# a8 = np.empty((2, 2))  # random garbage values (uninitialized)
+# a9 = np.eye(3)  # (n x n Identity matrix)
+# a10 = np.random.rand(3, 3)  # (rows, columns)
+# # generates random float values between 0 and 1
+# a11 = np.random.randint(1, 10, (2, 2))  
+# # Random integer values (low, high, size)
+# # low = minimum value   high = maximum value (excluded)
+# # size = shape of array
+# a12 = np.full((3, 3), 7)  # (shape, value)
+# # shape = size of array   value = number to fill
+# x = np.array([1, 2, 3])
+# y = np.array(x)      # makes a new copy
+# z = np.asarray(x)    # does NOT make new copy
+
+# print(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12)
+
+
+
+# index=[1,2,3,4,5,6]

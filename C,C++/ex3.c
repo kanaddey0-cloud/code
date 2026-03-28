@@ -81,29 +81,6 @@ int minus_plus(int num){ return num<0? 1:0; }
 char p_m__char(int p_m){ return p_m? '-':'+'; }
 int unSign(int number){ return number<0? number*-1 : number; }
 struct middle{ int f_num,s_num; char f_op,s_op; } result;
-void write(int f, int s,int operation, int target, int p_m){
-    if(p_m && operation){
-        result.f_num=max(f,s);
-        result.f_op=p_m__char(p_m);
-        result.s_num=min(f,s);
-        result.s_op='+';
-    }else if (p_m && !operation){
-        result.f_num=f;
-        result.f_op=p_m__char(p_m);
-        result.s_num=s;
-        result.s_op=p_m__char(p_m);
-    }else if (!p_m && operation){
-        result.f_num=max(f,s);
-        result.f_op=p_m__char(p_m);
-        result.s_num=min(f,s);
-        result.s_op='-';
-    }else if (!p_m && !operation){
-        result.f_num=f;
-        result.f_op=p_m__char(p_m);
-        result.s_num=s;
-        result.s_op=p_m__char(p_m);
-    }else{ printf("\n ERROR! \n"); }
-}
 int _divide(int n, int upto){
     if(n==upto) return upto;
     while(++upto != n && n%upto){}
@@ -132,6 +109,29 @@ int valid_tearm(int f, int s){
     c_d_left=comm_divisor(us_cx2,s); c_d_right=comm_divisor(us_c,f);
     if(c_d_left && c_d_right) return 1;
     return 0;
+}
+void write(int f, int s,int operation, int target, int p_m){
+    if(p_m && operation){
+        result.f_num=max(f,s);
+        result.f_op=p_m__char(p_m);
+        result.s_num=min(f,s);
+        result.s_op='+';
+    }else if (p_m && !operation){
+        result.f_num=f;
+        result.f_op=p_m__char(p_m);
+        result.s_num=s;
+        result.s_op=p_m__char(p_m);
+    }else if (!p_m && operation){
+        result.f_num=max(f,s);
+        result.f_op=p_m__char(p_m);
+        result.s_num=min(f,s);
+        result.s_op='-';
+    }else if (!p_m && !operation){
+        result.f_num=f;
+        result.f_op=p_m__char(p_m);
+        result.s_num=s;
+        result.s_op=p_m__char(p_m);
+    }else{ printf("\n ERROR! \n"); }
 }
 int find(int f, int s, int target){
     if(minus_plus(target)){
@@ -175,24 +175,24 @@ struct middle middle_tearm(){
             }
         }
     }
-    flag=0; printf("\n Middle Tearm Not Posible! \n\n");
+    flag=0; printf("\n Middle Tearm Not Posible! \n\n"); return result;
 }
 void ppp(void);
 int main(){
 
-    printf("The expression is = ax%c bx c\n",-3);
-    printf("input a=");
+    printf("The expression is ax%c bx c\n",-3);
+    printf("input a = ");
     scanf("%d",&cx2);
-    printf("input b=");
+    printf("input b = ");
     scanf("%d",&cx);
-    printf("input c=");
+    printf("input c = ");
     scanf("%d",&c);
-    printf("\n %dx%c%c%dx%d\n",cx2,-3,p_m__char(minus_plus(cx)),unSign(cx),c);
+    printf("\n %dx%c%c%dx%c%d\n",cx2,-3,p_m__char(minus_plus(cx)),unSign(cx),p_m__char(minus_plus(c)),unSign(c));
 
     // ppp();
     result=middle_tearm();
     if(flag)
-        printf("= %dx%c%c%dx%c%dx%d\n\n",cx2,-3,result.f_op,result.f_num,result.s_op,result.s_num,c);
+        printf("= %dx%c%c%dx%c%dx%c%d\n\n",cx2,-3,result.f_op,result.f_num,result.s_op,result.s_num,p_m__char(minus_plus(c)),c);
 
 return 0;
 }

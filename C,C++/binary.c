@@ -88,9 +88,40 @@ void lcm_clac(int n){
         index++;
     }   lcm[index]=1;
 }
-
+int _divide(int n, int upto){
+    if(n==upto) return upto;
+    while(++upto != n && n%upto){}
+    return upto;
+}
+int comm_divisor(int n1, int n2){
+    int n1_rem=_divide(n1,1), n2_rem=_divide(n2,1);
+    do{
+        if(n1_rem == n2_rem) break;
+        if(n1_rem < n2_rem) n1_rem=_divide(n1,n1_rem);
+        if(n1_rem > n2_rem) n2_rem=_divide(n2,n2_rem);
+    } while (n1_rem<n1 || n2_rem<n2); 
+    return n1_rem==n2_rem? n1_rem : 0;
+}
+int cx2,c;
+int valid_tearm(int f, int s){
+    int us_cx2=unSign(cx2), us_c=unSign(c);
+    if( !(max(us_cx2,f)%min(us_cx2,f)) && !(max(us_c,s)%min(us_c,s)) ){
+        if((max(us_cx2,f)/min(us_cx2,f)) == (max(us_c,s)/min(us_c,s))) { return 1; }
+    }
+    if( !(max(us_cx2,s)%min(us_cx2,s)) && !(max(us_c,f)%min(us_c,f)) ){
+        if((max(us_cx2,s)/min(us_cx2,s)) == (max(us_c,f)/min(us_c,f))) { return 1; }
+    }
+    int c_d_left=comm_divisor(us_cx2,f), c_d_right=comm_divisor(us_c,s);
+    if(c_d_left && c_d_right) return 1;
+    c_d_left=comm_divisor(us_cx2,s); c_d_right=comm_divisor(us_c,f);
+    if(c_d_left && c_d_right) return 1;
+    return 0;
+}
 int main(){
-    lcm_clac(36); int i=0;
+    // cx2=8;
+    // c=-15;
+    // printf("%d",valid_tearm(10,12));
+    lcm_clac(120); int i=0;
     while (lcm[i]){
         printf("%d ",lcm[i]); i++;
     } int rng=range(); printf("\nRange = %d" ,rng);

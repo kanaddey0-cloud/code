@@ -45,9 +45,11 @@ int comm_divisor(int n1, int n2){
     return n1_rem==n2_rem? n1_rem : 0;
 }
 int main(){
-    lcm_clac(36); int i=0;
+    int i=0;
+    lcm_clac(120); 
+    // factors(120);
     while (lcm[i]){
         printf("%d ",lcm[i]); i++;
     } printf("\n%d" ,range());
-    printf("\n%d" ,comm_divisor(4,6));
+    // printf("\n%d" ,comm_divisor(4,6));
 }

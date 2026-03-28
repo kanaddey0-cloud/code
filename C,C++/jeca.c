@@ -285,3 +285,27 @@
     
 //     return 0;
 // }
+// #include<stdio.h>
+// int n=0;
+// void get(int x){ n++;
+//     if(x<1) return;
+//     get(x-1);
+//     get(x-3);
+// }
+// int main(){
+//     get(6);
+//     printf("%d",n);
+//     return 0;
+// }
+
+#include <stdio.h>
+
+int main() {
+    int a=0, b=1, c;
+    for(int i=0; i<10; i++){
+        printf("%d\n",a);
+        c=a+b;
+        a=b; b=c;
+    }
+    return 0;
+}
