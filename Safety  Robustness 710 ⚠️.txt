@@ -1,6 +1,0 @@
-Safety / Robustness: 7/10 ⚠️
-Memory management works, but no destructor, so list leaks memory if destroyed without deleting nodes.
-Could use smart pointers (std::unique_ptr) to prevent leaks automatically.
-
-Implement destructor (free all nodes safely)
-OR add copy constructor (deep copy)

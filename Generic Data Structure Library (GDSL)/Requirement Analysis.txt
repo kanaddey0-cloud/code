@@ -1,0 +1,95 @@
+GenericDataStructureLibrary/
+│
+├── include/                          <-- User-facing headers
+│   ├── Linear/
+│   │   ├── Array.hpp
+│   │   ├── LinkedList/
+│   │   │   ├── SinglyList.hpp
+│   │   │   ├── DoublyList.hpp
+│   │   │   └── CircularList.hpp
+│   │   ├── Stack.hpp
+│   │   └── Queue/
+│   │       ├── SimpleQueue.hpp
+│   │       ├── CircularQueue.hpp
+│   │       ├── Deque.hpp
+│   │       └── PriorityQueue.hpp
+│   │
+│   ├── LinkedList.hpp  ┬
+│   ├── Queue.hpp       ┴ aggregated header
+│   │
+│   ├── NonLinear/
+│   │   ├── Tree/
+│   │   │   ├── BinaryTree.hpp
+│   │   │   ├── BST.hpp
+│   │   │   ├── AVL.hpp
+│   │   │   ├── RedBlack.hpp
+│   │   │   ├── Heap.hpp
+│   │   │   ├── Splay.hpp
+│   │   │   ├── Trie.hpp
+│   │   │   ├── BTree.hpp
+│   │   │   └── BPlusTree.hpp
+│   │   └── Graph/
+│   │       ├── DirectedGraph.hpp
+│   │       ├── UndirectedGraph.hpp
+│   │       └── WeightedGraph.hpp
+│   │
+│   ├── Hashing/
+│   │   ├── HashMap.hpp
+│   │   └── HashSet.hpp
+│   │
+│   └── Advanced/
+│   │   ├── DisjointSet.hpp
+│   │   ├── SegmentTree.hpp
+│   │   └── FenwickTree.hpp
+│   │
+│   ├── Tree.hpp       ┬
+│   ├── Graph.hpp      │ aggregated header
+│   ├── Hashing.hpp    │
+│   └── Advanced.hpp   ┴ 
+│
+│
+├── src/                              <-- Template implementations (.tpp)
+│   ├── Linear/
+│   │   ├── Array.tpp
+│   │   ├── LinkedList/
+│   │   │   ├── SinglyList.tpp
+│   │   │   ├── DoublyList.tpp
+│   │   │   └── CircularList.tpp
+│   │   ├── Stack.tpp
+│   │   └── Queue/
+│   │       ├── SimpleQueue.tpp
+│   │       ├── CircularQueue.tpp
+│   │       ├── Deque.tpp
+│   │       └── PriorityQueue.tpp
+│   │
+│   ├── NonLinear/
+│   │   ├── Tree/
+│   │   │   ├── BinaryTree.tpp
+│   │   │   ├── BST.tpp
+│   │   │   ├── AVL.tpp
+│   │   │   ├── RedBlack.tpp
+│   │   │   ├── Heap.tpp
+│   │   │   ├── Splay.tpp
+│   │   │   ├── Trie.tpp
+│   │   │   ├── BTree.tpp
+│   │   │   └── BPlusTree.tpp
+│   │   └── Graph/
+│   │       ├── DirectedGraph.tpp
+│   │       ├── UndirectedGraph.tpp
+│   │       └── WeightedGraph.tpp
+│   │
+│   ├── Hashing/
+│   │   ├── HashMap.tpp
+│   │   └── HashSet.tpp
+│   │
+│   └── Advanced/
+│       ├── DisjointSet.tpp
+│       ├── SegmentTree.tpp
+│       └── FenwickTree.tpp
+│
+│
+└── examples/                         <-- Example usage / tests
+    ├── linear_examples.cpp
+    ├── nonlinear_examples.cpp
+    ├── hashing_examples.cpp
+    └── advanced_examples.cpp
