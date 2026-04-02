@@ -26,7 +26,8 @@ protected:
     node<D>* H, *T;
     node<D>* pointer(long int index) const;
     void rotate(node<D>*& head, node<D>*& tail);
-    void clearupto(node<D>*& p);
+    long int clear(node<D>*& p);
+    long int clearupto(node<D>*& head, node<D>*& tail);
 public:
     LIST();
     LIST(const LIST<D>& other);
@@ -36,21 +37,33 @@ public:
     LIST<D>& operator=(const LIST<D>& other);
     LIST<D>& operator=(LIST<D>&& other) noexcept;
     long int size() const { return elem; }
-    int insert(D val, long int index=-1);
-    int drop(D val);
+    bool insert(D val, long int index=-1);
+    long int drop(D val);
     D remove(long int index);
-    long int update(D prev, D curr, bool in=0);
+    long int update(D prev, D curr, bool in=false);
     D modify(D curr, long int index);
-    D value(long int index) const;
+    bool add(const LIST<D>& next);
+    const D& value(long int index) const;
     long int index(D value) const;
     void reverse();
-    void view() const;
-    iterator<D> begin();
-    iterator<D> begin() const;
-    iterator<D> end();
-    iterator<D> end() const;
+    void view(bool v=false) const;
+    iterator<D> begin() noexcept;
+    iterator<D> begin() const noexcept;
+    iterator<D> end() noexcept;
+    iterator<D> end() const noexcept;
     ~LIST();
 };
+
+template<typename D>
+bool LIST<D>::add(const LIST<D>& next){
+    if(this == &next) return false;
+    if(!next.H) return false;
+    node<D>* tmp=next.H;
+    while(tmp){
+        insert(tmp->K); tmp=tmp->P;
+    }
+    return true;
+}
 
 template<typename D>
 void LIST<D>::rotate(node<D>*& head, node<D>*& tail){
@@ -85,7 +98,7 @@ LIST<D>::LIST(LIST<D>&& other) noexcept{
 template<typename D>
 LIST<D>& LIST<D>::operator=(LIST<D>&& other) noexcept{
     if(this != &other){
-        clearupto(H);
+        clear(H);
         H = other.H; T = other.T;
         elem = other.elem;
 
@@ -105,23 +118,58 @@ LIST<D>::LIST(const LIST<D>& other){
 }
 
 template<typename D>
-void LIST<D>::clearupto(node<D>*& p){
-    node<D>* tmp;
-    while(p){ 
-        tmp = p; p = p->P; 
-        delete tmp; 
+LIST<D>& LIST<D>::operator=(const LIST<D>& other){
+    if(this != &other){
+        clear(H);
+        H=T=nullptr; elem=0;
+        
+        node<D>* iter=other.H;
+        while(iter){
+            insert(iter->K); iter=iter->P;
+        }
     }
+    return *this;
+}
+
+template<typename D>
+long int LIST<D>::clear(node<D>*& p){
+    node<D>* tmp; long int count=0;
+    while(p){ 
+        tmp=p; p=p->P; 
+        delete tmp; count++;
+    }
+    return count;
+}
+
+template<typename D>
+long int LIST<D>::clearupto(node<D>*& head, node<D>*& tail){
+    if(!head) return 0;
+    node<D>* p=head->P, *tmp; long int count=0;
+    while(p && p!=tail){ 
+        tmp=p; p=p->P; 
+        delete tmp; count++;
+    }
+    if(!p){ head->P=nullptr; return count; }
+    if(tail && p==tail){
+        tail=tail->P; 
+        delete p; count++;
+    }
+    if(tail){ head->P=tail;  
+    }else{ 
+        tail=head; tail->P=head->P=nullptr; 
+    }
+    return count;
 }
 
 template<typename D>
 LIST<D>::~LIST(){
-    clearupto(H);
+    clear(H);
     T = nullptr; elem = 0;
 }
 
 template<typename D>
 D& LIST<D>::operator[](long int index){
-    node<D>* ptr = pointer(index);   // get the node pointer
+    node<D>* ptr=pointer(index);   // get the node pointer
     if(!ptr) throw std::out_of_range("Index out of bounds");
     return ptr->K;                    // return reference to the value
 }
@@ -131,20 +179,6 @@ const D& LIST<D>::operator[](long int index) const{
     node<D>* ptr = pointer(index);   // get the node pointer
     if(!ptr) throw std::out_of_range("Index out of bounds");
     return ptr->K;                    // return const reference
-}
-
-template<typename D>
-LIST<D>& LIST<D>::operator=(const LIST<D>& other){
-    if(this != &other){
-        clearupto(H);
-        H = T = nullptr; elem = 0;
-        
-        node<D>* iter = other.H;  // Copy new nodes
-        while(iter){
-            insert(iter->K); iter = iter->P;
-        }
-    }
-    return *this;
 }
 
 template<typename D>
@@ -180,29 +214,6 @@ node<D>* LIST<D>::pointer(long int index) const{
     return iter;
 }
 
-// template<typename I, typename R>
-// R find(I veriable, bool position){
-//     node<D> *iter=H; 
-//     if(position){
-//         if(veriable=elem) throw out_of_range("Index out of bounds");
-//         for(int i=0; i<veriable; i++) iter=iter->P;
-//         return iter->K;
-//     }
-//     long int index=0;
-//     while(iter){
-//         if(iter->K==val) return index;
-//         iter=iter->P; index++;
-//     } return -1;
-// }
-// template<typename D>
-// node<D>* LIST<D>::search(D val){
-//     node<D> *iter=H; 
-//     while(iter){
-//         if(iter->K==val) return iter;
-//         iter=iter->P; 
-//     } return nullptr;
-// }
-
 template<typename D>
 long int LIST<D>::index(D value) const{
     node<D> *iter=H; long int index=0;
@@ -213,7 +224,7 @@ long int LIST<D>::index(D value) const{
 }
 
 template<typename D>
-D LIST<D>::value(long int index) const{
+const D& LIST<D>::value(long int index) const{
     if(index>=elem || index<0) throw std::out_of_range("Index out of bounds");
     node<D> *iter=H;
     for(long int i=0; i<index; i++) iter=iter->P;
@@ -238,7 +249,7 @@ D LIST<D>::remove(long int index){
 }
 
 template<typename D>
-int LIST<D>::drop(D val){
+long int LIST<D>::drop(D val){
     if(H==nullptr) return -1; 
     node<D> *iter=H;
     if(H->K==val){ 
@@ -258,50 +269,52 @@ int LIST<D>::drop(D val){
 }
 
 template<typename D>
-int LIST<D>::insert(D val, long int index){
+bool LIST<D>::insert(D val, long int index){
     if(H==nullptr){
         H=T=new node<D>{val, nullptr}; elem++;
-        return 1;
+        return true;
     }
-    if(index<-1 || index>elem) return -1;
+    if(index<-1 || index>elem) return false;
     if(index==-1 || index==elem){
         T->P=new node<D>; T=T->P;
         *T=node<D>{val, nullptr}; elem++;    
-        return 1;    
+        return true;    
     }
     if(index==0){
         node<D> *tmp=new node<D>{val, H};
         H=tmp; elem++;
-        return 1;
+        return true;
     }
     node<D> *iter=H; long int i;
     for(i=1; i<index; i++) iter=iter->P;
     node<D> *tmp=new node<D>{val, iter->P};
     iter->P=tmp; elem++;
-    return 1;
+    return true;
 }
 
 template<typename D>
-void LIST<D>::view() const{
+void LIST<D>::view(bool v) const{
     node<D> *iter=H;
+    if(v) std::cout<<"head->";
     std::cout<<"[";
     while(iter){
         std::cout<<iter->K; if(iter->P!=nullptr) std::cout<<", ";
         iter=iter->P;
     } std::cout<<"]";
+    if(v) std::cout<<"<-tail";
 }
 
 template<typename D>
-iterator<D> LIST<D>::begin(){ return iterator<D>(H); }
+iterator<D> LIST<D>::begin() noexcept{ return iterator<D>(H); }
 
 template<typename D>
-iterator<D> LIST<D>::end(){ return iterator<D>(nullptr); }
+iterator<D> LIST<D>::end() noexcept{ return iterator<D>(nullptr); }
 
 template<typename D>
-iterator<D> LIST<D>::begin() const{ return iterator<D>(H); }
+iterator<D> LIST<D>::begin() const noexcept{ return iterator<D>(H); }
 
 template<typename D>
-iterator<D> LIST<D>::end() const{ return iterator<D>(nullptr); }
+iterator<D> LIST<D>::end() const noexcept{ return iterator<D>(nullptr); }
 
 //-------------- iterator
 template<typename D>
@@ -351,22 +364,61 @@ const D* iterator<D>::operator->() const{
 }
 
 
-#include <string>
 using namespace std;
 
-int main(){
-    LIST<int> l;
+int main() {
+    LIST<int> list1;
+    LIST<int> list2;
 
-    l.insert(10);
-    l.insert(20);
-    l.insert(30);
+    // Fill list2
+    list2.insert(10);
+    list2.insert(20);
+    list2.insert(30);
 
-    // 🔥 Range-based loop
-    for (auto x : l) {
-        cout << x << " ";
-    }
+    // cout << "Initial list2: ";
+    list2.view(true);
+
+    // // -----------------------------
+    // // ✅ TEST 1: add() (COPY)
+    // // -----------------------------
+    // cout << "\n--- Testing add() (copy) ---\n";
+
+    // list1.add(list2);
+
+    // cout << "list1 after add: ";
+    // list1.view();   // [10, 20, 30]
+
+    // cout << "list2 after add: ";
+    // list2.view();   // should remain SAME
+
+    // // Modify list1 to prove it's independent
+    // list1.insert(40);
+
+    // cout << "list1 after insert 40: ";
+    // list1.view();   // [10,20,30,40]
+
+    // cout << "list2 still unchanged: ";
+    // list2.view();   // [10,20,30]
+
     return 0;
 }
+
+// #include <string>
+// using namespace std;
+
+// int main(){
+//     LIST<int> l;
+
+//     l.insert(10);
+//     l.insert(20);
+//     l.insert(30);
+
+//     // 🔥 Range-based loop
+//     for (auto x : l) {
+//         cout << x << " ";
+//     }
+//     return 0;
+// }
 
 // // ---------- TEST FUNCTION ----------
 // template<typename T>
