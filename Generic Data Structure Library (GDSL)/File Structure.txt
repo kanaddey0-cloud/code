@@ -1,0 +1,111 @@
+C:\
+└── MinGW\
+    └── include\
+        └── GenericDataStructureLibrary\
+            │
+            ├── include/                          <-- User-facing headers (.hpp)
+            │   ├── Linear/
+            │   │   ├── Array.hpp
+            │   │   ├── List/
+            │   │   │   ├── SinglyList.hpp
+            │   │   │   ├── DoublyList.hpp
+            │   │   │   └── CircularList.hpp
+            │   │   ├── Stack.hpp
+            │   │   └── Queue/
+            │   │       ├── SimpleQueue.hpp
+            │   │       ├── CircularQueue.hpp
+            │   │       ├── Deque.hpp
+            │   │       └── PriorityQueue.hpp
+            │   │
+            │   ├── NonLinear/
+            │   │   ├── Tree/
+            │   │   │   ├── BinaryTree.hpp
+            │   │   │   ├── BST.hpp
+            │   │   │   ├── AVL.hpp
+            │   │   │   ├── RedBlack.hpp
+            │   │   │   ├── Heap.hpp
+            │   │   │   ├── Splay.hpp
+            │   │   │   ├── Trie.hpp
+            │   │   │   ├── BTree.hpp
+            │   │   │   └── BPlusTree.hpp
+            │   │   └── Graph/
+            │   │       ├── DirectedGraph.hpp
+            │   │       ├── UndirectedGraph.hpp
+            │   │       └── WeightedGraph.hpp
+            │   │
+            │   ├── Hashing/
+            │   │   ├── HashMap.hpp
+            │   │   └── HashSet.hpp
+            │   │
+            │   └── Advanced/
+            │       ├── DisjointSet.hpp
+            │       ├── SegmentTree.hpp
+            │       └── FenwickTree.hpp
+            │
+            │
+            ├── src/                              <-- Template implementations (.tpp)
+            │   ├── Linear/
+            │   │   ├── Array.tpp
+            │   │   ├── LinkedList/
+            │   │   │   ├── SinglyList.tpp
+            │   │   │   ├── DoublyList.tpp
+            │   │   │   └── CircularList.tpp
+            │   │   ├── Stack.tpp
+            │   │   └── Queue/
+            │   │       ├── SimpleQueue.tpp
+            │   │       ├── CircularQueue.tpp
+            │   │       ├── Deque.tpp
+            │   │       └── PriorityQueue.tpp
+            │   │
+            │   ├── NonLinear/
+            │   │   ├── Tree/
+            │   │   │   ├── BinaryTree.tpp
+            │   │   │   ├── BST.tpp
+            │   │   │   ├── AVL.tpp
+            │   │   │   ├── RedBlack.tpp
+            │   │   │   ├── Heap.tpp
+            │   │   │   ├── Splay.tpp
+            │   │   │   ├── Trie.tpp
+            │   │   │   ├── BTree.tpp
+            │   │   │   └── BPlusTree.tpp
+            │   │   └── Graph/
+            │   │       ├── DirectedGraph.tpp
+            │   │       ├── UndirectedGraph.tpp
+            │   │       └── WeightedGraph.tpp
+            │   │
+            │   ├── Hashing/
+            │   │   ├── HashMap.tpp
+            │   │   └── HashSet.tpp
+            │   │
+            │   └── Advanced/
+            │       ├── DisjointSet.tpp
+            │       ├── SegmentTree.tpp
+            │       └── FenwickTree.tpp
+            │
+            │                       
+            ├── GDSLlist.hpp        ┬
+            ├── GDSLstack.hpp       │ aggregated headers
+            ├── GDSLqueue.hpp       ┴
+            │                                                              
+            ├── GDSLtree.hpp        ┬
+            ├── GDSLgraph.hpp       │ aggregated headers
+            ├── GDSLhashing.hpp     │
+            └── GDSLadvanced.hpp    ┴
+                         
+
+___________________________________________________________________________________________________________
+
+
+┌   top-left corner
+┐   top-right corner
+└   bottom-left corner
+┘   bottom-right corner
+├   vertical + right branch
+┤   vertical + left branch
+┬   horizontal + down branch
+┴   horizontal + up branch
+│   vertical line
+─   horizontal line
+┼   cross (vertical + horizontal)
+
+‾‾‾‾‾‾‾‾Text below the line
