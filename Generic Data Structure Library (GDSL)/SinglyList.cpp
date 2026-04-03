@@ -167,18 +167,18 @@ LIST<D>::~LIST(){
     T = nullptr; elem = 0;
 }
 
-template<typename D>
+template<typename D>   // Read & Write 
 D& LIST<D>::operator[](long int index){
     node<D>* ptr=pointer(index);   // get the node pointer
     if(!ptr) throw std::out_of_range("Index out of bounds");
-    return ptr->K;                    // return reference to the value
+    return ptr->K;                 // return reference to the value
 }
 
-template<typename D>
+template<typename D>  // Read Only
 const D& LIST<D>::operator[](long int index) const{
-    node<D>* ptr = pointer(index);   // get the node pointer
+    node<D>* ptr=pointer(index);   // get the node pointer
     if(!ptr) throw std::out_of_range("Index out of bounds");
-    return ptr->K;                    // return const reference
+    return ptr->K;                 // return const reference
 }
 
 template<typename D>
