@@ -13,19 +13,13 @@ public:
 };
 
 template<typename D>
-long int QUEUE<D>::size(){
-    return Q.size();
-}
+long int QUEUE<D>::size(){ return Q.size(); }
 
 template<typename D>
-bool QUEUE<D>::empty(){
-    return size()==0;
-}
+bool QUEUE<D>::empty(){ return size()==0; }
 
 template<typename D>
-bool QUEUE<D>::enqueue(D val){
-    return Q.insert(val);
-}
+bool QUEUE<D>::enqueue(D val){ return Q.insert(val); }
 
 template<typename D>
 D QUEUE<D>::dequeue(){

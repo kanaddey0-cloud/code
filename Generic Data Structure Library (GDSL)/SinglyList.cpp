@@ -24,7 +24,7 @@ class LIST{
 protected:
     long int elem; 
     node<D>* H, *T;
-    node<D>* pointer(long int index) const;
+    node<D>* pointer(const long int index) const;
     void rotate(node<D>*& head, node<D>*& tail);
     long int clear(node<D>*& p);
     long int clearupto(node<D>*& head, node<D>*& tail);
@@ -32,8 +32,8 @@ public:
     LIST();
     LIST(const LIST<D>& other);
     LIST(LIST<D>&& other) noexcept;
-    D& operator[](long int index);
-    const D& operator[](long int index) const;
+    D& operator[](const long int index);
+    const D& operator[](const long int index) const;
     LIST<D>& operator=(const LIST<D>& other);
     LIST<D>& operator=(LIST<D>&& other) noexcept;
     long int size() const { return elem; }
@@ -87,10 +87,7 @@ LIST<D>::LIST(){
 }
 
 template<typename D>
-LIST<D>::LIST(LIST<D>&& other) noexcept{
-    H = other.H; T = other.T;
-    elem = other.elem;
-
+LIST<D>::LIST(LIST<D>&& other) noexcept :H(other.H), T(other.T), elem(other.elem){
     other.H = other.T = nullptr;
     other.elem = 0;
 }
@@ -109,8 +106,7 @@ LIST<D>& LIST<D>::operator=(LIST<D>&& other) noexcept{
 }
 
 template<typename D>
-LIST<D>::LIST(const LIST<D>& other){
-    H = T = nullptr; elem = 0;
+LIST<D>::LIST(const LIST<D>& other):LIST<D>(){
     node<D>* iter = other.H;
     while(iter){
         insert(iter->K); iter = iter->P;
@@ -168,17 +164,21 @@ LIST<D>::~LIST(){
 }
 
 template<typename D>   // Read & Write 
-D& LIST<D>::operator[](long int index){
+D& LIST<D>::operator[](const long int index){
+    if(H=T=nullptr) throw std::runtime_error("Tree is empty");
+
     node<D>* ptr=pointer(index);   // get the node pointer
     if(!ptr) throw std::out_of_range("Index out of bounds");
     return ptr->K;                 // return reference to the value
 }
 
 template<typename D>  // Read Only
-const D& LIST<D>::operator[](long int index) const{
-    node<D>* ptr=pointer(index);   // get the node pointer
+const D& LIST<D>::operator[](const long int index) const{
+    if(H=T=nullptr) throw std::runtime_error("Tree is empty");
+
+    const node<D>* ptr=pointer(index);   // get the node pointer
     if(!ptr) throw std::out_of_range("Index out of bounds");
-    return ptr->K;                 // return const reference
+    return ptr->K;                       // return const reference
 }
 
 template<typename D>
@@ -208,6 +208,7 @@ D LIST<D>::modify(D curr, long int index){
 
 template<typename D>
 node<D>* LIST<D>::pointer(long int index) const{
+    index = index<0? elem+index : index;
     if(index>=elem || index<0) return nullptr;
     node<D> *iter=H;
     for(long int i=0; i<index; i++) iter=iter->P;
@@ -367,7 +368,7 @@ const D* iterator<D>::operator->() const{
 using namespace std;
 
 int main() {
-    LIST<int> list1;
+    
     LIST<int> list2;
 
     // Fill list2
@@ -376,7 +377,12 @@ int main() {
     list2.insert(30);
 
     // cout << "Initial list2: ";
+    list2.view(true); cout<<"\n";
+    LIST<int> list1(list2);
     list2.view(true);
+    cout<<list1[0];
+    list1[1]=22;
+    cout<<list1[1];
 
     // // -----------------------------
     // // ✅ TEST 1: add() (COPY)
