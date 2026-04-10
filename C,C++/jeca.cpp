@@ -46,9 +46,30 @@
 //     ex(){ cout<<"Default"<<endl; }
 //     ex(int v):val(v){ cout<<"This->"<<val<<endl; }
 // };
-#include<iostream>
+
+#include <iostream>
 using namespace std;
-int main(){
+
+void getValue(bool x) {
+    if(x==0) cout<<"0";
+    if(x==1) cout<<"1";
+    if(x==2) cout<<"2";
+    
+}
+
+int main() {
+    // int a = 10;
+    getValue(2);
+    // getValue(a) = 99;   read-only
+
+    // cout << getValue(a);    // 10
+    // cout << getValue(20); // WORKS!
+    // int a=10; int &b=a; cout<<a<<b; 
+    // /* b=20; */  a=20; cout<<a<<b;
+}
+
+
+// int main(){
 //     ex x1,x2(2);
 //     // x1=ex(1);
 //     // x2=ex(4);
@@ -59,7 +80,8 @@ int main(){
 // int x=5;
 // std::cout<<++x<<std::
 // endl<<x++;
-float a=0.1;
-cout<<(a==0.1);  //ERROR
-    return 0;
-}
+// float a=0.1;
+// cout<<(a==0.1);  //ERROR
+
+//     return 0;
+// }

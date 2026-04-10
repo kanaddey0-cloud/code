@@ -2,7 +2,7 @@
 #include <iostream>
 #include <GDSLlist.hpp>
 // #include <GDSLstack.hpp>
-#include <GDSLqueue.hpp>
+// #include <GDSLqueue>
 
 template<typename D>
 std::ostream& operator<<(std::ostream& out, const node<D>& n){
@@ -10,64 +10,64 @@ std::ostream& operator<<(std::ostream& out, const node<D>& n){
 }
 
 using namespace std;
-int main() {
+// int main() {
 
-    cout << "===== Test 1: QUEUE<int> =====" << endl;
-    QUEUE<int> q1;
+//     cout << "===== Test 1: QUEUE<int> =====" << endl;
+//     QUEUE<int> q1;
 
-    q1.enqueue(10);
-    q1.enqueue(20);
-    q1.enqueue(30);
+//     q1.enqueue(10);
+//     q1.enqueue(20);
+//     q1.enqueue(30);
 
-    q1.view(true);   // SP->[10, 20, 30]
-    cout << endl;
+//     q1.view(true);   // SP->[10, 20, 30]
+//     cout << endl;
 
-    cout << "Dequeue: " << q1.dequeue() << endl;  // 10
-    q1.view(true);
-    cout << endl << endl;
-
-
-    cout << "===== Test 2: QUEUE<string> =====" << endl;
-    QUEUE<string> q2;
-
-    q2.enqueue("A");
-    q2.enqueue("B");
-    q2.enqueue("C");
-
-    q2.view(true);   // SP->[A, B, C]
-    cout << endl;
-
-    cout << "Dequeue: " << q2.dequeue() << endl;  // A
-    q2.view(true);
-    cout << endl << endl;
+//     cout << "Dequeue: " << q1.dequeue() << endl;  // 10
+//     q1.view(true);
+//     cout << endl << endl;
 
 
-    cout << "===== Test 3: QUEUE<node<int>> =====" << endl;
-    QUEUE<node<int>> q3;
+//     cout << "===== Test 2: QUEUE<string> =====" << endl;
+//     QUEUE<string> q2;
 
-    q3.enqueue({100, nullptr});
-    q3.enqueue({200, nullptr});
-    q3.enqueue({300, nullptr});
+//     q2.enqueue("A");
+//     q2.enqueue("B");
+//     q2.enqueue("C");
 
-    q3.view(true);   // SP->[100, 200, 300]
-    cout << endl;
+//     q2.view(true);   // SP->[A, B, C]
+//     cout << endl;
 
-    cout << "Dequeue: " << q3.dequeue().K << endl;  // 100
-    q3.view(true);
-    cout << endl << endl;
+//     cout << "Dequeue: " << q2.dequeue() << endl;  // A
+//     q2.view(true);
+//     cout << endl << endl;
 
 
-    cout << "===== Test 4: Empty Queue =====" << endl;
-    QUEUE<int> q4;
+//     cout << "===== Test 3: QUEUE<node<int>> =====" << endl;
+//     QUEUE<node<int>> q3;
 
-    try {
-        q4.dequeue();   // should throw
-    } catch(const exception& e) {
-        cout << "Exception: " << e.what() << endl;
-    }
+//     q3.enqueue({100, nullptr});
+//     q3.enqueue({200, nullptr});
+//     q3.enqueue({300, nullptr});
 
-    return 0;
-}
+//     q3.view(true);   // SP->[100, 200, 300]
+//     cout << endl;
+
+//     cout << "Dequeue: " << q3.dequeue().K << endl;  // 100
+//     q3.view(true);
+//     cout << endl << endl;
+
+
+//     cout << "===== Test 4: Empty Queue =====" << endl;
+//     QUEUE<int> q4;
+
+//     try {
+//         q4.dequeue();   // should throw
+//     } catch(const exception& e) {
+//         cout << "Exception: " << e.what() << endl;
+//     }
+
+//     return 0;
+// }
 
 // using namespace std;
 // int main() {
@@ -156,89 +156,89 @@ int main() {
 //     std::cout << is_basic_type<node<int>>() << std::endl;    // 0 ❌
 // }
 
-// // SinglyList Testing ... .
-// int main() {
-//     LIST<int> l;
+// SinglyList Testing ... .
+int main() {
+    LIST<int> l;
 
-//     std::cout << "===== BASIC INSERT =====\n";
-//     l.insert(10);
-//     l.insert(20);
-//     l.insert(30);
-//     l.view(); std::cout << "\n";
+    std::cout << "===== BASIC INSERT =====\n";
+    l.insert(10);
+    l.insert(20);
+    l.insert(30);
+    l.view(); std::cout << "\n";
 
-//     std::cout << "\n===== INSERT AT POSITION =====\n";
-//     l.insert(5, 0);     // head
-//     l.insert(25, 3);    // middle
-//     l.insert(40, -1);   // end
-//     l.view(true); std::cout << "\n";
+    std::cout << "\n===== INSERT AT POSITION =====\n";
+    l.insert(5, 0);     // head
+    l.insert(25, 3);    // middle
+    l.insert(40, -1);   // end
+    l.view(true); std::cout << "\n";
 
-//     std::cout << "\n===== SIZE =====\n";
-//     std::cout << "Size: " << l.size() << "\n";
+    std::cout << "\n===== SIZE =====\n";
+    std::cout << "Size: " << l.size() << "\n";
 
-//     std::cout << "\n===== ACCESS =====\n";
-//     std::cout << "l[0] = " << l[0] << "\n";
-//     std::cout << "l[2] = " << l[2] << "\n";
+    std::cout << "\n===== ACCESS =====\n";
+    std::cout << "l[0] = " << l[0] << "\n";
+    std::cout << "l[2] = " << l[2] << "\n";
 
-//     std::cout << "\n===== MODIFY =====\n";
-//     std::cout << "Old value at index 1: " << l.modify(100, 1) << "\n";
-//     l.view(); std::cout << "\n";
+    std::cout << "\n===== MODIFY =====\n";
+    std::cout << "Old value at index 1: " << l.modify(100, 1) << "\n";
+    l.view(); std::cout << "\n";
 
-//     std::cout << "\n===== UPDATE =====\n";
-//     std::cout << "Update 20 -> 200 at index: " << l.update(20, 200) << "\n";
-//     l.view(true); std::cout << "\n";
+    std::cout << "\n===== UPDATE =====\n";
+    std::cout << "Update 20 -> 200 at index: " << l.update(20, 200) << "\n";
+    l.view(true); std::cout << "\n";
 
-//     std::cout << "\n===== INDEX & VALUE =====\n";
-//     std::cout << "Index of 30: " << l.index(30) << "\n";
-//     std::cout << "Value at index 2: " << l.value(2) << "\n";
+    std::cout << "\n===== INDEX & VALUE =====\n";
+    std::cout << "Index of 30: " << l.index(30) << "\n";
+    std::cout << "Value at index 2: " << l.value(2) << "\n";
 
-//     std::cout << "\n===== REMOVE =====\n";
-//     std::cout << "Removed element: " << l.remove(0) << "\n";
-//     l.view(); std::cout << "\n";
+    std::cout << "\n===== REMOVE =====\n";
+    std::cout << "Removed element: " << l.remove(0) << "\n";
+    l.view(); std::cout << "\n";
 
-//     std::cout << "\n===== DROP =====\n";
-//     std::cout << "Dropped index of 200: " << l.drop(200) << "\n";
-//     l.view(true); std::cout << "\n";
+    std::cout << "\n===== DROP =====\n";
+    std::cout << "Dropped index of 200: " << l.drop(200) << "\n";
+    l.view(true); std::cout << "\n";
 
-//     std::cout << "\n===== REVERSE =====\n";
-//     l.reverse();
-//     l.view(); std::cout << "\n";
+    std::cout << "\n===== REVERSE =====\n";
+    l.reverse();
+    l.view(); std::cout << "\n";
 
-//     std::cout << "\n===== ITERATOR (manual) =====\n";
-//     for (auto it = l.begin(); it != l.end(); ++it) {
-//         std::cout << *it << " ";
-//     }
-//     std::cout << "\n";
+    std::cout << "\n===== ITERATOR (manual) =====\n";
+    for (auto it = l.begin(); it != l.end(); ++it) {
+        std::cout << *it << " ";
+    }
+    std::cout << "\n";
 
-//     std::cout << "\n===== RANGE LOOP =====\n";
-//     for (auto x : l) {
-//         std::cout << x << " ";
-//     }
-//     std::cout << "\n";
+    std::cout << "\n===== RANGE LOOP =====\n";
+    for (auto x : l) {
+        std::cout << x << " ";
+    }
+    std::cout << "\n";
 
-//     std::cout << "\n===== COPY TEST =====\n";
-//     LIST<int> copy = l;
-//     copy.insert(999);
-//     std::cout << "Original: ";
-//     l.view(); std::cout << "\n";
-//     std::cout << "Copy: ";
-//     copy.view(true); std::cout << "\n";
+    std::cout << "\n===== COPY TEST =====\n";
+    LIST<int> copy = l;
+    copy.insert(999);
+    std::cout << "Original: ";
+    l.view(); std::cout << "\n";
+    std::cout << "Copy: ";
+    copy.view(true); std::cout << "\n";
 
-//     std::cout << "\n===== MOVE TEST =====\n";
-//     LIST<int> moved = std::move(copy);
-//     std::cout << "Moved: ";
-//     moved.view(); std::cout << "\n";
+    std::cout << "\n===== MOVE TEST =====\n";
+    LIST<int> moved = std::move(copy);
+    std::cout << "Moved: ";
+    moved.view(); std::cout << "\n";
 
-//     std::cout << "\n===== ADD (MERGE COPY) =====\n";
-//     LIST<int> l2;
-//     l2.insert(1);
-//     l2.insert(2);
-//     l.add(l2);
+    std::cout << "\n===== ADD (MERGE COPY) =====\n";
+    LIST<int> l2;
+    l2.insert(1);
+    l2.insert(2);
+    l.add(l2);
 
-//     std::cout << "After adding l2 into l: ";
-//     l.view(true); std::cout << "\n";
+    std::cout << "After adding l2 into l: ";
+    l.view(true); std::cout << "\n";
 
-//     std::cout << "\n===== DONE =====\n";
+    std::cout << "\n===== DONE =====\n";
 
-//     return 0;
-// }
+    return 0;
+}
 
