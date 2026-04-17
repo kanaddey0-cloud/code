@@ -1,10 +1,10 @@
-#include <iostream>
 #include <GDSLstack.hpp>
 #include <GDSLqueue.hpp>
 
 enum class MODE : char {
     DFS='w', BFS='x', DFS_LR='y', BFS_RL='z',
-    IN='a', PRE='b', POST='c'
+    IN='a', PRE='b', POST='c',
+    DEF='d'
 };
 enum { L, R, P };
 
@@ -12,7 +12,194 @@ template<typename D>
 struct BSTnode{ D K; BSTnode<D>** LINK; };
 
 template<typename D>
-std::ostream& operator<<(std::ostream& out, const BSTnode<D>& n){ return out<<n.K; }
+class BSTiterator { 
+    BSTnode<D>* ptr, *ROOT, *last;
+    STACK<BSTnode<D>*> S;
+    QUEUE<BSTnode<D>*> Q;
+public:
+    MODE M;
+    BSTiterator(MODE mode, BSTnode<D>* p = nullptr);
+    BSTnode<D>* increment();
+    BSTnode<D>* incrementBFS();
+    BSTnode<D>* incrementDFS();
+    BSTnode<D>* incrementIN();
+    BSTnode<D>* incrementPRE();
+    BSTnode<D>* incrementPOST();
+    D& operator*();
+    const D& operator*() const;
+    BSTiterator& operator++() noexcept;
+    BSTiterator operator++(int) noexcept;
+    bool operator!=(const BSTiterator& other) const noexcept;
+    bool operator==(const BSTiterator& other) const noexcept;
+    D* operator->();
+    const D* operator->() const;
+};
+
+template<typename D>
+BSTiterator<D>::BSTiterator(MODE mode, BSTnode<D>* p) : ptr(nullptr), last(nullptr), ROOT(p), M(mode) {
+    if(!ROOT) return;
+
+    switch(M){
+        case MODE::BFS:
+        case MODE::BFS_RL:
+            Q.enqueue(ROOT); break;
+
+        case MODE::DFS:
+        case MODE::DFS_LR:
+
+        case MODE::PRE:
+            S.push(ROOT); break;
+
+        case MODE::IN:
+
+        case MODE::POST:
+        {
+            BSTnode<D>* temp = ROOT;
+            while(temp){
+                S.push(temp);
+                temp = temp->LINK[L];
+            } break;
+        }
+
+        default: break;
+    }
+}
+    
+template <typename D>
+BSTnode<D>* BSTiterator<D>::incrementBFS(){
+    if(Q.empty()) return nullptr;
+    BSTnode<D>* temp = Q.dequeue();
+
+    if(M == MODE::BFS){
+        if(temp->LINK[L]) Q.enqueue(temp->LINK[L]);
+        if(temp->LINK[R]) Q.enqueue(temp->LINK[R]);
+    }else{
+        if(temp->LINK[R]) Q.enqueue(temp->LINK[R]);
+        if(temp->LINK[L]) Q.enqueue(temp->LINK[L]);
+    }
+    return temp;
+}
+
+template<typename D>
+BSTnode<D>* BSTiterator<D>::incrementDFS(){
+    if(S.empty()) return nullptr;
+    BSTnode<D>* temp = S.pop();
+
+    if(M == MODE::DFS){
+        if(temp->LINK[L]) S.push(temp->LINK[L]);
+        if(temp->LINK[R]) S.push(temp->LINK[R]);
+    }else{
+        if(temp->LINK[R]) S.push(temp->LINK[R]);
+        if(temp->LINK[L]) S.push(temp->LINK[L]);
+    }
+    return temp;
+}
+
+template<typename D>
+BSTnode<D>* BSTiterator<D>::incrementIN(){
+    if(S.empty()) return nullptr;
+    BSTnode<D>* node = S.pop();
+
+    BSTnode<D>* temp = node->LINK[R];
+    while(temp){
+        S.push(temp);
+        temp = temp->LINK[L];
+    }
+    return node;
+}
+
+template<typename D>
+BSTnode<D>* BSTiterator<D>::incrementPRE(){
+    if(S.empty()) return nullptr;
+    BSTnode<D>* node = S.pop();
+
+    if(node->LINK[R]) S.push(node->LINK[R]);
+    if(node->LINK[L]) S.push(node->LINK[L]);
+    return node;
+}
+
+template<typename D>
+BSTnode<D>* BSTiterator<D>::incrementPOST(){
+    while(!S.empty()){
+        BSTnode<D>* peek = S.tos();
+        BSTnode<D>* right = peek->LINK[R];
+
+        if(right && last != right){
+            BSTnode<D>* temp = right;
+            while(temp){
+                S.push(temp);
+                temp = temp->LINK[L];
+            }
+        }else{
+            S.pop();
+            last = peek;
+            return peek;
+        }
+    }
+    return nullptr;
+}
+
+template<typename D>
+BSTnode<D>* BSTiterator<D>::increment(){
+    switch(M){
+        case MODE::BFS: 
+        case MODE::BFS_RL: 
+            return incrementBFS();
+
+        case MODE::DFS: 
+        case MODE::DFS_LR: 
+            return incrementDFS();
+
+        case MODE::IN:   return incrementIN();
+        case MODE::PRE:  return incrementPRE();
+        case MODE::POST: return incrementPOST();
+
+        default: return nullptr;
+    }
+}
+
+template<typename D>
+D& BSTiterator<D>::operator*(){
+    if(!ptr) throw std::runtime_error("Null iterator");
+    return ptr->K;
+}
+
+template<typename D>
+const D& BSTiterator<D>::operator*() const{
+    if(!ptr) throw std::runtime_error("Null iterator");
+    return ptr->K;
+}
+
+template<typename D>
+BSTiterator<D>& BSTiterator<D>::operator++() noexcept{
+    ptr = increment();
+    return *this;
+}
+
+template<typename D>
+BSTiterator<D> BSTiterator<D>::operator++(int) noexcept{
+    BSTiterator<D> temp = *this; 
+    ptr = increment();
+    return temp;
+}
+
+template<typename D>
+bool BSTiterator<D>::operator!=(const BSTiterator<D>& other) const noexcept{ return ptr != other.ptr; }
+
+template<typename D>
+bool BSTiterator<D>::operator==(const BSTiterator<D>& other) const noexcept{ return ptr == other.ptr; }
+
+template<typename D>
+D* BSTiterator<D>::operator->(){ 
+    if(!ptr) throw std::runtime_error("Null iterator");
+    return &(ptr->K); 
+}
+
+template<typename D>
+const D* BSTiterator<D>::operator->() const{ 
+    if(!ptr) throw std::runtime_error("Null iterator");
+    return &(ptr->K); 
+}
 
 template<typename D>
 class BSTREE{
@@ -25,7 +212,7 @@ protected:
     bool deleting(BSTnode<D>*& del, BSTnode<D>* tmp);
     bool freelink(BSTnode<D>*& root);
     unsigned long int addlink(BSTnode<D>*& root, const BSTnode<D>*& other);
-    BSTnode<D>* pointer(long int index) const;
+    BSTnode<D>* pointer(long int index, MODE mode=MODE::DEF) const;
     BSTnode<D>* pointerBFS(const unsigned long int index, bool order=false) const;
     BSTnode<D>* pointerDFS(const unsigned long int index, bool order=false) const;
     BSTnode<D>* pointerIN(BSTnode<D>* root, const unsigned long int index, unsigned long int& count) const;
@@ -45,31 +232,18 @@ public:
     bool search(D item);
     bool remove(D item);
     bool add(const BSTREE<D>& root);
-    void view();
+    void view(MODE mode=MODE::DEF);
     void viewDFS(bool order=false);
     void viewBFS(bool order=false);
     void viewIN(const BSTnode<D>* root) const;
     void viewPRE(const BSTnode<D>* root) const;
     void viewPOST(const BSTnode<D>* root) const;
+    BSTiterator<D> begin() noexcept;
+    BSTiterator<D> begin() const noexcept;
+    BSTiterator<D> end() noexcept;
+    BSTiterator<D> end() const noexcept;
     ~BSTREE();
 };
-
-template<typename D>
-bool BSTREE<D>::freelink(BSTnode<D>*& root){
-    if(!root) return false;
-    QUEUE<BSTnode<D>*> Q; 
-    BSTnode<D>* tmp;
-        if(root->LINK[L]) Q.enqueue(root->LINK[L]);
-        if(root->LINK[R]) Q.enqueue(root->LINK[R]);
-    while(!Q.empty()){
-        tmp=Q.dequeue();
-            if(tmp->LINK[L]) Q.enqueue(tmp->LINK[L]);
-            if(tmp->LINK[R]) Q.enqueue(tmp->LINK[R]);
-        delete tmp;
-    }
-    root->LINK[L]=nullptr; root->LINK[R]=nullptr; 
-    return true;
-}
 
 template<typename D>
 BSTREE<D>::BSTREE(bool l){ ROOT=nullptr; LC=l?3:2; M=MODE::IN; elem=0; }
@@ -99,9 +273,10 @@ template<typename D>
 BSTREE<D>& BSTREE<D>::operator=(const BSTREE<D>& other){
     if(this == &other) return *this;
 
-    freelink(ROOT); delete ROOT; ROOT=nullptr; elem=0; LC=other.LC;
-
+    freelink(ROOT); if(ROOT){ delete[] ROOT->LINK; delete ROOT; ROOT=nullptr; } 
+    elem=0; LC=other.LC;
     if(!other.ROOT) return *this;
+    
     QUEUE<BSTnode<D>*> Q; 
     BSTnode<D>* tmp;
     Q.enqueue(other.ROOT);
@@ -117,16 +292,20 @@ BSTREE<D>& BSTREE<D>::operator=(const BSTREE<D>& other){
 template<typename D>
 BSTREE<D>& BSTREE<D>::operator=(BSTREE<D>&& other) noexcept{
     if(this == &other) return *this;
-    freelink(ROOT); delete ROOT; ROOT=nullptr; elem=0; LC=other.LC;
+
+    freelink(ROOT); if(ROOT){ delete[] ROOT->LINK; delete ROOT; ROOT=nullptr; } 
+    elem=0; LC=other.LC;
     if(!other.ROOT) return *this;
 
-    ROOT=other.ROOT; elem=other.elem; LC=other.LC;
+    ROOT=other.ROOT; elem=other.elem;
     other.ROOT=nullptr; other.elem=0;
     return *this;
 }
 
 template<typename D>
-BSTREE<D>::~BSTREE(){ freelink(ROOT); delete ROOT; ROOT=nullptr; }
+BSTREE<D>::~BSTREE(){ 
+    if(ROOT){ freelink(ROOT); delete[] ROOT->LINK; delete ROOT; ROOT=nullptr; } 
+}
 
 template<typename D>
 unsigned long int BSTREE<D>::addlink(BSTnode<D>*& root, const BSTnode<D>*& other){
@@ -238,9 +417,10 @@ void BSTREE<D>::viewPOST(const BSTnode<D>* root) const{
 }
 
 template<typename D>
-void BSTREE<D>::view(){
+void BSTREE<D>::view(MODE mode){
     if(!ROOT){ std::cout << "NULL"; return; }
-    switch(M){
+    if(mode == MODE::DEF) mode=M;
+    switch(mode){
         case MODE::DFS: viewDFS(); break;
         case MODE::BFS: viewBFS(); break;
 
@@ -333,12 +513,12 @@ BSTnode<D>* BSTREE<D>::pointerDFS(const unsigned long int index, bool order) con
 }
 
 template<typename D>
-BSTnode<D>* BSTREE<D>::pointer(long int index) const{
+BSTnode<D>* BSTREE<D>::pointer(long int index, MODE mode) const{
     index = index<0 ? elem+index : index;
     if(index>=elem || index<0) return nullptr;
 
-    unsigned long int count = 0;
-    switch(M){
+    unsigned long int count = 0;  if(mode == MODE::DEF) mode=M;
+    switch(mode){
         case MODE::DFS: return pointerDFS(index);
         case MODE::BFS: return pointerBFS(index);
 
@@ -387,8 +567,11 @@ bool BSTREE<D>::deleting(BSTnode<D>*& del, BSTnode<D>* tmp){
         del->K=ptr->K; 
         return deleting(ptr,tmp);
     }
-    if(tmp->LINK[L] == ptr){ delete ptr; tmp->LINK[L]=nullptr; elem--; }
-    else{ delete ptr; tmp->LINK[R]=nullptr; elem--; }
+    if(tmp->LINK[L] == ptr){ 
+        delete[] ptr->LINK; delete ptr; tmp->LINK[L]=nullptr; elem--; 
+    }else{ 
+        delete[] ptr->LINK; delete ptr; tmp->LINK[R]=nullptr; elem--; 
+    }
     return true;
 }
 
@@ -404,14 +587,35 @@ bool BSTREE<D>::remove(D item){
     } 
     if(!ptr) return false;
     if(elem == 1){
-        ROOT=nullptr; delete ptr; delete tmp; elem--; return true; 
+        delete[] ROOT->LINK; delete ROOT; ROOT=nullptr; elem--; return true; 
     }
     if(ptr->LINK[L]==nullptr && ptr->LINK[R]==nullptr){
-        if(tmp->LINK[L] == ptr){ tmp->LINK[L]=nullptr; delete ptr; elem--; }
-        else{ tmp->LINK[R]=nullptr; delete ptr; elem--; }
+        if(tmp->LINK[L] == ptr){ 
+            tmp->LINK[L]=nullptr; delete[] ptr->LINK; delete ptr; elem--; 
+        }else{ 
+            tmp->LINK[R]=nullptr; delete[] ptr->LINK; delete ptr; elem--; 
+        }
         return true;
     }
     return deleting(ptr,tmp);
+}
+
+template<typename D>
+bool BSTREE<D>::freelink(BSTnode<D>*& root){
+    if(!root) return false;
+    QUEUE<BSTnode<D>*> Q; 
+    BSTnode<D>* tmp;
+        if(root->LINK[L]) Q.enqueue(root->LINK[L]);
+        if(root->LINK[R]) Q.enqueue(root->LINK[R]);
+    while(!Q.empty()){
+        tmp=Q.dequeue();
+            if(tmp->LINK[L]) Q.enqueue(tmp->LINK[L]);
+            if(tmp->LINK[R]) Q.enqueue(tmp->LINK[R]);
+        delete[] tmp->LINK;
+        delete tmp;
+    }
+    root->LINK[L]=nullptr; root->LINK[R]=nullptr; 
+    return true;
 }
 
 template<typename D>
@@ -420,7 +624,7 @@ bool BSTREE<D>::search(D item){
     while(ptr){ 
         if(item<ptr->K) ptr=ptr->LINK[L];
         else if(item>ptr->K) ptr=ptr->LINK[R];
-        else return false;
+        else return true;
     } 
     return false;
 }
@@ -428,9 +632,9 @@ bool BSTREE<D>::search(D item){
 template<typename D>
 BSTnode<D>* BSTREE<D>::create(D item, BSTnode<D>* parent){
     BSTnode<D>* ptr=new BSTnode<D>;
+    ptr->K=item;
     if(LC==3) ptr->LINK=new BSTnode<D>*[3]{nullptr,nullptr,parent}; 
     else ptr->LINK=new BSTnode<D>*[2]{nullptr,nullptr}; 
-    ptr->K=item;
     return ptr;
 }
 
@@ -452,127 +656,418 @@ bool BSTREE<D>::insert(D item){
     return true;
 }
 
+template<typename D>
+BSTiterator<D> BSTREE<D>::begin() noexcept{
+    BSTiterator<D> it(M,ROOT);  return ++it;
+}
+
+template<typename D>
+BSTiterator<D> BSTREE<D>::end() noexcept{ return BSTiterator<D>(M,nullptr); }
+
+template<typename D>
+BSTiterator<D> BSTREE<D>::begin() const noexcept{
+        BSTiterator<D> it(M,ROOT); return ++it;
+}
+
+template<typename D>
+BSTiterator<D> BSTREE<D>::end() const noexcept{ return BSTiterator<D>(M,nullptr); }
+
 
 #include <iostream>
-#include <stdexcept>
-
-// Assume your BSTREE and MODE are already defined
+using namespace std;
 
 #include <iostream>
-#include <stdexcept>
+
+// assume your headers
+// #include "BSTREE.hpp"
+// #include "BSTiterator.hpp"
+
+// int main() {
+
+//     BSTREE<int> tree;
+
+//     int arr[] = {10, 5, 20, 3, 7, 15, 30};
+//     for(int x : arr)
+//         tree.insert(x);
+
+//     // two iterators from same tree
+//     auto it1 = tree.begin();
+//     auto it2 = tree.begin();
+
+//     std::cout << "it1: ";
+//     for(; it1 != tree.end(); ++it1)
+//         std::cout << *it1 << " ";
+
+//     std::cout << "\nit2: ";
+//     for(; it2 != tree.end(); ++it2)
+//         std::cout << *it2 << " ";
+
+    // BSTREE<int> tree;
+
+    // int arr[] = {10, 5, 20, 3, 7, 15, 30};
+    // for(int x : arr)
+    //     tree.insert(x);
+
+    // // =========================
+    // // 1. INORDER
+    // // =========================
+    // tree.M = MODE::IN;
+
+    // std::cout << "INORDER:\n";
+    // for(auto it : tree)
+    //     std::cout << it << " ";
+    // std::cout << "\n\n";
+
+    // // =========================
+    // // 2. PREORDER
+    // // =========================
+    // tree.M = MODE::PRE;
+
+    // std::cout << "PREORDER:\n";
+    // for(auto it : tree)
+    //     std::cout << it << " ";
+    // std::cout << "\n\n";
+
+    // // =========================
+    // // 3. POSTORDER
+    // // =========================
+    // tree.M = MODE::POST;
+
+    // std::cout << "POSTORDER:\n";
+    // for(auto it : tree)
+    //     std::cout << it << " ";
+    // std::cout << "\n\n";
+
+    // // =========================
+    // // 4. BFS (LEVEL ORDER)
+    // // =========================
+    // tree.M = MODE::BFS;
+
+    // std::cout << "BFS:\n";
+    // for(auto it : tree)
+    //     std::cout << it << " ";
+    // std::cout << "\n\n";
+
+    // // =========================
+    // // 5. DFS (same as PREORDER usually)
+    // // =========================
+    // tree.M = MODE::DFS;
+
+    // std::cout << "DFS:\n";
+    // for(auto it : tree)
+    //     std::cout << it << " ";
+    // std::cout << "\n\n";
+
+    // // =========================
+    // // 6. DFS_LR (if you support variant)
+    // // =========================
+    // tree.M = MODE::DFS_LR;
+
+    // std::cout << "DFS_LR:\n";
+    // for(auto it : tree)
+    //     std::cout << it << " ";
+    // std::cout << "\n\n";
+
+    // // =========================
+    // // 7. BFS_RL (reverse level order or right-first BFS)
+    // // =========================
+    // tree.M = MODE::BFS_RL;
+
+    // std::cout << "BFS_RL:\n";
+    // for(auto it : tree)
+    //     std::cout << it << " ";
+    // std::cout << "\n\n";
+
+//     return 0;
+// }
+// int main() {
+//     BSTREE<int> tree;
+
+//     std::cout << "=== INSERT TEST ===\n";
+//     tree.insert(50);
+//     tree.insert(30);
+//     tree.insert(70);
+//     tree.insert(20);
+//     tree.insert(40);
+//     tree.insert(60);
+//     tree.insert(80);
+
+//     std::cout << "Tree (INORDER view):\n";
+//     tree.view(MODE::IN);
+//     std::cout << "\n\n";
+
+//     std::cout << "=== SIZE ===\n";
+//     std::cout << "Size: " << tree.size() << "\n\n";
+
+//     std::cout << "=== +VE INDEX TEST (INORDER) ===\n";
+//     std::cout << "tree[0] = " << tree[0] << "\n";
+//     std::cout << "tree[1] = " << tree[1] << "\n";
+//     std::cout << "tree[3] = " << tree[3] << "\n";
+//     std::cout << "tree[6] = " << tree[6] << "\n\n";
+
+//     std::cout << "=== -VE INDEX TEST (INORDER) ===\n";
+//     std::cout << "tree[-1] = " << tree[-1] << "\n";
+//     std::cout << "tree[-2] = " << tree[-2] << "\n";
+//     std::cout << "tree[-7] = " << tree[-7] << "\n\n";
+
+//     std::cout << "=== FRONT / BACK SIMULATION ===\n";
+//     std::cout << "First (tree[0]) = " << tree[0] << "\n";
+//     std::cout << "Last (tree[-1]) = " << tree[-1] << "\n\n";
+
+//     std::cout << "=== ITERATOR TEST (INORDER) ===\n";
+//     for(auto it = tree.begin(); it != tree.end(); ++it) {
+//         std::cout << *it << " ";
+//     }
+//     std::cout << "\n\n";
+
+//     std::cout << "=== SEARCH TEST ===\n";
+//     std::cout << "search(40): " << tree.search(40) << "\n";
+//     std::cout << "search(100): " << tree.search(100) << "\n\n";
+
+//     std::cout << "=== REMOVE TEST ===\n";
+//     tree.remove(30);
+//     tree.view(MODE::IN);
+//     std::cout << "\n\n";
+
+//     std::cout << "=== DFS VIEW ===\n";
+//     tree.view(MODE::DFS);
+//     std::cout << "\n\n";
+
+//     std::cout << "=== BFS VIEW ===\n";
+//     tree.view(MODE::BFS);
+//     std::cout << "\n\n";
+
+//     std::cout << "=== CONST INDEX TEST ===\n";
+//     const BSTREE<int>& cref = tree;
+//     std::cout << "cref[0] = " << cref[0] << "\n";
+//     std::cout << "cref[-1] = " << cref[-1] << "\n\n";
+
+//     std::cout << "=== OUT OF BOUNDS TEST ===\n";
+//     try {
+//         std::cout << tree[100] << "\n";
+//     } catch(const std::exception& e) {
+//         std::cout << "Exception: " << e.what() << "\n";
+//     }
+
+//     std::cout << "\n=== ALL TEST COMPLETE ===\n";
+
+//     return 0;
+// }
+
+// ---- assume your full class definitions are included above ----
+
+// -------- MAIN TEST --------
+// int main() {
+//     BSTREE<int> tree;
+
+//     // Insert elements
+//     tree.insert(10);
+//     tree.insert(5);
+//     tree.insert(15);
+//     tree.insert(2);
+//     tree.insert(7);
+
+//     cout << "Tree size: " << tree.size() << endl;
+
+//     // ---------------- INORDER ----------------
+//     cout << "\nINORDER Traversal:\n";
+//     tree.M = MODE::IN;
+
+//     for(auto it = tree.begin(); it != tree.end(); ++it) {
+//         cout << *it << " ";
+//         cout << "IN LOOP\n";
+//     }
+//     cout << endl;
+
+//     // ---------------- PREORDER ----------------
+//     cout << "\nPREORDER Traversal:\n";
+//     tree.M = MODE::PRE;
+
+//     for(auto it = tree.begin(); it != tree.end(); ++it) {
+//         cout << *it << " ";cout << "IN LOOP\n";
+//     }
+//     cout << endl;
+
+//     // ---------------- POSTORDER ----------------
+//     cout << "\nPOSTORDER Traversal:\n";
+//     tree.M = MODE::POST;
+
+//     for(auto it = tree.begin(); it != tree.end(); ++it) {
+//         cout << *it << " ";cout << "IN LOOP\n";
+//     }
+//     cout << endl;
+
+//     // ---------------- BFS ----------------
+//     cout << "\nBFS Traversal:\n";
+//     tree.M = MODE::BFS;
+
+//     for(auto it = tree.begin(); it != tree.end(); ++it) {
+//         cout << *it << " ";
+//     }
+//     cout << endl;
+
+//     // ---------------- BFS_RL ----------------
+//     cout << "\nBFS Right-to-Left Traversal:\n";
+//     tree.M = MODE::BFS_RL;
+
+//     for(auto it = tree.begin(); it != tree.end(); ++it) {
+//         cout << *it << " ";
+//     }
+//     cout << endl;
+
+//     // ---------------- DFS ----------------
+//     cout << "\nDFS Traversal:\n";
+//     tree.M = MODE::DFS;
+
+//     for(auto it = tree.begin(); it != tree.end(); ++it) {
+//         cout << *it << " ";
+//     }
+//     cout << endl;
+
+//     // ---------------- DFS_RL ----------------
+//     cout << "\nDFS Left-to-Right Traversal:\n";
+//     tree.M = MODE::DFS_LR;
+
+//     for(auto it = tree.begin(); it != tree.end(); ++it) {
+//         cout << *it << " ";
+//     }
+//     cout << endl;cout << endl;
+
+//     return 0;
+// }
+
+// #include <iostream>
+// #include <stdexcept>
+
+// // Assume your BSTREE and MODE are already defined
+
+// #include <iostream>
+// #include <stdexcept>
 
 // Assume BSTREE and MODE already defined
 
-int main(){
-    BSTREE<int> tree;
+// int main(){
+//     BSTREE<int> tree;
 
-    // 🔹 Insert sample data
-    int arr[] = {10, 5, 20, 3, 7, 15, 30};
-    for(int x : arr){
-        tree.insert(x);
-    }
+//     // 🔹 Insert sample data
+//     int arr[] = {10, 5, 20, 3, 7, 15, 30};
+//     for(int x : arr){
+//         tree.insert(x);
+//     }
 
-    // ============================
-    // 🔥 VIEW TESTS
-    // ============================
+//     // ============================
+//     // 🔥 VIEW TESTS
+//     // ============================
 
-    std::cout << "\n===== VIEW TESTS =====\n";
+//     std::cout << "\n===== VIEW TESTS =====\n";
 
-    tree.M = MODE::BFS;
-    std::cout << "\n--- BFS ---\n";
-    tree.view();
+//     tree.M = MODE::BFS;
+//     std::cout << "\n--- BFS ---\n";
+//     tree.view();
 
-    tree.M = MODE::DFS;
-    std::cout << "\n--- DFS ---\n";
-    tree.view();
+//     tree.M = MODE::DFS;
+//     std::cout << "\n--- DFS ---\n";
+//     tree.view();
 
-    tree.M = MODE::IN;
-    std::cout << "\n--- INORDER ---\n";
-    tree.view();
+//     tree.M = MODE::IN;
+//     std::cout << "\n--- INORDER ---\n";
+//     tree.view();
 
-    tree.M = MODE::PRE;
-    std::cout << "\n--- PREORDER ---\n";
-    tree.view();
+//     tree.M = MODE::PRE;
+//     std::cout << "\n--- PREORDER ---\n";
+//     tree.view();
 
-    tree.M = MODE::POST;
-    std::cout << "\n--- POSTORDER ---\n";
-    tree.view();
+//     tree.M = MODE::POST;
+//     std::cout << "\n--- POSTORDER ---\n";
+//     tree.view();
 
-    tree.M = MODE::DFS_LR;
-    std::cout << "\n--- DFS (Right->Left) ---\n";
-    tree.view();
+//     tree.M = MODE::DFS_LR;
+//     std::cout << "\n--- DFS (Right->Left) ---\n";
+//     tree.view();
 
-    tree.M = MODE::BFS_RL;
-    std::cout << "\n--- BFS (Right->Left) ---\n";
-    tree.view();
-
-
-    // ============================
-    // 🔥 POINTER / INDEX TESTS
-    // ============================
-
-    std::cout << "\n\n===== POINTER / INDEX TESTS =====\n";
-
-    tree.M = MODE::IN;
-    std::cout << "\nINORDER indexing:\n";
-    for(int i = 0; i < tree.size(); i++){
-        std::cout << "tree[" << i << "] = " << tree[i] << "\n";
-    }
-
-    tree.M = MODE::BFS;
-    std::cout << "\nBFS indexing:\n";
-    for(int i = 0; i < tree.size(); i++){
-        std::cout << "tree[" << i << "] = " << tree[i] << "\n";
-    }
-
-    tree.M = MODE::DFS;
-    std::cout << "\nDFS indexing:\n";
-    for(int i = 0; i < tree.size(); i++){
-        std::cout << "tree[" << i << "] = " << tree[i] << "\n";
-    }
+//     tree.M = MODE::BFS_RL;
+//     std::cout << "\n--- BFS (Right->Left) ---\n";
+//     tree.view();
 
 
-    // ============================
-    // 🔥 NEGATIVE INDEX TEST
-    // ============================
+//     // ============================
+//     // 🔥 POINTER / INDEX TESTS
+//     // ============================
 
-    std::cout << "\n\n===== NEGATIVE INDEX TEST =====\n";
+//     std::cout << "\n\n===== POINTER / INDEX TESTS =====\n";
 
-    tree.M = MODE::IN;
-    std::cout << "Last element (tree[-1]) = " << tree[-1] << "\n";
-    std::cout << "Second last (tree[-2]) = " << tree[-2] << "\n";
+//     tree.M = MODE::IN;
+//     std::cout << "\nINORDER indexing:\n";
+//     for(int i = 0; i < tree.size(); i++){
+//         std::cout << "tree[" << i << "] = " << tree[i] << "\n";
+//     }
+
+//     tree.M = MODE::PRE;
+//     std::cout << "\nPREORDER indexing:\n";
+//     for(int i = 0; i < tree.size(); i++){
+//         std::cout << "tree[" << i << "] = " << tree[i] << "\n";
+//     }
+
+//     tree.M = MODE::POST;
+//     std::cout << "\nPOSTORDER indexing:\n";
+//     for(int i = 0; i < tree.size(); i++){
+//         std::cout << "tree[" << i << "] = " << tree[i] << "\n";
+//     }
+
+//     tree.M = MODE::BFS;
+//     std::cout << "\nBFS indexing:\n";
+//     for(int i = 0; i < tree.size(); i++){
+//         std::cout << "tree[" << i << "] = " << tree[i] << "\n";
+//     }
+
+//     tree.M = MODE::DFS;
+//     std::cout << "\nDFS indexing:\n";
+//     for(int i = 0; i < tree.size(); i++){
+//         std::cout << "tree[" << i << "] = " << tree[i] << "\n";
+//     }
 
 
-    // ============================
-    // 🔥 OUT OF BOUNDS TEST
-    // ============================
+//     // ============================
+//     // 🔥 NEGATIVE INDEX TEST
+//     // ============================
 
-    std::cout << "\n\n===== OUT OF BOUNDS TEST =====\n";
+//     std::cout << "\n\n===== NEGATIVE INDEX TEST =====\n";
 
-    try{
-        std::cout << tree[100] << "\n";   // invalid
-    }
-    catch(const std::exception& e){
-        std::cout << "Caught: " << e.what() << "\n";
-    }
+//     tree.M = MODE::IN;
+//     std::cout << "Last element (tree[-1]) = " << tree[-1] << "\n";
+//     std::cout << "Second last (tree[-2]) = " << tree[-2] << "\n";
 
 
-    // ============================
-    // 🔥 INVALID MODE TEST
-    // ============================
+//     // ============================
+//     // 🔥 OUT OF BOUNDS TEST
+//     // ============================
 
-    std::cout << "\n\n===== INVALID MODE TEST =====\n";
+//     std::cout << "\n\n===== OUT OF BOUNDS TEST =====\n";
 
-    try{
-        tree.M = (MODE)'k';   // force invalid
-        tree.view();          // should throw
-    }
-    catch(const std::exception& e){
-        std::cout << "Caught: " << e.what() << "\n";
-    }
+//     try{
+//         std::cout << tree[100] << "\n";   // invalid
+//     }
+//     catch(const std::exception& e){
+//         std::cout << "Caught: " << e.what() << "\n";
+//     }
 
-    return 0;
-}
+
+//     // ============================
+//     // 🔥 INVALID MODE TEST
+//     // ============================
+
+//     std::cout << "\n\n===== INVALID MODE TEST =====\n";
+
+//     try{
+//         tree.M = (MODE)'k';   // force invalid
+//         tree.view();          // should throw
+//     }
+//     catch(const std::exception& e){
+//         std::cout << "Caught: " << e.what() << "\n";
+//     }
+
+//     return 0;
+// }
 
 // #include <stdexcept>
 // using namespace std;

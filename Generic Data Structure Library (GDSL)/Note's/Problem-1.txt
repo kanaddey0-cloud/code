@@ -1,0 +1,43 @@
+BSTiterator<D>::BSTiterator(MODE mode, BSTnode<D>* p) : ptr(nullptr), ROOT(p), M(mode) {}
+___________________________________________________
+
+BSTiterator<D> BSTREE<D>::begin() noexcept{ return BSTiterator<D>(M,ROOT); }
+
+BSTiterator<D> BSTREE<D>::end() noexcept{ return BSTiterator<D>(M,nullptr); }
+___________________________________________________
+
+BSTnode<D>* BSTiterator<D>::incrementIN(BSTnode<D>* root, bool& f) const{
+    if(!root) return nullptr;
+
+    BSTnode<D>* left=incrementIN(root->LINK[L], f);  if(left) return left;
+    if(f) return root; if(root == ptr) f=true;
+    return incrementIN(root->LINK[R], f);
+}
+        10
+       /  \
+      5    15
+     / \
+    2   7
+___________________________________________________
+
+BSTnode<D>* BSTiterator<D>::increment(BSTnode<D>* ptr){
+    bool f=(ptr==nullptr);
+    switch(M){
+        case MODE::DFS: if(ptr->LINK[R]) return ptr->LINK[R];
+                        if(ptr->LINK[L]) return ptr->LINK[L];
+                        return nullptr;
+        case MODE::BFS: return incrementBFS();
+
+        case MODE::IN:   return incrementIN(ROOT,f);
+        case MODE::PRE:  return incrementPRE(ROOT,f);
+        case MODE::POST: return incrementPOST(ROOT,f);
+
+        case MODE::DFS_LR: if(ptr->LINK[L]) return ptr->LINK[L];
+                           if(ptr->LINK[R]) return ptr->LINK[R];
+                           return nullptr;
+        case MODE::BFS_RL: return incrementBFS(true);
+
+        default:
+            return nullptr;
+    }
+}

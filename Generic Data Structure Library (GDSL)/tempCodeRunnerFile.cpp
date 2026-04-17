@@ -1,2 +1,3 @@
-int arr[] = {10, 5, 20, 3, 7, 15, 30};
-    for(int x : arr){
+for(long int i=index-1; i>=0; i--){
+        std::cout << S.value(i); if(i > 0) std::cout<<", ";
+    }

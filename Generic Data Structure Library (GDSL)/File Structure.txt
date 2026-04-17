@@ -20,12 +20,14 @@ C:\
             │   ├── NonLinear/
             │   │   ├── Tree/
             │   │   │   ├── BinaryTree.hpp
-            │   │   │   ├── BST.hpp
+            │   │   │   ├── BinarySearchTree.hpp
             │   │   │   ├── AVL.hpp
             │   │   │   ├── RedBlack.hpp
             │   │   │   ├── Heap.hpp
             │   │   │   ├── Splay.hpp
             │   │   │   ├── Trie.hpp
+            │   │   │   ├── R.hpp
+            │   │   │   ├── Suffix.hpp
             │   │   │   ├── BTree.hpp
             │   │   │   └── BPlusTree.hpp
             │   │   └── Graph/
@@ -66,6 +68,8 @@ C:\
             │   │   │   ├── Heap.tpp
             │   │   │   ├── Splay.tpp
             │   │   │   ├── Trie.tpp
+            │   │   │   ├── R.hpp
+            │   │   │   ├── Suffix.hpp
             │   │   │   ├── BTree.tpp
             │   │   │   └── BPlusTree.tpp
             │   │   └── Graph/
