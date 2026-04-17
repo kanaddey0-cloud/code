@@ -1,15 +1,157 @@
 
 #include <iostream>
 #include <GDSLlist.hpp>
-// #include <GDSLstack.hpp>
-// #include <GDSLqueue>
+#include <GDSLstack.hpp>
+#include <GDSLqueue.hpp>
+#include <GDSLtree.hpp>
 
 template<typename D>
 std::ostream& operator<<(std::ostream& out, const node<D>& n){
     return out << n.K;
 }
 
-using namespace std;
+#include <iostream>
+#include <stdexcept>
+
+// assume BSTREE + MODE already included
+
+int main() {
+
+    std::cout << "==============================\n";
+    std::cout << "   BST LIBRARY FINAL TEST\n";
+    std::cout << "==============================\n\n";
+
+    BSTREE<int> tree;
+
+    int arr[] = {10, 5, 20, 3, 7, 15, 30};
+    for(int x : arr)
+        tree.insert(x);
+
+    // =========================================================
+    // 1. ITERATOR MULTI OBJECT TEST
+    // =========================================================
+    std::cout << "=== ITERATOR MULTI OBJECT TEST ===\n";
+
+    auto it1 = tree.begin();
+    auto it2 = tree.begin();
+
+    std::cout << "it1: ";
+    for(; it1 != tree.end(); ++it1)
+        std::cout << *it1 << " ";
+
+    std::cout << "\nit2: ";
+    for(; it2 != tree.end(); ++it2)
+        std::cout << *it2 << " ";
+
+    std::cout << "\n\n";
+
+    // =========================================================
+    // 2. TRAVERSAL TESTS (ALL MODES)
+    // =========================================================
+    std::cout << "=== TRAVERSAL TESTS ===\n\n";
+
+    struct TestMode {
+        MODE m;
+        const char* name;
+    } tests[] = {
+        {MODE::IN, "INORDER"},
+        {MODE::PRE, "PREORDER"},
+        {MODE::POST, "POSTORDER"},
+        {MODE::BFS, "BFS"},
+        {MODE::DFS, "DFS"},
+        {MODE::DFS_LR, "DFS_LR"},
+        {MODE::BFS_RL, "BFS_RL"}
+    };
+
+    for(auto &t : tests) {
+        tree.M = t.m;
+
+        std::cout << t.name << ":\n";
+        for(auto x : tree)
+            std::cout << x << " ";
+
+        std::cout << "\n\n";
+    }
+
+    // =========================================================
+    // 3. SIZE TEST
+    // =========================================================
+    std::cout << "=== SIZE TEST ===\n";
+    std::cout << "Size: " << tree.size() << "\n\n";
+
+    // =========================================================
+    // 4. INDEX OPERATOR TEST
+    // =========================================================
+    std::cout << "=== INDEX TEST (INORDER) ===\n";
+    tree.M = MODE::IN;
+
+    for(int i = 0; i < tree.size(); i++)
+        std::cout << "tree[" << i << "] = " << tree[i] << "\n";
+
+    std::cout << "\n";
+
+    // negative index
+    std::cout << "Last element tree[-1] = " << tree[-1] << "\n\n";
+
+    // =========================================================
+    // 5. SEARCH TEST
+    // =========================================================
+    std::cout << "=== SEARCH TEST ===\n";
+    std::cout << "search(15): " << tree.search(15) << "\n";
+    std::cout << "search(100): " << tree.search(100) << "\n\n";
+
+    // =========================================================
+    // 6. REMOVE TEST
+    // =========================================================
+    std::cout << "=== REMOVE TEST ===\n";
+    tree.remove(20);
+
+    tree.M = MODE::IN;
+    for(auto x : tree)
+        std::cout << x << " ";
+
+    std::cout << "\n\n";
+
+    // =========================================================
+    // 7. VIEW FUNCTION TEST
+    // =========================================================
+    std::cout << "=== VIEW TEST (BFS) ===\n";
+    tree.view(MODE::BFS);
+
+    std::cout << "\n";
+
+    std::cout << "=== VIEW TEST (DFS) ===\n";
+    tree.view(MODE::DFS);
+
+    std::cout << "\n";
+
+    // =========================================================
+    // 8. CONST TEST
+    // =========================================================
+    std::cout << "=== CONST TEST ===\n";
+    const BSTREE<int>& cref = tree;
+
+    std::cout << "cref[0] = " << cref[0] << "\n";
+    std::cout << "cref[-1] = " << cref[-1] << "\n\n";
+
+    // =========================================================
+    // 9. EXCEPTION TEST
+    // =========================================================
+    std::cout << "=== EXCEPTION TEST ===\n";
+
+    try {
+        std::cout << tree[100] << "\n";
+    }
+    catch(const std::exception& e) {
+        std::cout << "Caught: " << e.what() << "\n";
+    }
+
+    std::cout << "\n=== ALL TESTS COMPLETE ===\n";
+
+    return 0;
+}
+
+// using namespace std;
 // int main() {
 
 //     cout << "===== Test 1: QUEUE<int> =====" << endl;
@@ -156,89 +298,89 @@ using namespace std;
 //     std::cout << is_basic_type<node<int>>() << std::endl;    // 0 ❌
 // }
 
-// SinglyList Testing ... .
-int main() {
-    LIST<int> l;
+// // SinglyList Testing ... .
+// int main() {
+//     LIST<int> l;
 
-    std::cout << "===== BASIC INSERT =====\n";
-    l.insert(10);
-    l.insert(20);
-    l.insert(30);
-    l.view(); std::cout << "\n";
+//     std::cout << "===== BASIC INSERT =====\n";
+//     l.insert(10);
+//     l.insert(20);
+//     l.insert(30);
+//     l.view(); std::cout << "\n";
 
-    std::cout << "\n===== INSERT AT POSITION =====\n";
-    l.insert(5, 0);     // head
-    l.insert(25, 3);    // middle
-    l.insert(40, -1);   // end
-    l.view(true); std::cout << "\n";
+//     std::cout << "\n===== INSERT AT POSITION =====\n";
+//     l.insert(5, 0);     // head
+//     l.insert(25, 3);    // middle
+//     l.insert(40, -1);   // end
+//     l.view(true); std::cout << "\n";
 
-    std::cout << "\n===== SIZE =====\n";
-    std::cout << "Size: " << l.size() << "\n";
+//     std::cout << "\n===== SIZE =====\n";
+//     std::cout << "Size: " << l.size() << "\n";
 
-    std::cout << "\n===== ACCESS =====\n";
-    std::cout << "l[0] = " << l[0] << "\n";
-    std::cout << "l[2] = " << l[2] << "\n";
+//     std::cout << "\n===== ACCESS =====\n";
+//     std::cout << "l[0] = " << l[0] << "\n";
+//     std::cout << "l[2] = " << l[2] << "\n";
 
-    std::cout << "\n===== MODIFY =====\n";
-    std::cout << "Old value at index 1: " << l.modify(100, 1) << "\n";
-    l.view(); std::cout << "\n";
+//     std::cout << "\n===== MODIFY =====\n";
+//     std::cout << "Old value at index 1: " << l.modify(100, 1) << "\n";
+//     l.view(); std::cout << "\n";
 
-    std::cout << "\n===== UPDATE =====\n";
-    std::cout << "Update 20 -> 200 at index: " << l.update(20, 200) << "\n";
-    l.view(true); std::cout << "\n";
+//     std::cout << "\n===== UPDATE =====\n";
+//     std::cout << "Update 20 -> 200 at index: " << l.update(20, 200) << "\n";
+//     l.view(true); std::cout << "\n";
 
-    std::cout << "\n===== INDEX & VALUE =====\n";
-    std::cout << "Index of 30: " << l.index(30) << "\n";
-    std::cout << "Value at index 2: " << l.value(2) << "\n";
+//     std::cout << "\n===== INDEX & VALUE =====\n";
+//     std::cout << "Index of 30: " << l.index(30) << "\n";
+//     std::cout << "Value at index 2: " << l.value(2) << "\n";
 
-    std::cout << "\n===== REMOVE =====\n";
-    std::cout << "Removed element: " << l.remove(0) << "\n";
-    l.view(); std::cout << "\n";
+//     std::cout << "\n===== REMOVE =====\n";
+//     std::cout << "Removed element: " << l.remove(0) << "\n";
+//     l.view(); std::cout << "\n";
 
-    std::cout << "\n===== DROP =====\n";
-    std::cout << "Dropped index of 200: " << l.drop(200) << "\n";
-    l.view(true); std::cout << "\n";
+//     std::cout << "\n===== DROP =====\n";
+//     std::cout << "Dropped index of 200: " << l.drop(200) << "\n";
+//     l.view(true); std::cout << "\n";
 
-    std::cout << "\n===== REVERSE =====\n";
-    l.reverse();
-    l.view(); std::cout << "\n";
+//     std::cout << "\n===== REVERSE =====\n";
+//     l.reverse();
+//     l.view(); std::cout << "\n";
 
-    std::cout << "\n===== ITERATOR (manual) =====\n";
-    for (auto it = l.begin(); it != l.end(); ++it) {
-        std::cout << *it << " ";
-    }
-    std::cout << "\n";
+//     std::cout << "\n===== ITERATOR (manual) =====\n";
+//     for (auto it = l.begin(); it != l.end(); ++it) {
+//         std::cout << *it << " ";
+//     }
+//     std::cout << "\n";
 
-    std::cout << "\n===== RANGE LOOP =====\n";
-    for (auto x : l) {
-        std::cout << x << " ";
-    }
-    std::cout << "\n";
+//     std::cout << "\n===== RANGE LOOP =====\n";
+//     for (auto x : l) {
+//         std::cout << x << " ";
+//     }
+//     std::cout << "\n";
 
-    std::cout << "\n===== COPY TEST =====\n";
-    LIST<int> copy = l;
-    copy.insert(999);
-    std::cout << "Original: ";
-    l.view(); std::cout << "\n";
-    std::cout << "Copy: ";
-    copy.view(true); std::cout << "\n";
+//     std::cout << "\n===== COPY TEST =====\n";
+//     LIST<int> copy = l;
+//     copy.insert(999);
+//     std::cout << "Original: ";
+//     l.view(); std::cout << "\n";
+//     std::cout << "Copy: ";
+//     copy.view(true); std::cout << "\n";
 
-    std::cout << "\n===== MOVE TEST =====\n";
-    LIST<int> moved = std::move(copy);
-    std::cout << "Moved: ";
-    moved.view(); std::cout << "\n";
+//     std::cout << "\n===== MOVE TEST =====\n";
+//     LIST<int> moved = std::move(copy);
+//     std::cout << "Moved: ";
+//     moved.view(); std::cout << "\n";
 
-    std::cout << "\n===== ADD (MERGE COPY) =====\n";
-    LIST<int> l2;
-    l2.insert(1);
-    l2.insert(2);
-    l.add(l2);
+//     std::cout << "\n===== ADD (MERGE COPY) =====\n";
+//     LIST<int> l2;
+//     l2.insert(1);
+//     l2.insert(2);
+//     l.add(l2);
 
-    std::cout << "After adding l2 into l: ";
-    l.view(true); std::cout << "\n";
+//     std::cout << "After adding l2 into l: ";
+//     l.view(true); std::cout << "\n";
 
-    std::cout << "\n===== DONE =====\n";
+//     std::cout << "\n===== DONE =====\n";
 
-    return 0;
-}
+//     return 0;
+// }
 
