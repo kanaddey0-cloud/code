@@ -100,10 +100,10 @@ BSTnode<D>* BSTiterator<D>::incrementIN(){
     if(S.empty()) return nullptr;
     BSTnode<D>* node = S.pop();
 
-    BSTnode<D>* temp = node->LINK[R];
-    while(temp){
-        S.push(temp);
-        temp = temp->LINK[L];
+    BSTnode<D>* tmp = node->LINK[R];
+    while(tmp){
+        S.push(tmp);
+        tmp = tmp->LINK[L];
     }
     return node;
 }
@@ -125,10 +125,10 @@ BSTnode<D>* BSTiterator<D>::incrementPOST(){
         BSTnode<D>* right = peek->LINK[R];
 
         if(right && last != right){
-            BSTnode<D>* temp = right;
-            while(temp){
-                S.push(temp);
-                temp = temp->LINK[L];
+            BSTnode<D>* tmp = right;
+            while(tmp){
+                S.push(tmp);
+                tmp = tmp->LINK[L];
             }
         }else{
             S.pop();
@@ -249,7 +249,7 @@ template<typename D>
 BSTREE<D>::BSTREE(bool l){ ROOT=nullptr; LC=l?3:2; M=MODE::IN; elem=0; }
 
 template<typename D>
-BSTREE<D>::BSTREE(const BSTREE<D>& other):BSTREE<D>(other.LC==3?true:false){
+BSTREE<D>::BSTREE(const BSTREE<D>& other) :BSTREE<D>(other.LC==3?true:false){
     M=other.M;
     if(!other.ROOT) return; 
     QUEUE<BSTnode<D>*> Q; 
@@ -682,25 +682,7 @@ using namespace std;
 // #include "BSTREE.hpp"
 // #include "BSTiterator.hpp"
 
-// int main() {
-
-//     BSTREE<int> tree;
-
-//     int arr[] = {10, 5, 20, 3, 7, 15, 30};
-//     for(int x : arr)
-//         tree.insert(x);
-
-//     // two iterators from same tree
-//     auto it1 = tree.begin();
-//     auto it2 = tree.begin();
-
-//     std::cout << "it1: ";
-//     for(; it1 != tree.end(); ++it1)
-//         std::cout << *it1 << " ";
-
-//     std::cout << "\nit2: ";
-//     for(; it2 != tree.end(); ++it2)
-//         std::cout << *it2 << " ";
+int main() {
 
     // BSTREE<int> tree;
 
@@ -708,78 +690,98 @@ using namespace std;
     // for(int x : arr)
     //     tree.insert(x);
 
-    // // =========================
-    // // 1. INORDER
-    // // =========================
-    // tree.M = MODE::IN;
+    // // two iterators from same tree
+    // auto it1 = tree.begin();
+    // auto it2 = tree.begin();
 
-    // std::cout << "INORDER:\n";
-    // for(auto it : tree)
-    //     std::cout << it << " ";
-    // std::cout << "\n\n";
+    // std::cout << "it1: ";
+    // for(; it1 != tree.end(); ++it1)
+    //     std::cout << *it1 << " ";
 
-    // // =========================
-    // // 2. PREORDER
-    // // =========================
-    // tree.M = MODE::PRE;
+    // std::cout << "\nit2: ";
+    // for(; it2 != tree.end(); ++it2)
+    //     std::cout << *it2 << " ";
 
-    // std::cout << "PREORDER:\n";
-    // for(auto it : tree)
-    //     std::cout << it << " ";
-    // std::cout << "\n\n";
+    BSTREE<int> tree;
 
-    // // =========================
-    // // 3. POSTORDER
-    // // =========================
-    // tree.M = MODE::POST;
+    int arr[] = {10, 5, 20, 3, 7, 15, 30};
+    for(int x : arr)
+        tree.insert(x);
 
-    // std::cout << "POSTORDER:\n";
-    // for(auto it : tree)
-    //     std::cout << it << " ";
-    // std::cout << "\n\n";
+    // =========================
+    // 1. INORDER
+    // =========================
+    tree.M = MODE::IN;
 
-    // // =========================
-    // // 4. BFS (LEVEL ORDER)
-    // // =========================
-    // tree.M = MODE::BFS;
+    std::cout << "INORDER:\n";
+    for(auto it : tree)
+        std::cout << it << " ";
+    std::cout << "\n\n";
 
-    // std::cout << "BFS:\n";
-    // for(auto it : tree)
-    //     std::cout << it << " ";
-    // std::cout << "\n\n";
+    // =========================
+    // 2. PREORDER
+    // =========================
+    tree.M = MODE::PRE;
 
-    // // =========================
-    // // 5. DFS (same as PREORDER usually)
-    // // =========================
-    // tree.M = MODE::DFS;
+    std::cout << "PREORDER:\n";
+    for(auto it : tree)
+        std::cout << it << " ";
+    std::cout << "\n\n";
 
-    // std::cout << "DFS:\n";
-    // for(auto it : tree)
-    //     std::cout << it << " ";
-    // std::cout << "\n\n";
+    // =========================
+    // 3. POSTORDER
+    // =========================
+    tree.M = MODE::POST;
 
-    // // =========================
-    // // 6. DFS_LR (if you support variant)
-    // // =========================
-    // tree.M = MODE::DFS_LR;
+    std::cout << "POSTORDER:\n";
+    for(auto it : tree)
+        std::cout << it << " ";
+    std::cout << "\n\n";
 
-    // std::cout << "DFS_LR:\n";
-    // for(auto it : tree)
-    //     std::cout << it << " ";
-    // std::cout << "\n\n";
+    // =========================
+    // 4. BFS (LEVEL ORDER)
+    // =========================
+    tree.M = MODE::BFS;
 
-    // // =========================
-    // // 7. BFS_RL (reverse level order or right-first BFS)
-    // // =========================
-    // tree.M = MODE::BFS_RL;
+    std::cout << "BFS:\n";
+    for(auto it : tree)
+        std::cout << it << " ";
+    std::cout << "\n\n";
 
-    // std::cout << "BFS_RL:\n";
-    // for(auto it : tree)
-    //     std::cout << it << " ";
-    // std::cout << "\n\n";
+    // =========================
+    // 5. DFS (same as PREORDER usually)
+    // =========================
+    tree.M = MODE::DFS;
 
-//     return 0;
-// }
+    std::cout << "DFS:\n";
+    for(auto it : tree)
+        std::cout << it << " ";
+    std::cout << "\n\n";
+
+    // =========================
+    // 6. DFS_LR (if you support variant)
+    // =========================
+    tree.M = MODE::DFS_LR;
+
+    std::cout << "DFS_LR:\n";
+    for(auto it : tree)
+        std::cout << it << " ";
+    std::cout << "\n\n";
+
+    // =========================
+    // 7. BFS_RL (reverse level order or right-first BFS)
+    // =========================
+    tree.M = MODE::BFS_RL;
+
+    std::cout << "BFS_RL:\n";
+    for(auto it : tree)
+        std::cout << it << " ";
+    std::cout << "\n\n";
+
+    return 0;
+}
+
+
 // int main() {
 //     BSTREE<int> tree;
 

@@ -363,6 +363,21 @@ iterator<D> LIST<D>::begin() const noexcept{ return iterator<D>(H); }
 template<typename D>
 iterator<D> LIST<D>::end() const noexcept{ return iterator<D>(nullptr); }
 
+// template<typename D>
+// std::ostream& operator<<(std::ostream& out, const LIST<D>& l)
+// {
+//     node<D>* iter = l.H;   // assuming H is accessible (friend or public getter)
+//     out << "[";
+//     while(iter){
+//         out << iter->K;
+//         if(iter->P != nullptr)
+//             out << ", ";
+//         iter = iter->P;
+//     }
+//     out << "]";
+//     return out;
+// }
+
 
 using namespace std;
 

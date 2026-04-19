@@ -1,1 +1,5 @@
 unsigned long int  -> Linked List
+unsigned long int -> size_t
+
+static functions or normal function
+<< Overload

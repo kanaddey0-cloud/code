@@ -1,3 +1,6 @@
-for(long int i=index-1; i>=0; i--){
-        std::cout << S.value(i); if(i > 0) std::cout<<", ";
+AVLTREE<int> tree;
+    int arr[] = {5, 10, 15};
+    for(int x : arr){
+        tree.insert(x); tree.view(MODE::BFS);
+        cout<<x<<"\n-------------------\n";
     }
