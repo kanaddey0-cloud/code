@@ -290,7 +290,7 @@ D LIST<D>::remove(long int index){
     }
     for(long int i=1; i<index; i++){ iter=iter->P; }
     node<D> *tmp=iter->P; 
-    iter->P=iter->P->P;
+    iter->P=tmp->P;
     if(T==tmp) T=iter;
     K=tmp->K; delete tmp; elem--; return K;
 }
@@ -362,6 +362,21 @@ iterator<D> LIST<D>::begin() const noexcept{ return iterator<D>(H); }
 
 template<typename D>
 iterator<D> LIST<D>::end() const noexcept{ return iterator<D>(nullptr); }
+
+// template<typename D>
+// std::ostream& operator<<(std::ostream& out, const LIST<D>& l)
+// {
+//     node<D>* iter = l.H;   // assuming H is accessible (friend or public getter)
+//     out << "[";
+//     while(iter){
+//         out << iter->K;
+//         if(iter->P != nullptr)
+//             out << ", ";
+//         iter = iter->P;
+//     }
+//     out << "]";
+//     return out;
+// }
 
 
 using namespace std;
@@ -440,3 +455,45 @@ int main() {
 
     return 0;
 }
+
+// int main() {
+    
+//     LIST<int> list2;
+
+//     // Fill list2
+//     list2.insert(10);
+//     list2.insert(20);
+//     list2.insert(30);
+
+//     // cout << "Initial list2: ";
+//     list2.view(true); cout<<"\n";
+//     LIST<int> list1(list2);
+//     list2.view(true);
+//     cout<<list1[0];
+//     list1[1]=22;
+//     cout<<list1[1];
+
+//     // // -----------------------------
+//     // // ✅ TEST 1: add() (COPY)
+//     // // -----------------------------
+//     // cout << "\n--- Testing add() (copy) ---\n";
+
+//     // list1.add(list2);
+
+//     // cout << "list1 after add: ";
+//     // list1.view();   // [10, 20, 30]
+
+//     // cout << "list2 after add: ";
+//     // list2.view();   // should remain SAME
+
+//     // // Modify list1 to prove it's independent
+//     // list1.insert(40);
+
+//     // cout << "list1 after insert 40: ";
+//     // list1.view();   // [10,20,30,40]
+
+//     // cout << "list2 still unchanged: ";
+//     // list2.view();   // [10,20,30]
+
+//     return 0;
+// }

@@ -1,0 +1,134 @@
+template<typename D>
+BSTiterator<D>::BSTiterator(MODE mode, BSTnode<D>* p) : ptr(nullptr), last(nullptr), ROOT(p), M(mode) {
+    if(!ROOT) return;
+
+    switch(M){
+        case MODE::BFS:
+        case MODE::BFS_RL:
+            Q.enqueue(ROOT); break;
+
+        case MODE::DFS:
+        case MODE::DFS_LR:
+
+        case MODE::PRE:
+            S.push(ROOT); break;
+
+        case MODE::IN:
+        case MODE::POST:
+        {
+            BSTnode<D>* temp = ROOT;
+            while(temp){
+                S.push(temp);
+                temp = temp->LINK[L];
+            } break;
+        }
+
+        default: break;
+    }
+}
+
+template<typename D>
+BSTiterator<D>& BSTiterator<D>::operator++() noexcept{
+    ptr = increment();
+    return *this;
+}
+
+template<typename D>
+BSTiterator<D> BSTiterator<D>::operator++(int) noexcept{
+    BSTiterator<D> temp = *this; 
+    ptr = increment();
+    return temp;
+}
+
+template<typename D>
+BSTnode<D>* BSTiterator<D>::increment(){
+    switch(M){
+        case MODE::BFS: 
+        case MODE::BFS_RL: 
+            return incrementBFS();
+
+        case MODE::DFS: 
+        case MODE::DFS_LR: 
+            return incrementDFS();
+
+        case MODE::IN:   return incrementIN();
+        case MODE::PRE:  return incrementPRE();
+        case MODE::POST: return incrementPOST();
+
+        default: return nullptr;
+    }
+}
+
+template<typename D>
+BSTnode<D>* BSTiterator<D>::incrementPOST(){
+    while(!S.empty()){
+        BSTnode<D>* peek = S.tos();
+        BSTnode<D>* right = peek->LINK[R];
+
+        if(right && last != right){
+            BSTnode<D>* tmp = right;
+            while(tmp){
+                S.push(tmp);
+                tmp = tmp->LINK[L];
+            }
+        }else{
+            S.pop();
+            last = peek;
+            return peek;
+        }
+    }
+    return nullptr;
+}
+
+template<typename D>
+BSTnode<D>* BSTiterator<D>::incrementIN(){
+    if(S.empty()) return nullptr;
+    BSTnode<D>* node = S.pop();
+
+    BSTnode<D>* tmp = node->LINK[R];
+    while(tmp){
+        S.push(tmp);
+        tmp = tmp->LINK[L];
+    }
+    return node;
+}
+
+template<typename D>
+BSTnode<D>* BSTiterator<D>::incrementPRE(){
+    if(S.empty()) return nullptr;
+    BSTnode<D>* node = S.pop();
+
+    if(node->LINK[R]) S.push(node->LINK[R]);
+    if(node->LINK[L]) S.push(node->LINK[L]);
+    return node;
+}
+
+template <typename D>
+BSTnode<D>* BSTiterator<D>::incrementBFS(){
+    if(Q.empty()) return nullptr;
+    BSTnode<D>* temp = Q.dequeue();
+
+    if(M == MODE::BFS){
+        if(temp->LINK[L]) Q.enqueue(temp->LINK[L]);
+        if(temp->LINK[R]) Q.enqueue(temp->LINK[R]);
+    }else{
+        if(temp->LINK[R]) Q.enqueue(temp->LINK[R]);
+        if(temp->LINK[L]) Q.enqueue(temp->LINK[L]);
+    }
+    return temp;
+}
+
+template<typename D>
+BSTnode<D>* BSTiterator<D>::incrementDFS(){
+    if(S.empty()) return nullptr;
+    BSTnode<D>* temp = S.pop();
+
+    if(M == MODE::DFS){
+        if(temp->LINK[L]) S.push(temp->LINK[L]);
+        if(temp->LINK[R]) S.push(temp->LINK[R]);
+    }else{
+        if(temp->LINK[R]) S.push(temp->LINK[R]);
+        if(temp->LINK[L]) S.push(temp->LINK[L]);
+    }
+    return temp;
+}

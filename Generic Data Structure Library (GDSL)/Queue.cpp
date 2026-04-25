@@ -9,7 +9,7 @@ public:
     bool empty();
     bool enqueue(D val);
     D dequeue();
-    void view(bool v=false);
+    void view(bool v=true) const;
     D front();
     D rear();
     void clear();
@@ -19,7 +19,7 @@ template<typename D>
 long int QUEUE<D>::size(){ return Q.size(); }
 
 template<typename D>
-bool QUEUE<D>::empty(){ return Q()==0; }
+bool QUEUE<D>::empty(){ return Q.size()==0; }
 
 template<typename D>
 bool QUEUE<D>::enqueue(D val){ return Q.insert(val); }
@@ -33,8 +33,8 @@ D QUEUE<D>::dequeue(){
 }
 
 template<typename D>
-void QUEUE<D>::view(bool v){
-    long int index = size();
+void QUEUE<D>::view(bool v) const{
+    long int index = Q.size();
     if(!index) return;
     if(v) std::cout << "Front->";
     std::cout << "[";
@@ -46,23 +46,35 @@ void QUEUE<D>::view(bool v){
 }
 
 template<typename D>
-std::ostream& operator<<(std::ostream& out, const node<D>& n){
-    return out << n.K;
-}
-
-template<typename D>
 void QUEUE<D>::clear(){
     while(Q.size()) Q.remove(Q.size()-1);
 }
 
 template<typename D>
-D QUEUE<D>::front(){ return Q.value(0); }
+D QUEUE<D>::front(){
+	if(!Q.size())
+		throw std::runtime_error("Queue is empty");
+		
+    return Q.value(0);
+}
 
 template<typename D>
-D QUEUE<D>::rear(){ return Q.value(-1); }
+D QUEUE<D>::rear(){
+	if(!Q.size())
+        throw std::runtime_error("Queue is empty");
+		
+    return Q.value(-1);
+}
+
+template<typename D>
+std::ostream& operator<<(std::ostream& out, const QUEUE<D>& Q){  Q.view(false); return out;  }
+
+template<typename D>
+std::ostream& operator<<(std::ostream& out, const node<D>& n){
+    return out << n.K;
+}
 
 #include <iostream>
-#include <string>
 using namespace std;
 
 // assuming QUEUE + node + LIST already defined

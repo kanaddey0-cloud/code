@@ -92,7 +92,7 @@ public:
     const D& value(long int index) const;
     long int index(D value) const;
     void reverse();
-    void view(bool v=false) const;
+    void view(bool v=true) const;
     iterator<D> begin() noexcept;
     iterator<D> begin() const noexcept;
     iterator<D> end() noexcept;
@@ -363,20 +363,8 @@ iterator<D> LIST<D>::begin() const noexcept{ return iterator<D>(H); }
 template<typename D>
 iterator<D> LIST<D>::end() const noexcept{ return iterator<D>(nullptr); }
 
-// template<typename D>
-// std::ostream& operator<<(std::ostream& out, const LIST<D>& l)
-// {
-//     node<D>* iter = l.H;   // assuming H is accessible (friend or public getter)
-//     out << "[";
-//     while(iter){
-//         out << iter->K;
-//         if(iter->P != nullptr)
-//             out << ", ";
-//         iter = iter->P;
-//     }
-//     out << "]";
-//     return out;
-// }
+template<typename D>
+std::ostream& operator<<(std::ostream& out, const LIST<D>& l){  l.view(false); return out;  }
 
 
 using namespace std;
@@ -391,67 +379,68 @@ int main() {
     list.insert(40);
     list.insert(50);
 
-    std::cout << "List: ";
-    list.view(true);
-    std::cout << "\n\n";
-
-    std::cout << "=== INDEX TEST (+ve) ===\n";
-    std::cout << "list[0] = " << list[0] << "\n";
-    std::cout << "list[2] = " << list[2] << "\n";
-    std::cout << "list[4] = " << list[4] << "\n\n";
-
-    std::cout << "=== INDEX TEST (-ve) ===\n";
-    std::cout << "list[-1] = " << list[-1] << "\n";
-    std::cout << "list[-2] = " << list[-2] << "\n";
-    std::cout << "list[-5] = " << list[-5] << "\n\n";
-
-    std::cout << "=== MODIFY TEST ===\n";
-    list.modify(999, 2);
-    std::cout << "After modify index 2 → ";
+    cout<<list;
+    std::cout << "\n";
     list.view();
     std::cout << "\n\n";
 
-    std::cout << "=== UPDATE TEST ===\n";
-    int pos = list.update(40, 777);
-    std::cout << "Updated position: " << pos << "\n";
-    list.view();
-    std::cout << "\n\n";
+    // std::cout << "=== INDEX TEST (+ve) ===\n";
+    // std::cout << "list[0] = " << list[0] << "\n";
+    // std::cout << "list[2] = " << list[2] << "\n";
+    // std::cout << "list[4] = " << list[4] << "\n\n";
 
-    std::cout << "=== DROP TEST ===\n";
-    int d = list.drop(20);
-    std::cout << "Dropped index: " << d << "\n";
-    list.view();
-    std::cout << "\n\n";
+    // std::cout << "=== INDEX TEST (-ve) ===\n";
+    // std::cout << "list[-1] = " << list[-1] << "\n";
+    // std::cout << "list[-2] = " << list[-2] << "\n";
+    // std::cout << "list[-5] = " << list[-5] << "\n\n";
 
-    std::cout << "=== REMOVE TEST ===\n";
-    int removed = list.remove(0);
-    std::cout << "Removed value: " << removed << "\n";
-    list.view();
-    std::cout << "\n\n";
+    // std::cout << "=== MODIFY TEST ===\n";
+    // list.modify(999, 2);
+    // std::cout << "After modify index 2 → ";
+    // list.view();
+    // std::cout << "\n\n";
 
-    std::cout << "=== REVERSE TEST ===\n";
-    list.reverse();
-    list.view(true);
-    std::cout << "\n\n";
+    // std::cout << "=== UPDATE TEST ===\n";
+    // int pos = list.update(40, 777);
+    // std::cout << "Updated position: " << pos << "\n";
+    // list.view();
+    // std::cout << "\n\n";
 
-    std::cout << "=== ITERATOR TEST ===\n";
-    for(auto it = list.begin(); it != list.end(); ++it) {
-        std::cout << *it << " ";
-    }
-    std::cout << "\n\n";
+    // std::cout << "=== DROP TEST ===\n";
+    // int d = list.drop(20);
+    // std::cout << "Dropped index: " << d << "\n";
+    // list.view();
+    // std::cout << "\n\n";
 
-    std::cout << "=== CONST RANGE FOR STYLE ===\n";
-    for(const auto &x : list) {
-        std::cout << x << " ";
-    }
-    std::cout << "\n\n";
+    // std::cout << "=== REMOVE TEST ===\n";
+    // int removed = list.remove(0);
+    // std::cout << "Removed value: " << removed << "\n";
+    // list.view();
+    // std::cout << "\n\n";
 
-    std::cout << "=== OUT OF BOUND TEST ===\n";
-    try {
-        std::cout << list[100];
-    } catch(const std::exception &e) {
-        std::cout << "Exception: " << e.what() << "\n";
-    }
+    // std::cout << "=== REVERSE TEST ===\n";
+    // list.reverse();
+    // list.view(true);
+    // std::cout << "\n\n";
+
+    // std::cout << "=== ITERATOR TEST ===\n";
+    // for(auto it = list.begin(); it != list.end(); ++it) {
+    //     std::cout << *it << " ";
+    // }
+    // std::cout << "\n\n";
+
+    // std::cout << "=== CONST RANGE FOR STYLE ===\n";
+    // for(const auto &x : list) {
+    //     std::cout << x << " ";
+    // }
+    // std::cout << "\n\n";
+
+    // std::cout << "=== OUT OF BOUND TEST ===\n";
+    // try {
+    //     std::cout << list[100];
+    // } catch(const std::exception &e) {
+    //     std::cout << "Exception: " << e.what() << "\n";
+    // }
 
     return 0;
 }

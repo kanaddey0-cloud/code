@@ -1,5 +1,4 @@
 #include <GDSLlist.hpp>
-#include <string>
 
 template<typename D>
 class STACK{
@@ -9,7 +8,7 @@ public:
     long int size();
     bool empty();
     bool push(D val);
-    void view(bool v=false);
+    void view(bool v=true) const;
     D tos();
     D pop();
     void clear();
@@ -33,7 +32,7 @@ D STACK<D>::pop(){
 }
 
 template<typename D>
-void STACK<D>::view(bool v){
+void STACK<D>::view(bool v) const{
     long int index = S.size();
     if(!index) return;
     if(v) std::cout << "SP->";
@@ -50,7 +49,15 @@ void STACK<D>::clear(){
 }
 
 template<typename D>
-D STACK<D>::tos(){ return S.value(-1); }
+D STACK<D>::tos(){
+	if(!S.size())
+        throw std::runtime_error("Stack is empty");
+		
+    return S.value(-1);
+}
+
+template<typename D>
+std::ostream& operator<<(std::ostream& out, const STACK<D>& S){  S.view(false); return out;  }
 
 template<typename D>
 std::ostream& operator<<(std::ostream& out, const node<D>& n){
@@ -69,11 +76,11 @@ int main() {
     s1.push(20);
     s1.push(30);
 
-    s1.view(true);   // expected: SP->[10, 20, 30]
+    cout<<s1;   // expected: SP->[10, 20, 30]
     cout << endl;
 
     cout << "Pop: " << s1.pop() << endl;  // 30
-    s1.view(true);
+    s1.view();
     cout << endl << endl;
 
 
@@ -84,11 +91,11 @@ int main() {
     s2.push("B");
     s2.push("C");
 
-    s2.view(true);   // SP->[A, B, C]
+    s2.view();   // SP->[A, B, C]
     cout << endl;
 
     cout << "Pop: " << s2.pop() << endl;  // C
-    s2.view(true);
+    s2.view();
     cout << endl << endl;
 
 
@@ -99,11 +106,11 @@ int main() {
     s3.push({200, nullptr});
     s3.push({300, nullptr});
 
-    s3.view(true);   // SP->[100, 200, 300]
+    s3.view(false);   // SP->[100, 200, 300]
     cout << endl;
 
     cout << "Pop: " << s3.pop().K << endl;  // 300
-    s3.view(true);
+    s3.view(false);
     cout << endl << endl;
 
 

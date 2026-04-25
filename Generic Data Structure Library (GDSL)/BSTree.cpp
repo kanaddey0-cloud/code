@@ -51,7 +51,6 @@ BSTiterator<D>::BSTiterator(MODE mode, BSTnode<D>* p) : ptr(nullptr), last(nullp
             S.push(ROOT); break;
 
         case MODE::IN:
-
         case MODE::POST:
         {
             BSTnode<D>* temp = ROOT;
@@ -232,9 +231,9 @@ public:
     bool search(D item);
     bool remove(D item);
     bool add(const BSTREE<D>& root);
-    void view(MODE mode=MODE::DEF);
-    void viewDFS(bool order=false);
-    void viewBFS(bool order=false);
+    void view(MODE mode=MODE::DEF) const;
+    void viewDFS(bool order=false) const;
+    void viewBFS(bool order=false) const;
     void viewIN(const BSTnode<D>* root) const;
     void viewPRE(const BSTnode<D>* root) const;
     void viewPOST(const BSTnode<D>* root) const;
@@ -358,7 +357,7 @@ void BSTREE<D>::print_Key_L_C_R(const BSTnode<D>* tmp) const{
 }
 
 template<typename D>
-void BSTREE<D>::viewBFS(bool order){
+void BSTREE<D>::viewBFS(bool order) const{
     if(!ROOT){ std::cout<<"Tree is empty"; return; }
     QUEUE<BSTnode<D>*> Q; 
     BSTnode<D>* tmp;
@@ -377,7 +376,7 @@ void BSTREE<D>::viewBFS(bool order){
 }
 
 template<typename D>
-void BSTREE<D>::viewDFS(bool order){
+void BSTREE<D>::viewDFS(bool order) const{
     if(!ROOT){ std::cout<<"Tree is empty"; return; }
     STACK<BSTnode<D>*> S; 
     BSTnode<D>* tmp;
@@ -417,7 +416,7 @@ void BSTREE<D>::viewPOST(const BSTnode<D>* root) const{
 }
 
 template<typename D>
-void BSTREE<D>::view(MODE mode){
+void BSTREE<D>::view(MODE mode) const{
     if(!ROOT){ std::cout << "NULL"; return; }
     if(mode == MODE::DEF) mode=M;
     switch(mode){
@@ -672,189 +671,185 @@ BSTiterator<D> BSTREE<D>::begin() const noexcept{
 template<typename D>
 BSTiterator<D> BSTREE<D>::end() const noexcept{ return BSTiterator<D>(M,nullptr); }
 
+template<typename D>
+std::ostream& operator<<(std::ostream& out, const BSTREE<D>& BST){  BST.view(); return out;  }
 
 #include <iostream>
 using namespace std;
 
-#include <iostream>
-
-// assume your headers
-// #include "BSTREE.hpp"
-// #include "BSTiterator.hpp"
-
-int main() {
-
-    // BSTREE<int> tree;
-
-    // int arr[] = {10, 5, 20, 3, 7, 15, 30};
-    // for(int x : arr)
-    //     tree.insert(x);
-
-    // // two iterators from same tree
-    // auto it1 = tree.begin();
-    // auto it2 = tree.begin();
-
-    // std::cout << "it1: ";
-    // for(; it1 != tree.end(); ++it1)
-    //     std::cout << *it1 << " ";
-
-    // std::cout << "\nit2: ";
-    // for(; it2 != tree.end(); ++it2)
-    //     std::cout << *it2 << " ";
-
-    BSTREE<int> tree;
-
-    int arr[] = {10, 5, 20, 3, 7, 15, 30};
-    for(int x : arr)
-        tree.insert(x);
-
-    // =========================
-    // 1. INORDER
-    // =========================
-    tree.M = MODE::IN;
-
-    std::cout << "INORDER:\n";
-    for(auto it : tree)
-        std::cout << it << " ";
-    std::cout << "\n\n";
-
-    // =========================
-    // 2. PREORDER
-    // =========================
-    tree.M = MODE::PRE;
-
-    std::cout << "PREORDER:\n";
-    for(auto it : tree)
-        std::cout << it << " ";
-    std::cout << "\n\n";
-
-    // =========================
-    // 3. POSTORDER
-    // =========================
-    tree.M = MODE::POST;
-
-    std::cout << "POSTORDER:\n";
-    for(auto it : tree)
-        std::cout << it << " ";
-    std::cout << "\n\n";
-
-    // =========================
-    // 4. BFS (LEVEL ORDER)
-    // =========================
-    tree.M = MODE::BFS;
-
-    std::cout << "BFS:\n";
-    for(auto it : tree)
-        std::cout << it << " ";
-    std::cout << "\n\n";
-
-    // =========================
-    // 5. DFS (same as PREORDER usually)
-    // =========================
-    tree.M = MODE::DFS;
-
-    std::cout << "DFS:\n";
-    for(auto it : tree)
-        std::cout << it << " ";
-    std::cout << "\n\n";
-
-    // =========================
-    // 6. DFS_LR (if you support variant)
-    // =========================
-    tree.M = MODE::DFS_LR;
-
-    std::cout << "DFS_LR:\n";
-    for(auto it : tree)
-        std::cout << it << " ";
-    std::cout << "\n\n";
-
-    // =========================
-    // 7. BFS_RL (reverse level order or right-first BFS)
-    // =========================
-    tree.M = MODE::BFS_RL;
-
-    std::cout << "BFS_RL:\n";
-    for(auto it : tree)
-        std::cout << it << " ";
-    std::cout << "\n\n";
-
-    return 0;
-}
-
-
 // int main() {
+
+//     // BSTREE<int> tree;
+
+//     // int arr[] = {10, 5, 20, 3, 7, 15, 30};
+//     // for(int x : arr)
+//     //     tree.insert(x);
+
+//     // // two iterators from same tree
+//     // auto it1 = tree.begin();
+//     // auto it2 = tree.begin();
+
+//     // std::cout << "it1: ";
+//     // for(; it1 != tree.end(); ++it1)
+//     //     std::cout << *it1 << " ";
+
+//     // std::cout << "\nit2: ";
+//     // for(; it2 != tree.end(); ++it2)
+//     //     std::cout << *it2 << " ";
+
 //     BSTREE<int> tree;
 
-//     std::cout << "=== INSERT TEST ===\n";
-//     tree.insert(50);
-//     tree.insert(30);
-//     tree.insert(70);
-//     tree.insert(20);
-//     tree.insert(40);
-//     tree.insert(60);
-//     tree.insert(80);
+//     int arr[] = {10, 5, 20, 3, 7, 15, 30};
+//     for(int x : arr)
+//         tree.insert(x);
 
-//     std::cout << "Tree (INORDER view):\n";
-//     tree.view(MODE::IN);
+//     // =========================
+//     // 1. INORDER
+//     // =========================
+//     tree.M = MODE::IN;
+
+//     std::cout << "INORDER:\n";
+//     for(auto it : tree)
+//         std::cout << it << " ";
 //     std::cout << "\n\n";
 
-//     std::cout << "=== SIZE ===\n";
-//     std::cout << "Size: " << tree.size() << "\n\n";
+//     // =========================
+//     // 2. PREORDER
+//     // =========================
+//     tree.M = MODE::PRE;
 
-//     std::cout << "=== +VE INDEX TEST (INORDER) ===\n";
-//     std::cout << "tree[0] = " << tree[0] << "\n";
-//     std::cout << "tree[1] = " << tree[1] << "\n";
-//     std::cout << "tree[3] = " << tree[3] << "\n";
-//     std::cout << "tree[6] = " << tree[6] << "\n\n";
-
-//     std::cout << "=== -VE INDEX TEST (INORDER) ===\n";
-//     std::cout << "tree[-1] = " << tree[-1] << "\n";
-//     std::cout << "tree[-2] = " << tree[-2] << "\n";
-//     std::cout << "tree[-7] = " << tree[-7] << "\n\n";
-
-//     std::cout << "=== FRONT / BACK SIMULATION ===\n";
-//     std::cout << "First (tree[0]) = " << tree[0] << "\n";
-//     std::cout << "Last (tree[-1]) = " << tree[-1] << "\n\n";
-
-//     std::cout << "=== ITERATOR TEST (INORDER) ===\n";
-//     for(auto it = tree.begin(); it != tree.end(); ++it) {
-//         std::cout << *it << " ";
-//     }
+//     std::cout << "PREORDER:\n";
+//     for(auto it : tree)
+//         std::cout << it << " ";
 //     std::cout << "\n\n";
 
-//     std::cout << "=== SEARCH TEST ===\n";
-//     std::cout << "search(40): " << tree.search(40) << "\n";
-//     std::cout << "search(100): " << tree.search(100) << "\n\n";
+//     // =========================
+//     // 3. POSTORDER
+//     // =========================
+//     tree.M = MODE::POST;
 
-//     std::cout << "=== REMOVE TEST ===\n";
-//     tree.remove(30);
-//     tree.view(MODE::IN);
+//     std::cout << "POSTORDER:\n";
+//     for(auto it : tree)
+//         std::cout << it << " ";
 //     std::cout << "\n\n";
 
-//     std::cout << "=== DFS VIEW ===\n";
-//     tree.view(MODE::DFS);
+//     // =========================
+//     // 4. BFS (LEVEL ORDER)
+//     // =========================
+//     tree.M = MODE::BFS;
+
+//     std::cout << "BFS:\n";
+//     for(auto it : tree)
+//         std::cout << it << " ";
 //     std::cout << "\n\n";
 
-//     std::cout << "=== BFS VIEW ===\n";
-//     tree.view(MODE::BFS);
+//     // =========================
+//     // 5. DFS (same as PREORDER usually)
+//     // =========================
+//     tree.M = MODE::DFS;
+
+//     std::cout << "DFS:\n";
+//     for(auto it : tree)
+//         std::cout << it << " ";
 //     std::cout << "\n\n";
 
-//     std::cout << "=== CONST INDEX TEST ===\n";
-//     const BSTREE<int>& cref = tree;
-//     std::cout << "cref[0] = " << cref[0] << "\n";
-//     std::cout << "cref[-1] = " << cref[-1] << "\n\n";
+//     // =========================
+//     // 6. DFS_LR (if you support variant)
+//     // =========================
+//     tree.M = MODE::DFS_LR;
 
-//     std::cout << "=== OUT OF BOUNDS TEST ===\n";
-//     try {
-//         std::cout << tree[100] << "\n";
-//     } catch(const std::exception& e) {
-//         std::cout << "Exception: " << e.what() << "\n";
-//     }
+//     std::cout << "DFS_LR:\n";
+//     for(auto it : tree)
+//         std::cout << it << " ";
+//     std::cout << "\n\n";
 
-//     std::cout << "\n=== ALL TEST COMPLETE ===\n";
+//     // =========================
+//     // 7. BFS_RL (reverse level order or right-first BFS)
+//     // =========================
+//     tree.M = MODE::BFS_RL;
+
+//     std::cout << "BFS_RL:\n";
+//     for(auto it : tree)
+//         std::cout << it << " ";
+//     std::cout << "\n\n";
 
 //     return 0;
 // }
+
+
+int main() {
+    BSTREE<int> tree;
+
+    std::cout << "=== INSERT TEST ===\n\n";
+    tree.insert(50);
+    tree.insert(30);
+    tree.insert(70);
+    tree.insert(20);
+    tree.insert(40);
+    tree.insert(60);
+    tree.insert(80);
+    cout<<tree;
+    std::cout << "\nTree (INORDER view):\n";
+    tree.view(MODE::IN);
+    std::cout << "\n\n";
+
+    std::cout << "=== SIZE ===\n";
+    std::cout << "Size: " << tree.size() << "\n\n";
+
+    std::cout << "=== +VE INDEX TEST (INORDER) ===\n";
+    std::cout << "tree[0] = " << tree[0] << "\n";
+    std::cout << "tree[1] = " << tree[1] << "\n";
+    std::cout << "tree[3] = " << tree[3] << "\n";
+    std::cout << "tree[6] = " << tree[6] << "\n\n";
+
+    std::cout << "=== -VE INDEX TEST (INORDER) ===\n";
+    std::cout << "tree[-1] = " << tree[-1] << "\n";
+    std::cout << "tree[-2] = " << tree[-2] << "\n";
+    std::cout << "tree[-7] = " << tree[-7] << "\n\n";
+
+    std::cout << "=== FRONT / BACK SIMULATION ===\n";
+    std::cout << "First (tree[0]) = " << tree[0] << "\n";
+    std::cout << "Last (tree[-1]) = " << tree[-1] << "\n\n";
+
+    std::cout << "=== ITERATOR TEST (INORDER) ===\n";
+    for(auto it = tree.begin(); it != tree.end(); ++it) {
+        std::cout << *it << " ";
+    }
+    std::cout << "\n\n";
+
+    std::cout << "=== SEARCH TEST ===\n";
+    std::cout << "search(40): " << tree.search(40) << "\n";
+    std::cout << "search(100): " << tree.search(100) << "\n\n";
+
+    std::cout << "=== REMOVE TEST ===\n";
+    tree.remove(30);
+    tree.view(MODE::IN);
+    std::cout << "\n\n";
+
+    std::cout << "=== DFS VIEW ===\n";
+    tree.view(MODE::DFS);
+    std::cout << "\n\n";
+
+    std::cout << "=== BFS VIEW ===\n";
+    tree.view(MODE::BFS);
+    std::cout << "\n\n";
+
+    std::cout << "=== CONST INDEX TEST ===\n";
+    const BSTREE<int>& cref = tree;
+    std::cout << "cref[0] = " << cref[0] << "\n";
+    std::cout << "cref[-1] = " << cref[-1] << "\n\n";
+
+    std::cout << "=== OUT OF BOUNDS TEST ===\n";
+    try {
+        std::cout << tree[100] << "\n";
+    } catch(const std::exception& e) {
+        std::cout << "Exception: " << e.what() << "\n";
+    }
+
+    std::cout << "\n=== ALL TEST COMPLETE ===\n";
+
+    return 0;
+}
 
 // ---- assume your full class definitions are included above ----
 
