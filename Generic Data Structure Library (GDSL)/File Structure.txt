@@ -1,7 +1,7 @@
 C:\
 └── MinGW\
     └── include\
-        └── GenericDataStructureLibrary\
+        └── GDSL\
             │
             ├── include/                          <-- User-facing headers (.hpp)
             │   ├── Linear/

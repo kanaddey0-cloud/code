@@ -228,6 +228,8 @@ public:
     const D& operator[](const long int index) const;
     long int size() const { return elem; }
     bool insert(D item);
+    void insert_array(D arr[], size_t SIZE);
+    void insert_index(D arr[], size_t LOW, size_t HIGH);
     bool search(D item);
     bool remove(D item);
     bool add(const BSTREE<D>& root);
@@ -653,6 +655,26 @@ bool BSTREE<D>::insert(D item){
     if(item<tmp->K) tmp->LINK[L]=create(item,tmp); 
     else tmp->LINK[R]=create(item,tmp); elem++; 
     return true;
+}
+
+template<typename D>
+void BSTREE<D>::insert_index(D arr[], size_t LOW, size_t HIGH){
+    if(LOW == HIGH){ insert(arr[LOW]); return; }
+    else if((1+LOW) == HIGH){ 
+        insert(arr[LOW]); insert(arr[HIGH]); return;
+    }else{
+        size_t MID=(LOW+HIGH)/2;
+        insert(arr[MID]);
+        insert_index(arr,LOW,(MID-1));
+        insert_index(arr,(1+MID),HIGH);
+    }
+}
+
+template<typename D>
+void BSTREE<D>::insert_array(D arr[], size_t SIZE){
+    if(ROOT) insert_index(arr,0,SIZE-1);
+    else
+        for(size_t i=0; i<SIZE; i++) insert(arr[i]);
 }
 
 template<typename D>

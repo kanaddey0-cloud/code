@@ -9,7 +9,7 @@ enum class MODE :char {
 enum { L, R };
 
 template<typename D>
-struct AVLnode{ unsigned int H: 7; D K; AVLnode<D>* LINK[2]; };
+struct AVLnode{ int H: 8; D K; AVLnode<D>* LINK[2]; };
 
 template<typename D>
 class AVLiterator { 
@@ -204,13 +204,13 @@ template<typename D>
 class AVLTREE{
 protected:
     unsigned long int elem;
-    AVLnode<D>* ROOT;
-    STACK<AVLnode<D>*> S;
+    AVLnode<D>* ROOT, *AVL;
+    bool f0=false;
     AVLnode<D>* node[3];
     AVLnode<D>* link[4];
     AVLnode<D>* create(D item);
     void print_Key_L_C_R(const AVLnode<D>* tmp) const;
-    bool deleting(AVLnode<D>*& del, AVLnode<D>* tmp);
+    D deleting(AVLnode<D>* point, bool f1, bool f2=false);
     bool freelink(AVLnode<D>*& root);
     unsigned long int addlink(AVLnode<D>*& root, const AVLnode<D>*& other);
     AVLnode<D>* pointer(long int index, MODE mode=MODE::DEF) const;
@@ -229,9 +229,11 @@ public:
     D& operator[](const long int index);
     const D& operator[](const long int index) const;
     long int size() const { return elem; }
-    bool insert(D item);
     bool search(D item);
+    void insert(D item);
+    bool insert_(D item, AVLnode<D>* root);
     bool remove(D item);
+    bool remove_(D item, AVLnode<D>* root);
     bool add(const AVLTREE<D>& root);
     void view(MODE mode=MODE::DEF) const;
     void viewDFS(bool order=false) const;
@@ -247,12 +249,11 @@ public:
 //-------------------BALANCE_TREE
     char subH(AVLnode<D>* sub) const noexcept;
     char balanceH(AVLnode<D>* subL, AVLnode<D>* subR) const noexcept;
-    void tree_balance(bool f=true) noexcept;
-    void balance(AVLnode<D>*& AVL, AVLnode<D>* parent);
+    AVLnode<D>* balance(AVLnode<D>* AVL);
 };
 
 template<typename D>
-AVLTREE<D>::AVLTREE() : ROOT(nullptr),M(MODE::IN), elem(0) {}
+AVLTREE<D>::AVLTREE() : ROOT(nullptr), AVL(nullptr), M(MODE::IN), elem(0) {}
 
 template<typename D>
 AVLTREE<D>::AVLTREE(const AVLTREE<D>& other) :AVLTREE<D>(){
@@ -614,22 +615,7 @@ char AVLTREE<D>::balanceH(AVLnode<D>* subL, AVLnode<D>* subR) const noexcept{
 }
 
 template<typename D>
-void AVLTREE<D>::tree_balance(bool f) noexcept{
-    AVLnode<D>* tmp;
-    char height;
-    while(!S.empty()){
-        tmp=S.pop();
-        height=balanceH(tmp->LINK[L],tmp->LINK[R]);
-        if(-1 == height){ 
-            balance(tmp,!S.empty() ? S.tos() : nullptr); if(f) break; 
-        }
-        else tmp->H=height;
-    } 
-    if(f) S.clear();
-}
-
-template<typename D>
-void AVLTREE<D>::balance(AVLnode<D>*& AVL, AVLnode<D>* parent){ 
+AVLnode<D>* AVLTREE<D>::balance(AVLnode<D>* AVL){ 
     if(subH(AVL->LINK[L]) > subH(AVL->LINK[R])){  // if(AVL->H > 0)
         node[2]=AVL; link[3]=AVL->LINK[R]; 
         AVLnode<D>* left=AVL->LINK[L];
@@ -667,119 +653,182 @@ void AVLTREE<D>::balance(AVLnode<D>*& AVL, AVLnode<D>* parent){
     node[2]->H=balanceH(node[2]->LINK[L],node[2]->LINK[R]);
     node[1]->H=balanceH(node[1]->LINK[L],node[1]->LINK[R]);
 
-    if(parent){
-        if(parent->K > node[1]->K) parent->LINK[L]=node[1];
-        else if(parent->K < node[1]->K) parent->LINK[R]=node[1];
-    } 
-    else ROOT=node[1];
+    return node[1];
 }
 
-template<typename D>  
-bool AVLTREE<D>::deleting(AVLnode<D>*& del, AVLnode<D>* tmp){
-    AVLnode<D>* ptr=del;  
-    if(ptr->LINK[L]){
-        tmp=ptr; ptr=ptr->LINK[L]; S.push(tmp);
-        while(ptr->LINK[R]){ 
-            tmp=ptr; ptr=ptr->LINK[R]; S.push(tmp);
+template<typename D> 
+D AVLTREE<D>::deleting(AVLnode<D>* point, bool f1, bool f2){  D tmp;
+    if(f1){
+        if(f2){
+            if(point->LINK[R]){
+                tmp=deleting(point->LINK[R],true,true);
+                if(f0){
+                    delete point->LINK[R]; point->LINK[R]=nullptr; f0=false; elem--;
+                }else{
+                    if(AVL) point->LINK[R]=AVL; AVL=nullptr; 
+                }
+            }else return deleting(point,false);
+        }else{
+            if(point->LINK[L]){
+                tmp=deleting(point->LINK[L],true);
+                if(f0){
+                    delete point->LINK[L]; point->LINK[L]=nullptr; f0=false; elem--;
+                }else{
+                    if(AVL) point->LINK[L]=AVL; AVL=nullptr;
+                }
+            }else return deleting(point,false);
         }
-        del->K=ptr->K;
-        return deleting(ptr,tmp);
-    }
-    if(ptr->LINK[R]){
-        tmp=ptr; ptr=ptr->LINK[R]; S.push(tmp);
-        while(ptr->LINK[L]){ 
-            tmp=ptr; ptr=ptr->LINK[L]; S.push(tmp);
+        point->H=balanceH(point->LINK[L],point->LINK[R]);
+        if(-1 == point->H) AVL=balance(point); 
+        return tmp;
+
+    }else{
+        if(!point->LINK[L] && !point->LINK[R]){ f0=true; return point->K; }
+        else if(point->LINK[L] && !point->LINK[R]){
+            point->K=point->LINK[L]->K;
+            delete point->LINK[L]; point->LINK[L]=nullptr; elem--;
         }
-        del->K=ptr->K; 
-        return deleting(ptr,tmp);
+        else if(!point->LINK[L] && point->LINK[R]){
+            point->K=point->LINK[R]->K;
+            delete point->LINK[R]; point->LINK[R]=nullptr; elem--;
+        }
+        else{
+            if(subH(point->LINK[L]) >= subH(point->LINK[R])){
+                if(point->LINK[L]->LINK[R]){
+                    point->K=deleting(point->LINK[L]->LINK[R],true,true);
+                    if(f0){  
+                        delete point->LINK[L]->LINK[R]; point->LINK[L]->LINK[R]=nullptr; f0=false; elem--;
+                    }
+                    point->LINK[L]->H=balanceH(point->LINK[L]->LINK[L],point->LINK[L]->LINK[R]);
+                    if(-1 == point->LINK[L]->H) 
+                        point->LINK[L]=balance(point->LINK[L]);
+                }else{
+                    point->K=deleting(point->LINK[L],false);
+                    if(f0){  
+                        delete point->LINK[L]; point->LINK[L]=nullptr; f0=false; elem--;
+                    }
+                }
+            }else{
+                if(point->LINK[R]->LINK[L]){
+                    point->K=deleting(point->LINK[R]->LINK[L],true);
+                    if(f0){  
+                        delete point->LINK[R]->LINK[L]; point->LINK[R]->LINK[L]=nullptr; f0=false;  elem--;
+                    }
+                    point->LINK[R]->H=balanceH(point->LINK[R]->LINK[L],point->LINK[R]->LINK[R]);
+                    if(-1 == point->LINK[R]->H) 
+                        point->LINK[R]=balance(point->LINK[R]);
+                }else{
+                    point->K=deleting(point->LINK[R],false);
+                    if(f0){  
+                        delete point->LINK[R]; point->LINK[R]=nullptr; f0=false; elem--;
+                    }
+                }
+            }
+        }
+        point->H=balanceH(point->LINK[L],point->LINK[R]);
+        if(-1 == point->H) AVL=balance(point);
+        return point->K;
     }
-    if(tmp->LINK[L] == ptr){ 
-        delete ptr; tmp->LINK[L]=nullptr; elem--; 
-    }else{ 
-        delete ptr; tmp->LINK[R]=nullptr; elem--; 
+}
+
+template<typename D>
+bool AVLTREE<D>::remove_(D item, AVLnode<D>* root){
+    if(!root) std::cout<<root->K<<"\n";
+    if(root->K > item){  
+        if(root->LINK[L]){
+            if(remove_(item,root->LINK[L])){ delete root->LINK[L]; root->LINK[L]=nullptr; elem--;}
+            else if(AVL){
+                root->LINK[L]=AVL; AVL=nullptr;
+            }
+        }else return false;
+
+    }else if(root->K < item){ 
+        if(root->LINK[R]){
+            if(remove_(item,root->LINK[R])){ delete root->LINK[R]; root->LINK[R]=nullptr; elem--; }
+            else if(AVL){
+                root->LINK[R]=AVL; AVL=nullptr;
+            }
+        }else return false;
+
+    }else{  
+        deleting(root,false); 
+        if(f0) return true;   f0=true;  
     }
-    return true;
+    
+    if(f0){
+        root->H=balanceH(root->LINK[L],root->LINK[R]); 
+        if(-1 == root->H)
+            AVL=balance(root); 
+    }return false;  
 }
 
 template<typename D>
 bool AVLTREE<D>::remove(D item){
-    AVLnode<D>* ptr, *tmp;
-    tmp=ptr=ROOT;
-    while(ptr){
-        if(ptr->K!=item){ 
-            tmp=ptr;  S.push(tmp); 
-        }
-        if(item<ptr->K) ptr=ptr->LINK[L];
-        else if(item>ptr->K) ptr=ptr->LINK[R];
-        else break;
-    } 
-    if(!ptr){ S.clear(); return false; }
-    if(elem == 1){
-        delete ROOT; ROOT=nullptr; elem--; return true; 
-    }
-    if(ptr->LINK[L]==nullptr && ptr->LINK[R]==nullptr){
-        if(tmp->LINK[L] == ptr){ 
-            tmp->LINK[L]=nullptr; delete ptr; elem--; 
-        }else{ 
-            tmp->LINK[R]=nullptr; delete ptr; elem--; 
-        }
-        tree_balance();
-        return true;
-    }
-    bool del=deleting(ptr,tmp); 
-    tree_balance(false);
-    return del;
+    if(!ROOT) return false;
+    if(ROOT->K == item){
+        deleting(ROOT,false);
+        if(f0){ delete ROOT; ROOT=nullptr; f0=false; elem--; }
+        else if(AVL){ ROOT=AVL; AVL=nullptr; }
+    }else{
+        remove_(item,ROOT); f0=false;
+        if(AVL){ ROOT=AVL; AVL=nullptr; }
+    }   
+    return false; 
 }
 
-// template<typename D>  
-// bool AVLTREE<D>::deleting(AVLnode<D>*& del, AVLnode<D>* tmp){
-//     AVLnode<D>* ptr=del;
-//     bool Lnull=ptr->LINK[L], Rnull=ptr->LINK[R];
-//     while(ptr){
-//         if(subH(ptr->LINK[L]) > subH(ptr->LINK[R])){
-//             del->K=ptr->K;
-//             ptr=ptr->LINK[L]; S.push(del);
-//         }else if(subH(ptr->LINK[L]) < subH(ptr->LINK[R])){
-//             del->K=ptr->K;
-//             ptr=ptr->LINK[R]; S.push(del);
-//         }else{
-//             if(ptr->LINK[L]){
-//                 del->K=ptr->K;
-//                 ptr=ptr->LINK[L]; S.push(del);
-//                 continue;
-//             }
-//             ptr=ptr->LINK[L];
-//         }
-//     }
-// }
-
 template<typename D>
-AVLnode<D>* AVLTREE<D>::create(D item){
+AVLnode<D>* AVLTREE<D>::create(D item){  elem++;
     AVLnode<D>* ptr=new AVLnode<D>;
-    ptr->H=0;
-    ptr->K=item;
+
+    ptr->H=0; ptr->K=item;
     ptr->LINK[L]=nullptr; ptr->LINK[R]=nullptr; 
+
     return ptr;
 }
 
 template<typename D>
-bool AVLTREE<D>::insert(D item){
-    if(!ROOT){
-        ROOT=create(item); elem++; return true;
-    }
-    AVLnode<D>* ptr, *tmp;
-    ptr=ROOT;
-    while(ptr){
-        tmp=ptr; 
-        S.push(tmp);
-        if(item<ptr->K) ptr=ptr->LINK[L];
-        else if(item>ptr->K) ptr=ptr->LINK[R];
-        else{ S.clear(); return false; }
-    }
-    if(item<tmp->K) tmp->LINK[L]=create(item); 
-    else tmp->LINK[R]=create(item); elem++; 
-    tree_balance();
-    return true;
+bool AVLTREE<D>::insert_(D item, AVLnode<D>* root){
+    if(root->K > item){
+        if(!root->LINK[L]){
+            root->LINK[L]=create(item); 
+            root->H=balanceH(root->LINK[L],root->LINK[R]); 
+            return true;
+        }else{
+            if(insert_(item,root->LINK[L])) root->H=balanceH(root->LINK[L],root->LINK[R]);
+            else if(AVL){
+                if(root->K > AVL->K) root->LINK[L]=AVL;
+                else root->LINK[R]=AVL;
+                AVL=nullptr; return false;
+            }else return false;
+        }
+    }else if(root->K < item){
+        if(!root->LINK[R]){
+            root->LINK[R]=create(item);
+            root->H=balanceH(root->LINK[L],root->LINK[R]);  
+            return true;
+        }else{
+            if(insert_(item,root->LINK[R])) root->H=balanceH(root->LINK[L],root->LINK[R]);
+            else if(AVL){
+                if(root->K > AVL->K) root->LINK[L]=AVL;
+                else root->LINK[R]=AVL;
+                AVL=nullptr; return false;
+            }else return false;
+        }
+    }else return false;
+
+    if(-1 != root->H) return true; 
+    AVL=balance(root);  return false;
+}
+
+template<typename D>
+void AVLTREE<D>::insert(D item){ 
+    if(!ROOT){ ROOT=create(item); }
+    else{
+        insert_(item,ROOT);
+        if(AVL){
+            ROOT=AVL; AVL=nullptr;
+        }
+    } 
 }
 
 template<typename D>
@@ -795,42 +844,42 @@ using namespace std::chrono;
 
 // #include "AVLTree.h"   // IMPORTANT: add your AVL definition here
 
-int main() {
+// int main() {
 
-    cout << "Program started\n";
+//     cout << "Program started\n";
 
-    srand(time(0));
+//     srand(time(0));
 
-    auto start = high_resolution_clock::now();
+//     auto start = high_resolution_clock::now();
 
-    AVLTREE<int> tree;
+//     AVLTREE<int> tree;
 
-    int n = 1000000;
+//     int n = 1000000;
 
-cout << "S\n";
+// cout << "S\n";
 
-    for(int i = 0; i < n; i++){
-        tree.insert(i);
-        // if(i % 1000 == 0) cout << "Inserted " << i << endl;
-    }
-
-cout << "I\n";
-
-//     for(int i = 0; i < n/2; i++){
-//         tree.remove(i);
-//         // cout<<"|";
+//     for(int i = 0; i < n; i++){
+//         tree.insert(i);
+//         // if(i % 1000 == 0) cout << "Inserted " << i << endl;
 //     }
 
-// cout << "D\n";
+// cout << "I\n";
 
-    auto end = high_resolution_clock::now();
+// //     for(int i = 0; i < n/2; i++){
+// //         tree.remove(i);
+// //         // cout<<"|";
+// //     }
 
-    cout << duration_cast<milliseconds>(end - start).count() << " ms\n";
+// // cout << "D\n";
 
-    cout << "Program finished\n";
+//     auto end = high_resolution_clock::now();
 
-    return 0;
-}
+//     cout << duration_cast<milliseconds>(end - start).count() << " ms\n";
+
+//     cout << "Program finished\n";
+
+//     return 0;
+// }
 
 // int main() {
 
@@ -894,49 +943,49 @@ cout << "I\n";
 
 //"give hardest case"
 
-// int main(){
+int main(){
 
-// auto start = high_resolution_clock::now();
-// AVLTREE<int> tree;
+auto start = high_resolution_clock::now();
+AVLTREE<int> tree;
 
-// int arr[] = {
-//     50,20,70,10,30,60,80,
-//     25,27,26,5,1,2,3,4,
-//     90,100,95,85,75
-// };
+int arr[] = {
+    50,20,70,10,30,60,80,
+    25,27,26,5,1,2,3,4,
+    90,100,95,85,75
+};
 
-// tree.M=MODE::BFS;
+tree.M=MODE::BFS;
 
-// for(int x : arr){
-//     // cout << x << "-------------------\n";
-//     tree.insert(x);
-// }     
-// cout<<tree;
+for(int x : arr){
+    // cout << x << "-------------------\n";
+    tree.insert(x); //cout<<tree;
+}     
+cout<<tree;
 
-// cout << "\n===== DELETION START =====\n";
-// int delArr[] = {
-//     4,   // leaf
-//     5,   // single child
-//     25,  // internal (rotation heavy)
-//     50,  // ROOT deletion
-//     70,  // internal (right heavy)
-//     90,  // deeper subtree
-//     20   // near root rebalance
-// };
+cout << "\n===== DELETION START =====\n";
+int delArr[] = {
+    4,   // leaf
+    5,   // single child
+    25,  // internal (rotation heavy)
+    50,  // ROOT deletion
+    70,  // internal (right heavy)
+    90,  // deeper subtree
+    20   // near root rebalance
+};
 
-// for(int x : delArr){
-//     // cout << "------------------- DELETE " << x << "\n" ;
-//     tree.remove(x);
-// }
-// cout<<tree;
+for(int x : delArr){
+    // cout << "------------------- DELETE " << x << "\n" ;
+    tree.remove(x);
+}
+cout<<tree;
 
-// auto end = high_resolution_clock::now();
+auto end = high_resolution_clock::now();
 
-// auto duration = duration_cast<microseconds>(end - start);
+auto duration = duration_cast<microseconds>(end - start);
 
-// cout << "\nTime taken: " << duration.count() << " microseconds\n";
-// return 0;
-// }
+cout << "\nTime taken: " << duration.count() << " microseconds\n";
+return 0;
+}
 
 
 
