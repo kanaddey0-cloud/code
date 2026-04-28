@@ -4,6 +4,8 @@
 #include <GDSLstack.hpp>
 #include <GDSLqueue.hpp>
 #include <GDSLtree.hpp>
+#include <GDSLbst.hpp>
+#include <GDSLavl.hpp>
 
 template<typename D>
 std::ostream& operator<<(std::ostream& out, const node<D>& n){
@@ -13,20 +15,19 @@ std::ostream& operator<<(std::ostream& out, const node<D>& n){
 #include <iostream>
 #include <stdexcept>
 
-// assume BSTREE + MODE already included
-
+// assume AVLTREE + MODE already included
 int main() {
 
     std::cout << "==============================\n";
     std::cout << "   BST LIBRARY FINAL TEST\n";
     std::cout << "==============================\n\n";
 
-    BSTREE<int> tree;
+    AVLTREE<int> tree;
 
     int arr[] = {10, 5, 20, 3, 7, 15, 30};
     for(int x : arr)
         tree.insert(x);
-
+    std::cout<<tree<<"\n\n";
     // =========================================================
     // 1. ITERATOR MULTI OBJECT TEST
     // =========================================================
@@ -129,7 +130,7 @@ int main() {
     // 8. CONST TEST
     // =========================================================
     std::cout << "=== CONST TEST ===\n";
-    const BSTREE<int>& cref = tree;
+    const AVLTREE<int>& cref = tree;
 
     std::cout << "cref[0] = " << cref[0] << "\n";
     std::cout << "cref[-1] = " << cref[-1] << "\n\n";
@@ -312,7 +313,7 @@ int main() {
 //     l.insert(5, 0);     // head
 //     l.insert(25, 3);    // middle
 //     l.insert(40, -1);   // end
-//     l.view(true); std::cout << "\n";
+//     l.view(false); std::cout << "\n";
 
 //     std::cout << "\n===== SIZE =====\n";
 //     std::cout << "Size: " << l.size() << "\n";
@@ -327,7 +328,7 @@ int main() {
 
 //     std::cout << "\n===== UPDATE =====\n";
 //     std::cout << "Update 20 -> 200 at index: " << l.update(20, 200) << "\n";
-//     l.view(true); std::cout << "\n";
+//     l.view(); std::cout << "\n";
 
 //     std::cout << "\n===== INDEX & VALUE =====\n";
 //     std::cout << "Index of 30: " << l.index(30) << "\n";
@@ -339,7 +340,7 @@ int main() {
 
 //     std::cout << "\n===== DROP =====\n";
 //     std::cout << "Dropped index of 200: " << l.drop(200) << "\n";
-//     l.view(true); std::cout << "\n";
+//     l.view(false); std::cout << "\n";
 
 //     std::cout << "\n===== REVERSE =====\n";
 //     l.reverse();
@@ -363,7 +364,7 @@ int main() {
 //     std::cout << "Original: ";
 //     l.view(); std::cout << "\n";
 //     std::cout << "Copy: ";
-//     copy.view(true); std::cout << "\n";
+//     copy.view(); std::cout << "\n";
 
 //     std::cout << "\n===== MOVE TEST =====\n";
 //     LIST<int> moved = std::move(copy);
@@ -377,7 +378,7 @@ int main() {
 //     l.add(l2);
 
 //     std::cout << "After adding l2 into l: ";
-//     l.view(true); std::cout << "\n";
+//     l.view(false); std::cout << "\n";
 
 //     std::cout << "\n===== DONE =====\n";
 
