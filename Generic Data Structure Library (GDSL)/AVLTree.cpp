@@ -203,8 +203,8 @@ const D* AVLiterator<D>::operator->() const{
 template<typename D>
 class AVLTREE{
 protected:
-    unsigned long int elem;
-    AVLnode<D>* ROOT, *AVL;
+    unsigned long int elem=0;
+    AVLnode<D>* ROOT=nullptr, *AVL=nullptr;
     bool f0=false;
     AVLnode<D>* node[3];
     AVLnode<D>* link[4];
@@ -220,8 +220,8 @@ protected:
     AVLnode<D>* pointerPRE(AVLnode<D>* root, const unsigned long int index, unsigned long int& count) const;
     AVLnode<D>* pointerPOST(AVLnode<D>* root, const unsigned long int index, unsigned long int& count) const;
 public:
-    MODE M;
-    AVLTREE();
+    MODE M=MODE::IN;
+    AVLTREE()=default;
     AVLTREE(const AVLTREE<D>& other);
     AVLTREE(AVLTREE<D>&& other) noexcept;
     AVLTREE& operator=(const AVLTREE& other);
@@ -251,9 +251,6 @@ public:
     char balanceH(AVLnode<D>* subL, AVLnode<D>* subR) const noexcept;
     AVLnode<D>* balance(AVLnode<D>* AVL);
 };
-
-template<typename D>
-AVLTREE<D>::AVLTREE() : ROOT(nullptr), AVL(nullptr), M(MODE::IN), elem(0) {}
 
 template<typename D>
 AVLTREE<D>::AVLTREE(const AVLTREE<D>& other) :AVLTREE<D>(){

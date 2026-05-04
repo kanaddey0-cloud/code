@@ -203,9 +203,9 @@ const D* BSTiterator<D>::operator->() const{
 template<typename D>
 class BSTREE{
 protected:
-    unsigned long int elem;
+    unsigned long int elem=0;
     unsigned int LC: 2;
-    BSTnode<D>* ROOT;
+    BSTnode<D>* ROOT=nullptr;
     BSTnode<D>* create(D item, BSTnode<D>* parent=nullptr);
     void print_Key_L_C_R(const BSTnode<D>* tmp) const;
     bool deleting(BSTnode<D>*& del, BSTnode<D>* tmp);
@@ -218,7 +218,7 @@ protected:
     BSTnode<D>* pointerPRE(BSTnode<D>* root, const unsigned long int index, unsigned long int& count) const;
     BSTnode<D>* pointerPOST(BSTnode<D>* root, const unsigned long int index, unsigned long int& count) const;
 public:
-    MODE M;
+    MODE M=MODE::IN;
     BSTREE(bool l=false);
     BSTREE(const BSTREE<D>& other);
     BSTREE(BSTREE<D>&& other) noexcept;
@@ -247,7 +247,7 @@ public:
 };
 
 template<typename D>
-BSTREE<D>::BSTREE(bool l){ ROOT=nullptr; LC=l?3:2; M=MODE::IN; elem=0; }
+BSTREE<D>::BSTREE(bool l) : LC(l?3:2) {}
 
 template<typename D>
 BSTREE<D>::BSTREE(const BSTREE<D>& other) :BSTREE<D>(other.LC==3?true:false){
