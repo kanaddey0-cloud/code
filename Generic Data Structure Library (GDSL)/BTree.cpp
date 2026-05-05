@@ -33,7 +33,16 @@ protected:
     BTnode<D>* create();
     void print_BTnode(BTnode<D>* ptr, bool f=false);
     void split(BTnode<D>* curr, D item, BTnode<D>* child);
-    bool BTREE<D>::deletecase(NTYPE NT, BTnode<D>* node, unsigned short i, unsigned short l=65535){}
+    void borrowLeftSibling(NTYPE NT, BTnode<D>* left, BTnode<D>* parent, BTnode<D>* node, unsigned short l, unsigned short i=0);
+    void borrowRightSibling(NTYPE NT, BTnode<D>* node, BTnode<D>* parent, BTnode<D>* right, unsigned short l, unsigned short i=0);
+    void mergeLeftSibling(NTYPE NT, BTnode<D>* left, BTnode<D>* parent, BTnode<D>* node, unsigned short l, unsigned short i=0);
+    void mergeRightSibling(NTYPE NT, BTnode<D>* node, BTnode<D>* parent, BTnode<D>* right, unsigned short l, unsigned short i=0);
+    void inorderPredecessor(BTnode<D>* pred, BTnode<D>* node, unsigned short i, bool gape=false);
+    void inorderSuccessor(BTnode<D>* node, BTnode<D>* succ, unsigned short i);
+    void mergeLeftRight(BTnode<D>* left, BTnode<D>* node, BTnode<D>* right, unsigned short i);
+    unsigned short link(BTnode<D>* node, BTnode<D>* parent);
+    void fillMinimum(BTnode<D>* node, BTnode<D>* parent);
+    void deletecase(NTYPE NT, BTnode<D>* node, unsigned short i, unsigned short l=65535);
 public:
     BTREE(unsigned short order);
     ~BTREE();
@@ -210,51 +219,20 @@ void BTREE<D>::split(BTnode<D>* curr, D item, BTnode<D>* child){
         node->P=currP;
     }
 }
-
-void applyDEL(DEL mode, BTnode<D>* node, unsigned short i, unsigned short l){
-    switch(mode){
-        case DEL::IOP: inorderPredecessor(node, i); break;
-        case DEL::IOS: inorderSuccessor(node, i); break;
-        case DEL::MLR: mergeLeftRight(node, i); break;
-
-        case DEL::BLS: borrowLeftSibling(node, l); break;
-        case DEL::BRS: borrowRightSibling(node, l); break;
-
-        case DEL::MLS: mergeLeftParent(node, l); break;
-        case DEL::MRS: mergeRightParent(node, l); break;
-
-        case DEL::SKH: shrinkHeight(node); break;
-        case DEL::LPR: levelPropagateRepair(node); break;
-
-        case DEL::NONE: break;
-    }
-}
-
-void inorderPredecessor(BTnode<D>* node, unsigned short i);   // IOP
-void inorderSuccessor(BTnode<D>* node, unsigned short i);     // IOS
-void mergeLeftRight(BTnode<D>* node, unsigned short i);       // MLR
-
-void borrowLeftSibling(BTnode<D>* node, unsigned short l);    // BLS
-void borrowRightSibling(BTnode<D>* node, unsigned short l);   // BRS
-
-void mergeLeftSibling(BTnode<D>* node, unsigned short l);     // MLS
-void mergeRightSibling(BTnode<D>* node, unsigned short l);    // MRS
-
-void shrinkHeight(BTnode<D>* node);                           // SKH
-void levelPropagateRepair(BTnode<D>* node);                   // LPR
+                  
 enum class DEL : uint8_t {
     // Internal operations------------------------------------(RT, IM)
-    IOP,   // Inorder Predecessor → replace with predecessor 
-    IOS,   // Inorder Successor   → replace with successor   
-    MLR,   // Merge Left+Right    → merge children      
+ /*✔✔*/ IOP,   // Inorder Predecessor → replace with predecessor   ✔
+ /*✔✔*/ IOS,   // Inorder Successor   → replace with successor     ✔
+ /*✔*/ MLR,   // Merge Left+Right    → merge children      
 
     // Borrow operations--------------------------------------(IM, LF)
-    BLS,   // Borrow Left Sibling  → borrow from left       
-    BRS,   // Borrow Right Sibling → borrow from right   
+ /*✔*/ BLS,   // Borrow Left Sibling  → borrow from left       
+ /*✔*/ BRS,   // Borrow Right Sibling → borrow from right   
 
     // Merge with parent direction----------------------------(IM, LF)
-    MLS,   // Merge Left Parent  → merge via left parent side  
-    MRS,   // Merge Right Parent → merge via right parent side 
+ /*✔*/ MLS,   // Merge Left Parent  → merge via left parent side  
+ /*✔*/ MRS,   // Merge Right Parent → merge via right parent side 
 
     // Root / level handling----------------------------------(RT)
     SKH,   // Shrink Height → root collapse
@@ -264,7 +242,8 @@ enum class DEL : uint8_t {
     NONE   // No action (any)
 };
 
-void borrowLeftSibling(NTYPE NT, BTnode<D>* left, BTnode<D>* parent, BTnode<D>* node, unsigned short i, unsigned short l){
+template<typename D>
+void BTREE<D>::borrowLeftSibling(NTYPE NT, BTnode<D>* left, BTnode<D>* parent, BTnode<D>* node, unsigned short l, unsigned short i){
     BTnode<D>* tmp; 
     switch (NT){
         case NTYPE::LF :
@@ -276,13 +255,23 @@ void borrowLeftSibling(NTYPE NT, BTnode<D>* left, BTnode<D>* parent, BTnode<D>* 
                 }}
             node->KEY[0]=parent->KEY[l-1];
             parent->KEY[l-1]=left->KEY[left->K -1];
-            left->KEY[--left->K]=D(); 
+            left->KEY[--left->K]=D();
+            return; 
 
         case NTYPE::IM :
+            for(int j=node->K -1; j>0; j--){ node->KEY[j]=node->KEY[j-1];
+                                             node->LINK[j+1]=node->LINK[j]; }
+            node->LINK[1]=node->LINK[0];
+            node->KEY[0]=parent->KEY[l-1];   node->LINK[0]=left->LINK[left->K];   node->K++;
+            parent->KEY[l-1]=left->KEY[left->K -1];
+            
+            left->LINK[left->K]=nullptr;     left->KEY[--left->K]=D();
+            return;
     }
 }
 
-void borrowRightSibling(NTYPE NT, BTnode<D>* node, BTnode<D>* parent, BTnode<D>* right, unsigned short i, unsigned short l){
+template<typename D>
+void BTREE<D>::borrowRightSibling(NTYPE NT, BTnode<D>* node, BTnode<D>* parent, BTnode<D>* right, unsigned short l, unsigned short i){
     BTnode<D>* tmp; 
     switch (NT){
         case NTYPE::LF :
@@ -292,28 +281,62 @@ void borrowRightSibling(NTYPE NT, BTnode<D>* node, BTnode<D>* parent, BTnode<D>*
 
             for(int j=1; j<right->K; j++) right->KEY[j-1]=right->KEY[j];
             right->KEY[--right->K]=D();
+            return;
 
         case NTYPE::IM :
+            node->KEY[node->K++]=parent->KEY[l]; node->LINK[node->K]=right->LINK[0];
+            parent->KEY[l]=right->KEY[0];
+
+            int j; for(j=0; j<right->K-1; j++){ right->KEY[j]=right->KEY[j+1];
+                                                right->LINK[j]=right->LINK[j+1]; }
+            right->LINK[j]=right->LINK[j+1];
+            right->LINK[right->K]=nullptr;      right->KEY[--right->K]=D();
+            return;
     }
 }
 
-void mergeLeftSibling(NTYPE NT, BTnode<D>* left, BTnode<D>* parent, BTnode<D>* node, unsigned short i, unsigned short l){
+template<typename D>
+void BTREE<D>::mergeLeftSibling(NTYPE NT, BTnode<D>* left, BTnode<D>* parent, BTnode<D>* node, unsigned short l, unsigned short i){
     switch(NT){
         case NTYPE::LF :
             left->KEY[left->K++]=parent->KEY[l-1];
             for(int j=l-1; (j+1)<parent->K; j++){ parent->KEY[j]=parent->KEY[j+1];
                                                   parent->LINK[j+1]=parent->LINK[j+2]; }
+            parent->LINK[parent->K]=nullptr;
             parent->KEY[--parent->K]=D(); 
-            parent->LINK[parent->K +1]=nullptr;
 
             for(int j=0; j<node->K; j++) if(i!=j) left->KEY[left->K++]=node->KEY[j];
             delete[] (char*)node;
+            
+            if(parent->K < (O/2)) fillMinimum(parent,parent->P);
+            return;
 
         case NTYPE::IM :
+            left->KEY[left->K++]=parent->KEY[l-1];
+            for(int j=l-1; (j+1)<parent->K; j++){ parent->KEY[j]=parent->KEY[j+1];
+                                                  parent->LINK[j+1]=parent->LINK[j+2]; }
+            parent->LINK[parent->K]=nullptr;
+            parent->KEY[--parent->K]=D(); 
+
+            for(int j=0; j<node->K; j++) left->KEY[left->K++]=node->KEY[j];
+            delete[] (char*)node;
+
+            if(parent->K < (O/2)) fillMinimum(parent,parent->P);
+            return;
+        
+        case NTYPE::RT :
+            left->KEY[left->K++]=parent->KEY[l-1];
+            delete[] (char*)parent;
+
+            for(int j=0; j<node->K; j++) left->KEY[left->K++]=node->KEY[j];
+            delete[] (char*)node;
+            return;
     }
+    
 }
 
-void mergeRightSibling(NTYPE NT, BTnode<D>* node, BTnode<D>* parent, BTnode<D>* right, unsigned short i, unsigned short l){
+template<typename D>
+void BTREE<D>::mergeRightSibling(NTYPE NT, BTnode<D>* node, BTnode<D>* parent, BTnode<D>* right, unsigned short l, unsigned short i){
     switch(NT){
         case NTYPE::LF :
             for(int j=i; (j+1)<node->K; j++) node->KEY[j]=node->KEY[j+1];
@@ -322,113 +345,179 @@ void mergeRightSibling(NTYPE NT, BTnode<D>* node, BTnode<D>* parent, BTnode<D>* 
             node->KEY[node->K++]=parent->KEY[l];
             for(int j=l; (j+1)<parent->K; j++){ parent->KEY[j]=parent->KEY[j+1];
                                                 parent->LINK[j+1]=parent->LINK[j+2]; }
+            parent->LINK[parent->K]=nullptr;
             parent->KEY[--parent->K]=D(); 
-            parent->LINK[parent->K +1]=nullptr;
 
             for(int j=0; j<right->K; j++) node->KEY[node->K++]=right->KEY[j];
             delete[] (char*)right;
+            
+            if(parent->K < (O/2)) fillMinimum(parent,parent->P);
+            return;
 
         case NTYPE::IM :
+            node->KEY[node->K++]=parent->KEY[l];
+            for(int j=l; (j+1)<parent->K; j++){ parent->KEY[j]=parent->KEY[j+1];
+                                                parent->LINK[j+1]=parent->LINK[j+2]; }
+            parent->LINK[parent->K]=nullptr;
+            parent->KEY[--parent->K]=D(); 
+
+            for(int j=0; j<right->K; j++) node->KEY[node->K++]=right->KEY[j];
+            delete[] (char*)right;
+            
+            if(parent->K < (O/2)) fillMinimum(parent,parent->P);
+            return;
+
+        case NTYPE::RT :
+            node->KEY[node->K++]=parent->KEY[l];
+            delete[] (char*)parent;
+
+            for(int j=0; j<right->K; j++) node->KEY[node->K++]=right->KEY[j];
+            delete[] (char*)right;
+            return;
     }
 }
 
-void inorderPredecessor(BTnode<D>* pred, BTnode<D>* node, unsigned short i){
+template<typename D>
+void BTREE<D>::inorderPredecessor(BTnode<D>* pred, BTnode<D>* node, unsigned short i, bool gape){
     node->KEY[i]=pred->KEY[--pred->K];
     pred->KEY[pred->K]=D();
+
+    if(gape) fillMinimum(pred,pred->P);
 }
 
-void inorderSuccessor(BTnode<D>* node, BTnode<D>* succ, unsigned short i){
+template<typename D>
+void BTREE<D>::inorderSuccessor(BTnode<D>* node, BTnode<D>* succ, unsigned short i){
     node->KEY[i]=succ->KEY[0];
     for(int j=0; (j+1)<succ->K; j++) succ->KEY[j]=succ->KEY[j+1];
     succ->KEY[--succ->K]=D();
 }
 
-void mergeLeftRight(NTYPE NT, BTnode<D>* left, BTnode<D>* node, BTnode<D>* right, unsigned short i){
-    switch (NT){
-        case NTYPE::LF :
-            for(int j=0; j<right->K; j++)
-                left->KEY[left->K++]=right->KEY[j];
-            for(int j=i; (j+1)<node->K; j++){ node->KEY[j]=node->KEY[j+1];
-                                            node->LINK[j+1]=node->LINK[j+2]; }
-            node->KEY[--node->K]=D(); 
-            node->LINK[node->K +1]=nullptr;
-            delete [](char*)right;
-        
-        case NTYPE::IM :
-        
-        default:
-            break;
+template<typename D>
+void BTREE<D>::mergeLeftRight(BTnode<D>* left, BTnode<D>* node, BTnode<D>* right, unsigned short i){
+    for(int j=0; j<right->K; j++)
+        left->KEY[left->K++]=right->KEY[j];
+    for(int j=i; (j+1)<node->K; j++){ node->KEY[j]=node->KEY[j+1];
+                                        node->LINK[j+1]=node->LINK[j+2]; }
+    node->LINK[node->K]=nullptr;
+    node->KEY[--node->K]=D(); 
+    delete [](char*)right;
+
+    if(node->K < (O/2)) fillMinimum(node,node->P);
+}
+
+template<typename D>
+unsigned short BTREE<D>::link(BTnode<D>* node, BTnode<D>* parent){
+    if(!parent) 
+        throw std::runtime_error("Parent link null");
+
+    for(int l=0; l<=parent->K; l++)
+        if(parent->LINK[l] == node) return l;
+    throw std::runtime_error("Link(l) not found");
+}
+
+template<typename D>
+void BTREE<D>::fillMinimum(BTnode<D>* node, BTnode<D>* parent){
+    if(!node || node==ROOT) return;
+    
+    unsigned short l=link(node,parent);
+    
+    if(parent->K==1){
+        if(l)
+            if((parent->LINK[l-1])->K > (O/2)) 
+                borrowLeftSibling(NTYPE::IM,parent->LINK[l-1],parent,node,l);
+            else 
+                mergeLeftSibling(NTYPE::RT,parent->LINK[l-1],parent,node,l);
+        else
+            if((parent->LINK[l+1])->K > (O/2)) 
+                borrowRightSibling(NTYPE::IM,node,parent,parent->LINK[l+1],l);
+            else 
+                mergeRightSibling(NTYPE::RT,node,parent,parent->LINK[l+1],l);       
+    }else{
+        if(!l)
+            if((parent->LINK[l+1])->K > (O/2)) 
+                borrowRightSibling(NTYPE::IM,node,parent,parent->LINK[l+1],l);
+            else 
+                mergeRightSibling(NTYPE::IM,node,parent,parent->LINK[l+1],l);
+        else if(l==parent->K)
+            if((parent->LINK[l-1])->K > (O/2)) 
+                borrowLeftSibling(NTYPE::IM,parent->LINK[l-1],parent,node,l);
+            else 
+                mergeLeftSibling(NTYPE::IM,parent->LINK[l-1],parent,node,l);
+        else 
+            if((parent->LINK[l-1])->K > (parent->LINK[l+1])->K) 
+                borrowLeftSibling(NTYPE::IM,parent->LINK[l-1],parent,node,l);
+            else if((parent->LINK[l-1])->K < (parent->LINK[l+1])->K) 
+                borrowRightSibling(NTYPE::IM,node,parent,parent->LINK[l+1],l);
+            else
+                if((parent->LINK[l-1])->K > (O/2)) 
+                    borrowLeftSibling(NTYPE::IM,parent->LINK[l-1],parent,node,l);
+                else 
+                    mergeLeftSibling(NTYPE::IM,parent->LINK[l-1],parent,node,l);
     }
 }
-    
+
 template<typename D>
-bool BTREE<D>::deletecase(NTYPE NT, BTnode<D>* node, unsigned short i, unsigned short l){
+void BTREE<D>::deletecase(NTYPE NT, BTnode<D>* node, unsigned short i , unsigned short l){
     switch(NT){
         case NTYPE::LF :
             if(!l)
                 if((node->P->LINK[l+1])->K > (O/2)) 
-                    borrowRightSibling(NT,node,node->P,node->P->LINK[l+1],i,l);
+                    borrowRightSibling(NT,node,node->P,node->P->LINK[l+1],l,i);
                 else
-                    mergeRightSibling(NT,node,node->P,node->P->LINK[l+1],i,l);
+                    mergeRightSibling(NT,node,node->P,node->P->LINK[l+1],l,i);
+
             else if(l==node->P->K)
                 if((node->P->LINK[l-1])->K > (O/2)) 
-                    borrowLeftSibling(NT,node->P->LINK[l-1],node->P,node,i,l);
+                    borrowLeftSibling(NT,node->P->LINK[l-1],node->P,node,l,i);
                 else 
-                    mergeLeftSibling(NT,node->P->LINK[l-1],node->P,node,i,l);
+                    mergeLeftSibling(NT,node->P->LINK[l-1],node->P,node,l,i);
             else 
                 if((node->P->LINK[l-1])->K > (node->P->LINK[l+1])->K) 
-                    borrowLeftSibling(NT,node->P->LINK[l-1],node->P,node,i,l);
+                    borrowLeftSibling(NT,node->P->LINK[l-1],node->P,node,l,i);
                 else if((node->P->LINK[l-1])->K < (node->P->LINK[l+1])->K)
-                    borrowRightSibling(NT,node,node->P,node->P->LINK[l+1],i,l);
+                    borrowRightSibling(NT,node,node->P,node->P->LINK[l+1],l,i);
                 else
                     if((node->P->LINK[l-1])->K > (O/2)) 
-                        borrowLeftSibling(NT,node->P->LINK[l-1],node->P,node,i,l);
+                        borrowLeftSibling(NT,node->P->LINK[l-1],node->P,node,l,i);
                     else 
-                        mergeLeftSibling(NT,node->P->LINK[l-1],node->P,node,i,l);
+                        mergeLeftSibling(NT,node->P->LINK[l-1],node->P,node,l,i);
+            break;
 
         case NTYPE::IM :
-            BTnode<D>* pred=node->LINK[i];
-            while(pred->LINK[0]) pred=pred->LINK[pred->K]; 
-            if(pred->K > (O/2)) 
-                inorderPredecessor(pred,node,i);
-
-            BTnode<D>* succ=node->LINK[i+1];
-            while(succ->LINK[0]) succ=succ->LINK[0]; 
-            if(succ->K > (O/2)) 
-                inorderSuccessor(node,succ,i);
-
-            if(pred == node->LINK[i]) mergeLeftRight(NTYPE::LF,pred,node,succ,i); // LF
-            else if(node->LINK[i]==(O/2) && node->LINK[i+1]==(O/2)) return MLR; // IM
-            else
-
-            if(!l)
-                if((node->P->LINK[l+1])->K > (O/2)) return BRS;
-                else return MRS;
-            else if(l==node->P->K)
-                if((node->P->LINK[l-1])->K > (O/2)) return BLS;
-                else return MLS;
-            else 
-                if((node->P->LINK[l-1])->K > (node->P->LINK[l+1])->K) return BLS;
-                else if((node->P->LINK[l-1])->K < (node->P->LINK[l+1])->K) return BRS;
-                else
-                    if((node->P->LINK[l-1])->K > (O/2)) return BLS;
-                    else return MLS;
-
         case NTYPE::RT :
+
             BTnode<D>* pred=node->LINK[i];
             while(pred->LINK[0]) pred=pred->LINK[pred->K]; 
-            if(pred->K > (O/2)) return IOP;
+            if(pred->K > (O/2)){ 
+                inorderPredecessor(pred,node,i);
+            break;}
 
             BTnode<D>* succ=node->LINK[i+1];
             while(succ->LINK[0]) succ=succ->LINK[0]; 
-            if(succ->K > (O/2)) return IOS;
+            if(succ->K > (O/2)){ 
+                inorderSuccessor(node,succ,i);
+            break;}
 
-            if(pred == node->LINK[i]) return MLR;
+            if(pred == node->LINK[i]) mergeLeftRight(pred,node,succ,i); // Leaf
             else
-                if(node->K == 1) return SKH;
-                else return LPR;
+                inorderPredecessor(pred,node,i,true);
+            break;
+    
+        // case NTYPE::RT :
+        //     BTnode<D>* pred=node->LINK[i];
+        //     while(pred->LINK[0]) pred=pred->LINK[pred->K]; 
+        //     if(pred->K > (O/2)) return IOP;
 
-        default: return false;
+        //     BTnode<D>* succ=node->LINK[i+1];
+        //     while(succ->LINK[0]) succ=succ->LINK[0]; 
+        //     if(succ->K > (O/2)) return IOS;
+
+        //     if(pred == node->LINK[i]) return MLR;
+        //     else
+        //         if(node->K == 1) return SKH;
+        //         else return LPR;
+
+        //     break;
     }
 }
 
@@ -447,7 +536,7 @@ bool BTREE<D>::remove(D item){
 
     if(ptr==ROOT){
         if(ptr->LINK[0]){
-            deletecase(NTYPE::RT,ptr,i);
+            deletecase(NTYPE::RT,ptr,i,l);
         }else{
             while((i+1)<ptr->K){
                 ptr->KEY[i]=ptr->KEY[i+1]; i++;
@@ -463,7 +552,7 @@ bool BTREE<D>::remove(D item){
         }else{}
     }else{
         if(ptr->K==(O/2)){
-            deletecase(NTYPE::LF,ptr,i,l);
+            // deletecase(NTYPE::LF,ptr,i,l);
         }else{
             while((i+1)<ptr->K){
                 ptr->KEY[i]=ptr->KEY[i+1]; i++;
