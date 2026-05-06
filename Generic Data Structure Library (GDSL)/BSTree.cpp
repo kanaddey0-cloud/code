@@ -813,6 +813,7 @@ int main() {
     cout<<tree;
     std::cout << "\nTree (INORDER view):\n";
     tree.view(MODE::IN);
+    tree.M=MODE::
     std::cout << "\n\n";
 
     std::cout << "=== SIZE ===\n";

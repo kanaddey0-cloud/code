@@ -162,7 +162,6 @@ bool BTREE<D>::insert(D item){
         ptr=ptr->LINK[i];
     }
     if(ptr->K==O){ split(ptr,item,nullptr);
-
     }else{
         unsigned short n=ptr->K;
         while(n-- && n>=i){
@@ -188,14 +187,13 @@ void BTREE<D>::split(BTnode<D>* curr, D item, BTnode<D>* child){
     else if(i>n) for(int j=i-1; j>=n; j--){ std::swap(tmpK,curr->KEY[j]);
                                             std::swap(tmpL,curr->LINK[j+1]); } 
     int k=0;
-    node->LINK[k]=tmpL;
+    node->LINK[k]=tmpL;  if(tmpL) tmpL->P = node;
     while(n<O){
         node->KEY[k]=curr->KEY[n]; curr->KEY[n]=D();
         node->LINK[k+1]=curr->LINK[n+1]; curr->LINK[n+1]=nullptr;
         
         if(node->LINK[k+1]) node->LINK[k+1]->P=node;
-        
-        node->K++;      curr->K--;
+        node->K++;   curr->K--;
         k++; n++;
     }
 
@@ -204,12 +202,12 @@ void BTREE<D>::split(BTnode<D>* curr, D item, BTnode<D>* child){
         node2->KEY[0]=tmpK; node2->K++;
         node2->LINK[0]=curr; node2->LINK[1]=node;
         curr->P=node->P=node2;
-        ROOT=node2;
+        node2->P=nullptr; ROOT=node2;
     }
     else if(curr->P->K==O) split(curr->P,tmpK,node);
     else{
         BTnode<D>* currP=curr->P;
-        unsigned short n=currP->K -1;
+        int n=currP->K -1;
         while(n>=0 && tmpK<currP->KEY[n]){
             currP->KEY[n+1]=currP->KEY[n];
             currP->LINK[n+2]=currP->LINK[n+1]; 
@@ -219,7 +217,7 @@ void BTREE<D>::split(BTnode<D>* curr, D item, BTnode<D>* child){
         node->P=currP;
     }
 }
-                  
+                
 enum class DEL : uint8_t {
     // Internal operations------------------------------------(RT, IM)
  /*✔✔*/ IOP,   // Inorder Predecessor → replace with predecessor   ✔
@@ -252,20 +250,20 @@ void BTREE<D>::borrowLeftSibling(NTYPE NT, BTnode<D>* left, BTnode<D>* parent, B
                 for(int j=1; j<node->K; j++){
                     if(i<j) break;
                     std::swap(t,node->KEY[j]);
-                }}
+            }}
             node->KEY[0]=parent->KEY[l-1];
             parent->KEY[l-1]=left->KEY[left->K -1];
             left->KEY[--left->K]=D();
             return; 
 
         case NTYPE::IM :
-            for(int j=node->K -1; j>0; j--){ node->KEY[j]=node->KEY[j-1];
-                                             node->LINK[j+1]=node->LINK[j]; }
+            for(int j=node->K; j>0; j--){ node->KEY[j]=node->KEY[j-1];
+                                          node->LINK[j+1]=node->LINK[j]; }
             node->LINK[1]=node->LINK[0];
-            node->KEY[0]=parent->KEY[l-1];   node->LINK[0]=left->LINK[left->K];   node->K++;
-            parent->KEY[l-1]=left->KEY[left->K -1];
+            node->KEY[0]=parent->KEY[l-1];            node->LINK[0]=left->LINK[left->K];   node->K++;
+            parent->KEY[l-1]=left->KEY[left->K -1];   if(left->LINK[left->K]) left->LINK[left->K]->P=node;
             
-            left->LINK[left->K]=nullptr;     left->KEY[--left->K]=D();
+            left->LINK[left->K]=nullptr;   left->KEY[--left->K]=D();
             return;
     }
 }
@@ -285,12 +283,12 @@ void BTREE<D>::borrowRightSibling(NTYPE NT, BTnode<D>* node, BTnode<D>* parent, 
 
         case NTYPE::IM :
             node->KEY[node->K++]=parent->KEY[l]; node->LINK[node->K]=right->LINK[0];
-            parent->KEY[l]=right->KEY[0];
+            parent->KEY[l]=right->KEY[0];        if(right->LINK[0]) right->LINK[0]->P=node;
 
             int j; for(j=0; j<right->K-1; j++){ right->KEY[j]=right->KEY[j+1];
                                                 right->LINK[j]=right->LINK[j+1]; }
             right->LINK[j]=right->LINK[j+1];
-            right->LINK[right->K]=nullptr;      right->KEY[--right->K]=D();
+            right->LINK[right->K]=nullptr;      --right->K;
             return;
     }
 }
@@ -306,33 +304,40 @@ void BTREE<D>::mergeLeftSibling(NTYPE NT, BTnode<D>* left, BTnode<D>* parent, BT
             parent->KEY[--parent->K]=D(); 
 
             for(int j=0; j<node->K; j++) if(i!=j) left->KEY[left->K++]=node->KEY[j];
-            delete[] (char*)node;
+            delete[] (char*)node; N--;
             
             if(parent->K < (O/2)) fillMinimum(parent,parent->P);
             return;
 
         case NTYPE::IM :
             left->KEY[left->K++]=parent->KEY[l-1];
+            left->LINK[left->K]=node->LINK[0];
+            left->LINK[left->K]->P=left;
             for(int j=l-1; (j+1)<parent->K; j++){ parent->KEY[j]=parent->KEY[j+1];
                                                   parent->LINK[j+1]=parent->LINK[j+2]; }
             parent->LINK[parent->K]=nullptr;
             parent->KEY[--parent->K]=D(); 
 
-            for(int j=0; j<node->K; j++) left->KEY[left->K++]=node->KEY[j];
-            delete[] (char*)node;
-
+            for(int j=0; j<node->K; j++){ left->KEY[left->K++]=node->KEY[j];
+                                          left->LINK[left->K]=node->LINK[j+1];
+                                          left->LINK[left->K]->P=left; }
+            delete[] (char*)node; N--;
             if(parent->K < (O/2)) fillMinimum(parent,parent->P);
             return;
         
         case NTYPE::RT :
             left->KEY[left->K++]=parent->KEY[l-1];
-            delete[] (char*)parent;
+            left->LINK[left->K]=node->LINK[0];
+            left->LINK[left->K]->P=left;
+            delete[] (char*)parent; N--;
 
-            for(int j=0; j<node->K; j++) left->KEY[left->K++]=node->KEY[j];
-            delete[] (char*)node;
+            for(int j=0; j<node->K; j++){ left->KEY[left->K++]=node->KEY[j];
+                                          left->LINK[left->K]=node->LINK[j+1];
+                                          left->LINK[left->K]->P=left; }
+            delete[] (char*)node; N--;
+            left->P=nullptr;  ROOT=left;
             return;
     }
-    
 }
 
 template<typename D>
@@ -349,30 +354,38 @@ void BTREE<D>::mergeRightSibling(NTYPE NT, BTnode<D>* node, BTnode<D>* parent, B
             parent->KEY[--parent->K]=D(); 
 
             for(int j=0; j<right->K; j++) node->KEY[node->K++]=right->KEY[j];
-            delete[] (char*)right;
+            delete[] (char*)right; N--;
             
             if(parent->K < (O/2)) fillMinimum(parent,parent->P);
             return;
 
         case NTYPE::IM :
             node->KEY[node->K++]=parent->KEY[l];
+            node->LINK[node->K]=right->LINK[0];
+            node->LINK[node->K]->P=node;
             for(int j=l; (j+1)<parent->K; j++){ parent->KEY[j]=parent->KEY[j+1];
                                                 parent->LINK[j+1]=parent->LINK[j+2]; }
             parent->LINK[parent->K]=nullptr;
             parent->KEY[--parent->K]=D(); 
 
-            for(int j=0; j<right->K; j++) node->KEY[node->K++]=right->KEY[j];
-            delete[] (char*)right;
-            
+            for(int j=0; j<right->K; j++){ node->KEY[node->K++]=right->KEY[j];
+                                           node->LINK[node->K]=right->LINK[j+1]; 
+                                           node->LINK[node->K]->P=node; }
+            delete[] (char*)right; N--;
             if(parent->K < (O/2)) fillMinimum(parent,parent->P);
             return;
 
         case NTYPE::RT :
             node->KEY[node->K++]=parent->KEY[l];
-            delete[] (char*)parent;
+            node->LINK[node->K]=right->LINK[0];
+            node->LINK[node->K]->P=node;
+            delete[] (char*)parent; N--;
 
-            for(int j=0; j<right->K; j++) node->KEY[node->K++]=right->KEY[j];
-            delete[] (char*)right;
+            for(int j=0; j<right->K; j++){ node->KEY[node->K++]=right->KEY[j];
+                                           node->LINK[node->K]=right->LINK[j+1]; 
+                                           node->LINK[node->K]->P=node; }
+            delete[] (char*)right; N--;
+            node->P=nullptr;  ROOT=node;
             return;
     }
 }
@@ -474,6 +487,7 @@ void BTREE<D>::deletecase(NTYPE NT, BTnode<D>* node, unsigned short i , unsigned
             else 
                 if((node->P->LINK[l-1])->K > (node->P->LINK[l+1])->K) 
                     borrowLeftSibling(NT,node->P->LINK[l-1],node->P,node,l,i);
+
                 else if((node->P->LINK[l-1])->K < (node->P->LINK[l+1])->K)
                     borrowRightSibling(NT,node,node->P,node->P->LINK[l+1],l,i);
                 else
@@ -536,7 +550,7 @@ bool BTREE<D>::remove(D item){
 
     if(ptr==ROOT){
         if(ptr->LINK[0]){
-            deletecase(NTYPE::RT,ptr,i,l);
+            deletecase(NTYPE::RT,ptr,i);
         }else{
             while((i+1)<ptr->K){
                 ptr->KEY[i]=ptr->KEY[i+1]; i++;
@@ -546,13 +560,14 @@ bool BTREE<D>::remove(D item){
         return true;
     }
 
-    if(ptr->LINK[0]){
-        if(ptr->K==(O/2)){
+    if(ptr->LINK[0]){ 
+        deletecase(NTYPE::IM,ptr,i,l);
+        // if(ptr->K==(O/2)){
 
-        }else{}
+        // }else{}
     }else{
         if(ptr->K==(O/2)){
-            // deletecase(NTYPE::LF,ptr,i,l);
+            deletecase(NTYPE::LF,ptr,i,l);
         }else{
             while((i+1)<ptr->K){
                 ptr->KEY[i]=ptr->KEY[i+1]; i++;
@@ -563,32 +578,349 @@ bool BTREE<D>::remove(D item){
     return true;
 }
 
+#include <iostream>
 using namespace std;
+
 int main(){
-    // BTREE<int> T(6);   
 
-    // int arr[] = {10, 20, 30, 40, 50, 60, 5, 80};
+    cout << "\n===== HIDDEN BUG ZONE TEST =====\n";
 
-    // for(int x : arr){
-    //     std::cout << "\nInsert: " << x << "\n";
-    //     T.insert(x); 
-    //     T.viewBFS();
-    // }
+BTREE<int> T(4);
+
+// -----------------------------
+// STEP 1: Build controlled tree
+// (balanced but fragile layout)
+// -----------------------------
+int base[] = {
+    50,
+
+    20, 80,
+
+    10, 30, 60, 90,
+
+    5, 15, 25, 35,
+    55, 65, 75, 85,
+    95, 100
+};
+
+for(int x : base)
+    T.insert(x);
+
+cout << "\n===== INITIAL TREE =====\n";
+T.viewBFS();
 
 
+// =============================
+// 🔥 STAGE 1: FORCE BORROW EDGE CASE
+// =============================
+cout << "\n===== BORROW EDGE CASE =====\n";
 
-    BTREE<int> T(4);   // order = 6
+// removes from nodes with uneven siblings
+T.remove(5);     // left extreme
+T.remove(15);    // forces borrow from right sibling
+T.remove(25);    // middle-left imbalance
 
-    // Sequential insert
-    for(int i = 1; i <= 10; i++){
-        // std::cout << "\nInsert: " << i << "\n";
-        T.insert(i);
-    }    
-    T.viewBFS();
+// T.viewBFS();
 
-    // for(int i = 1; i <= 20; i++){
-    //     std::cout <<T.search(i)<< "\n";
-    // }
+
+// =============================
+// 🔥 STAGE 2: FORCE WRONG SIBLING CHOICE
+// =============================
+cout << "\n===== SIBLING CHOICE TEST =====\n";
+
+T.remove(55);   // left of right subtree
+T.remove(65);   // adjacent internal shift
+T.remove(75);   // forces decision: left or right borrow?
+
+// T.viewBFS();
+
+
+// // =============================
+// // 🔥 STAGE 3: FORCE MERGE CHAIN ACROSS LEVELS
+// // =============================
+cout << "\n===== CROSS-LEVEL MERGE =====\n";
+
+T.remove(10);
+T.remove(20);
+T.remove(30);
+T.remove(35);
+
+T.viewBFS();
+
+
+// =============================
+// 🔥 STAGE 4: ROOT SHRINK STRESS
+// =============================
+cout << "\n===== ROOT SHRINK STRESS =====\n";
+
+T.remove(50); //T.viewBFS();
+T.remove(60); T.viewBFS();
+T.remove(80); T.viewBFS();
+T.remove(90);
+
+T.viewBFS();
+
+
+// =============================
+// 🔥 STAGE 5: FINAL CASCADING COLLAPSE
+// =============================
+// cout << "\n===== FINAL CASCADE WIPE =====\n";
+
+// int wipe[] = {
+//     2, 5, 7, 12, 15, 18, 22, 25, 28,
+//     32, 35, 38, 55, 58, 60, 62, 65,
+//     68, 70, 72, 75, 78, 80, 82, 85,
+//     88, 90, 92, 95, 98, 100
+// };
+
+// for(int x : wipe){
+//     T.remove(x); cout<<"\n-----------"<<x<<"\n";
+//     T.viewBFS();
+// }
+// cout << "\n===== TEST COMPLETE =====\n";
 
     return 0;
 }
+
+// int main() {
+
+//     BTREE<int> T(4);
+
+//     // ------------------------------
+//     // STEP 1: Build tree
+//     // ------------------------------
+//     int arr[] = {
+//         50,
+
+//         20, 80,
+
+//         10, 30, 60, 90,
+
+//         5, 15, 25, 35,
+//         55, 65, 75, 85,
+//         95, 100,
+
+//         2, 7, 12, 18,
+//         22, 28, 32, 38,
+//         52, 58, 62, 68,
+//         72, 78, 82, 88,
+//         92, 98
+//     };
+
+//     for(int x : arr)
+//         T.insert(x);
+
+//     cout << "\n===== INITIAL TREE =====\n";
+//     T.viewBFS();
+
+//     // ------------------------------
+//     // STEP 2: Leaf deletions
+//     // ------------------------------
+//     cout << "\n===== LEAF DELETION TEST =====\n";
+//     T.remove(7);
+//     T.remove(18);
+//     T.viewBFS();
+
+//     // ------------------------------
+//     // STEP 3: Internal deletions
+//     // ------------------------------
+//     cout << "\n===== INTERNAL NODE DELETION =====\n";
+//     T.remove(50);
+//     T.remove(20);
+//     T.remove(80);
+//     T.viewBFS();
+
+//     // ------------------------------
+//     // STEP 4: Borrow / merge stress
+//     // ------------------------------
+//     cout << "\n===== BORROW + MERGE TEST =====\n";
+//     T.remove(2);
+//     T.remove(100);
+//     T.remove(5);
+//     T.remove(10);
+//     T.viewBFS();
+
+//     // ------------------------------
+//     // STEP 5: Cascading underflow
+//     // ------------------------------
+//     cout << "\n===== CASCADING UNDERFLOW TEST =====\n";
+//     T.remove(15);
+//     T.remove(25);
+//     T.remove(30);
+//     T.remove(35);
+//     T.viewBFS();
+
+
+//     // ------------------------------
+//     // STEP 6: Root shrink stress
+//     // (safe controlled deletion)
+//     // ------------------------------
+//     cout << "\n===== ROOT SHRINK TEST =====\n";
+
+//     int shrink[] = {
+//         60, 65, 70, 75,
+//         85, 90, 95, 98,
+//         55, 58, 62, 68,
+//         72, 78, 82, 88, 92,
+//         22, 28, 32, 38
+//     };
+
+//     for(int x : shrink)
+//         T.remove(x);
+
+//     T.viewBFS();
+
+//     return 0;
+// }
+
+// using namespace std;
+
+// int main(){
+
+//     BTREE<int> T(4);   // order = 4 (max keys = 4)
+
+// // ---------------------------
+// // Build a dense balanced tree
+// // ---------------------------
+// int arr[] = {
+//     50,
+
+//     20, 80,
+
+//     10, 30, 60, 90,
+
+//     5, 15, 25, 35,
+//     55, 65, 75, 85,
+//     95, 100
+// };
+
+// for(int x : arr){
+//     T.insert(x);
+// }
+
+// cout << "\n===== INITIAL TREE =====\n";
+// T.viewBFS();
+
+
+// // ======================================================
+// // INTERNAL NODE DELETION TEST CASES
+// // ======================================================
+
+// cout << "\n\n===== DELETE INTERNAL KEYS =====\n";
+
+// // Case 1: internal node with both children (force successor swap)
+// cout << "\n--- Delete 50 (root internal) ---\n";
+// T.remove(50);
+// T.viewBFS();
+
+
+// // Case 2: internal node causing successor path borrow/merge
+// cout << "\n--- Delete 20 (internal, left-heavy subtree) ---\n";
+// T.remove(20);
+// T.viewBFS();
+
+
+// // Case 3: internal deletion triggering predecessor replacement
+// cout << "\n--- Delete 80 (internal, right subtree) ---\n";
+// T.remove(80);
+// T.viewBFS();
+
+
+// // Case 4: cascading underflow after internal deletion
+// cout << "\n--- Delete 30 (forces merge chain) ---\n";
+// T.remove(30);
+// T.viewBFS();
+
+
+// // Case 5: deep internal node stress
+// cout << "\n--- Delete 60 (deep internal case) ---\n";
+// T.remove(60);
+// T.viewBFS();
+
+
+// // Case 6: cleanup stress
+// cout << "\n--- Delete 90 ---\n";
+// T.remove(90);
+// T.viewBFS();
+
+    // BTREE<int> T(4);
+
+    // // Build a balanced tree
+    // int arr[] = {
+    //     10,20,30,40,50,60,70,80,90,100,
+    //     5,15,25,35,45,55,65,75,85,95
+    // };
+
+    // for(int x : arr){
+    //     T.insert(x); // T.viewBFS(); cout<<"--------------";
+    // }
+
+    // cout << "\nInitial Tree:\n";
+    // T.viewBFS();
+
+    // // ROOT deletions (important sequence)
+    // int del[] = {50, 60, 55, 65, 70, 75, 80};
+
+    // for(int x : del){
+    //     cout << "\n\nDelete: " << x << "\n";
+    //     T.remove(x);
+    // }
+    //     T.viewBFS();
+//     return 0;
+// }
+
+// using namespace std;
+// int main(){
+
+//     BTREE<int> T(4);   // order = 4 (min = 1)
+
+//     // Insert elements
+//     for(int i = 1; i <= 20; i++){
+//         T.insert(i);
+//     }
+
+//     cout << "\nInitial Tree (BFS):\n";
+//     T.viewBFS(true);
+
+
+//     // 🔴 Delete ONLY leaf-heavy values (rightmost side)
+//     int delArr[] = {20, 19, 18, 17, 16};
+
+//     for(int x : delArr){
+//         cout << "\n\nDelete: " << x << "\n";
+//         T.remove(x);
+//         T.viewBFS(true);
+//     }
+
+//     return 0;
+// }
+
+// using namespace std;
+// int main(){
+//     // BTREE<int> T(6);   
+
+//     // int arr[] = {10, 20, 30, 40, 50, 60, 5, 80};
+
+//     // for(int x : arr){
+//     //     std::cout << "\nInsert: " << x << "\n";
+//     //     T.insert(x); 
+//     //     T.viewBFS();
+//     // }
+
+
+
+//     BTREE<int> T(4);   // order = 6
+
+//     // Sequential insert
+//     for(int i = 1; i <= 20; i++){
+//         // std::cout << "\nInsert: " << i << "\n";
+//         T.insert(i);
+//     }    
+//     T.viewBFS();
+
+//     // for(int i = 1; i <= 20; i++){
+//     //     std::cout <<T.search(i)<< "\n";
+//     // }
+
+//     return 0;
+// }

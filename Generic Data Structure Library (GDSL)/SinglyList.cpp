@@ -430,9 +430,9 @@ int main() {
     // std::cout << "\n\n";
 
     // std::cout << "=== CONST RANGE FOR STYLE ===\n";
-    // for(const auto &x : list) {
-    //     std::cout << x << " ";
-    // }
+    for(const auto &x : list) {
+        std::cout << x << " ";
+    }
     // std::cout << "\n\n";
 
     // std::cout << "=== OUT OF BOUND TEST ===\n";
