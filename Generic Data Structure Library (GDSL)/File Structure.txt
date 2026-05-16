@@ -1,3 +1,180 @@
+C:\MinGW\include\GDSL>tree /f
+Folder PATH listing for volume Windows
+Volume serial number is 5655-2F2B
+C:.
+│   g++
+│   test.c
+│   test.exe
+│   test.py
+│
+├───bin
+│       gdsl.dll
+│
+├───c_api
+│   ├───include
+│   │       gdsl_avl.h
+│   │       gdsl_bst.h
+│   │       gdsl_btree.h
+│   │       GDSL_C.h
+│   │       gdsl_config.h
+│   │       gdsl_list.h
+│   │       gdsl_mode.h
+│   │       gdsl_queue.h
+│   │       gdsl_stack.h
+│   │
+│   └───src
+│           gdsl_avl.cpp
+│           gdsl_bst.cpp
+│           gdsl_btree.cpp
+│           gdsl_list.cpp
+│           gdsl_queue.cpp
+│           gdsl_stack.cpp
+│
+├───include
+│   ├───Linear
+│   │   │   Stack.hpp
+│   │   │
+│   │   ├───List
+│   │   │       SinglyList.hpp
+│   │   │
+│   │   └───Queue
+│   │           SimpleQueue.hpp
+│   │
+│   └───NonLinear
+│       └───Tree
+│               AdelsonVelskyLandisTree.hpp
+│               BalancedTree.hpp
+│               BinarySearchTree.hpp
+│               Mode.hpp
+│
+├───lib
+│       libgdsl.a
+│
+└───src
+    ├───Linear
+    │   │   Stack.tpp
+    │   │
+    │   ├───List
+    │   │       SinglyList.tpp
+    │   │
+    │   └───Queue
+    │           SimpleQueue.tpp
+    │
+    └───NonLinear
+        └───Tree
+                AdelsonVelskyLandisTree.tpp
+                BalancedTree.tpp
+                BinarySearchTree.tpp
+
+
+C:\MinGW\include\GDSL>
+
+
+___________________________________________________________________________________________________________
+imagins structure
+
+C:\
+└── MinGW\
+    │
+    ├── include\
+    │   │
+    │   ├── GDSLlist.hpp
+    │   ├── GDSLstack.hpp
+    │   ├── GDSLqueue.hpp
+    │   ├── GDSLbst.hpp
+    │   ├── GDSLavl.hpp
+    │   ├── GDSLbtree.hpp
+    │   │
+    │   ├── GDSL.hpp         <-- Full C++ master include
+    │   ├── GDSL_C.h         <-- Full C master include
+    │   │
+    │   └── GDSL/
+    │       ├── include/
+    │       │   ├── Linear/
+    │       │   │   ├── List/
+    │       │   │   │   └── SinglyList.hpp
+    │       │   │   ├── Queue/
+    │       │   │   │   └── SimpleQueue.hpp
+    │       │   │   └── Stack.hpp
+    │       │   │
+    │       │   └── Non Linear/
+    │       │       └── Tree/
+    │       │           ├── AdelsonVelskyLandisTree.hpp
+    │       │           ├── BalancedTree.hpp
+    │       │           ├── BinarySearchTree.hpp
+    │       │           └── Mode.hpp
+    │       │   
+    │       │   
+    │       ├── src/
+    │       │   ├── Linear/
+    │       │   │   ├── List/
+    │       │   │   │   └── SinglyList.tpp
+    │       │   │   ├── Queue/
+    │       │   │   │   └── SimpleQueue.tpp
+    │       │   │   └── Stack.tpp
+    │       │   └── Non Linear/
+    │       │       └── Tree/
+    │       │           ├── AdelsonVelskyLandisTree.tpp
+    │       │           ├── BalancedTree.tpp
+    │       │           └── BinarySearchTree.tpp
+    │       │
+    │       │
+    │       ├── c_api/                            <-- C Interface Layer
+    │       │   │
+    │       │   ├── include/
+    │       │   │   ├── gdsl_list.h
+    │       │   │   ├── gdsl_stack.h
+    │       │   │   ├── gdsl_queue.h
+    │       │   │   ├── gdsl_bst.h
+    │       │   │   ├── gdsl_avl.h
+    │       │   │   └── gdsl_btree.h
+    │       │   │
+    │       │   └── src/
+    │       │       ├── gdsl_list.cpp
+    │       │       ├── gdsl_stack.cpp
+    │       │       ├── gdsl_queue.cpp
+    │       │       ├── gdsl_bst.cpp
+    │       │       ├── gdsl_avl.cpp
+    │       │       └── gdsl_btree.cpp
+    │       │
+    │       │
+    │       ├── bindings/                         <-- Future Language Bindings
+    │       │   ├── python/
+    │       │   │   │
+    │       │   │   ├── setup.py
+    │       │   │   ├── pyproject.toml
+    │       │   │   ├── README.md
+    │       │   │   │
+    │       │   │   └── gdsl
+    │       │   │       │
+    │       │   │       ├── __init__.py
+    │       │   │       ├── stack.py
+    │       │   │       ├── queue.py
+    │       │   │       ├── bst.py
+    │       │   │       ├── avl.py
+    │       │   │       │
+    │       │   │       └── _native
+    │       │   │           └── gdsl.dll
+    │       │   ├── java/
+    │       │   ├── rust/
+    │       │   └── csharp/
+    │       │
+    │       │
+    │       └── examples/
+    │            ├── cpp/
+    │            ├── c/
+    │            └── python/
+    │    
+    ├── lib\
+    │   └── libgdsl.a                            <-- Static library
+    │
+    └── bin\
+        └── libgdsl.dll                          <-- Shared library
+
+
+___________________________________________________________________________________________________________
+
+
 C:\
 └── MinGW\
     └── include\
@@ -40,7 +217,7 @@ C:\
             │   │   └── HashSet.hpp
             │   │
             │   └── Advanced/
-            │       ├── DisjointSet.hpp
+            │   │   ├── DisjointSet.hpp
             │       ├── SegmentTree.hpp
             │       └── FenwickTree.hpp
             │
@@ -90,6 +267,8 @@ C:\
             ├── GDSLlist.hpp        ┬
             ├── GDSLstack.hpp       │ aggregated headers
             ├── GDSLqueue.hpp       ┴
+            ├── GDSLavl.hpp
+            ├── GDSLbst.hpp
             │                                                              
             ├── GDSLtree.hpp        ┬
             ├── GDSLgraph.hpp       │ aggregated headers

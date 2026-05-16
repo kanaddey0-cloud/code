@@ -6,6 +6,7 @@
 #include <GDSLtree.hpp>
 #include <GDSLbst.hpp>
 #include <GDSLavl.hpp>
+#include <GDSLbtree.hpp>
 
 template<typename D>
 std::ostream& operator<<(std::ostream& out, const node<D>& n){

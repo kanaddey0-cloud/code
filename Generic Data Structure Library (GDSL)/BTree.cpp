@@ -46,7 +46,9 @@ protected:
 public:
     BTREE(unsigned short order);
     ~BTREE();
+    size_t size() const { return N; }
     void viewBFS(bool f=false);
+    void viewDFS(bool f=false);
     bool search(D item);
     bool insert(D item);
     bool remove(D item);
@@ -130,7 +132,22 @@ void BTREE<D>::viewBFS(bool f){
     while(!Q.empty()){
         tmp=Q.dequeue();
         for(int i=0; i<=tmp->K; i++) if(tmp->LINK[i]) Q.enqueue(tmp->LINK[i]);
-        print_BTnode(tmp,f); std::cout<<"\n\n";
+        print_BTnode(tmp,f);  
+        if(!Q.empty()) std::cout<<"\n\n";
+    }
+}
+
+template<typename D>
+void BTREE<D>::viewDFS(bool f){
+    if(!ROOT){ std::cout<<"Tree is empty"; return; }
+    STACK<BTnode<D>*> S; 
+    BTnode<D>* tmp;
+    S.push(ROOT); std::cout<<"\n";
+    while(!S.empty()){
+        tmp=S.pop();
+        for(int i=0; i<=tmp->K; i++) if(tmp->LINK[i]) S.push(tmp->LINK[i]);
+        print_BTnode(tmp,f); 
+        if(!S.empty()) std::cout<<"\n\n";
     }
 }
 
@@ -217,28 +234,6 @@ void BTREE<D>::split(BTnode<D>* curr, D item, BTnode<D>* child){
         node->P=currP;
     }
 }
-                
-enum class DEL : uint8_t {
-    // Internal operations------------------------------------(RT, IM)
- /*✔✔*/ IOP,   // Inorder Predecessor → replace with predecessor   ✔
- /*✔✔*/ IOS,   // Inorder Successor   → replace with successor     ✔
- /*✔*/ MLR,   // Merge Left+Right    → merge children      
-
-    // Borrow operations--------------------------------------(IM, LF)
- /*✔*/ BLS,   // Borrow Left Sibling  → borrow from left       
- /*✔*/ BRS,   // Borrow Right Sibling → borrow from right   
-
-    // Merge with parent direction----------------------------(IM, LF)
- /*✔*/ MLS,   // Merge Left Parent  → merge via left parent side  
- /*✔*/ MRS,   // Merge Right Parent → merge via right parent side 
-
-    // Root / level handling----------------------------------(RT)
-    SKH,   // Shrink Height → root collapse
-    LPR,   // Level Propagate Repair → recursive fix 
-
-    // Optional / safety
-    NONE   // No action (any)
-};
 
 template<typename D>
 void BTREE<D>::borrowLeftSibling(NTYPE NT, BTnode<D>* left, BTnode<D>* parent, BTnode<D>* node, unsigned short l, unsigned short i){
@@ -430,42 +425,45 @@ unsigned short BTREE<D>::link(BTnode<D>* node, BTnode<D>* parent){
 
 template<typename D>
 void BTREE<D>::fillMinimum(BTnode<D>* node, BTnode<D>* parent){
-    if(!node || node==ROOT) return;
-    
-    unsigned short l=link(node,parent);
-    
-    if(parent->K==1){
-        if(l)
-            if((parent->LINK[l-1])->K > (O/2)) 
-                borrowLeftSibling(NTYPE::IM,parent->LINK[l-1],parent,node,l);
-            else 
-                mergeLeftSibling(NTYPE::RT,parent->LINK[l-1],parent,node,l);
-        else
-            if((parent->LINK[l+1])->K > (O/2)) 
-                borrowRightSibling(NTYPE::IM,node,parent,parent->LINK[l+1],l);
-            else 
-                mergeRightSibling(NTYPE::RT,node,parent,parent->LINK[l+1],l);       
+    if(!node || (node==ROOT && node->K>0)) return;
+    else if(node==ROOT && node->K==0 && node->LINK[0]){
+        ROOT=node->LINK[0];
+        ROOT->P=nullptr; delete[] (char*)node;
     }else{
-        if(!l)
-            if((parent->LINK[l+1])->K > (O/2)) 
-                borrowRightSibling(NTYPE::IM,node,parent,parent->LINK[l+1],l);
-            else 
-                mergeRightSibling(NTYPE::IM,node,parent,parent->LINK[l+1],l);
-        else if(l==parent->K)
-            if((parent->LINK[l-1])->K > (O/2)) 
-                borrowLeftSibling(NTYPE::IM,parent->LINK[l-1],parent,node,l);
-            else 
-                mergeLeftSibling(NTYPE::IM,parent->LINK[l-1],parent,node,l);
-        else 
-            if((parent->LINK[l-1])->K > (parent->LINK[l+1])->K) 
-                borrowLeftSibling(NTYPE::IM,parent->LINK[l-1],parent,node,l);
-            else if((parent->LINK[l-1])->K < (parent->LINK[l+1])->K) 
-                borrowRightSibling(NTYPE::IM,node,parent,parent->LINK[l+1],l);
+        unsigned short l=link(node,parent);
+        if(parent->K==1){
+            if(l)
+                if((parent->LINK[l-1])->K > (O/2)) 
+                    borrowLeftSibling(NTYPE::IM,parent->LINK[l-1],parent,node,l);
+                else 
+                    mergeLeftSibling(NTYPE::RT,parent->LINK[l-1],parent,node,l);
             else
+                if((parent->LINK[l+1])->K > (O/2)) 
+                    borrowRightSibling(NTYPE::IM,node,parent,parent->LINK[l+1],l);
+                else 
+                    mergeRightSibling(NTYPE::RT,node,parent,parent->LINK[l+1],l);       
+        }else{
+            if(!l)
+                if((parent->LINK[l+1])->K > (O/2)) 
+                    borrowRightSibling(NTYPE::IM,node,parent,parent->LINK[l+1],l);
+                else 
+                    mergeRightSibling(NTYPE::IM,node,parent,parent->LINK[l+1],l);
+            else if(l==parent->K)
                 if((parent->LINK[l-1])->K > (O/2)) 
                     borrowLeftSibling(NTYPE::IM,parent->LINK[l-1],parent,node,l);
                 else 
                     mergeLeftSibling(NTYPE::IM,parent->LINK[l-1],parent,node,l);
+            else 
+                if((parent->LINK[l-1])->K > (parent->LINK[l+1])->K) 
+                    borrowLeftSibling(NTYPE::IM,parent->LINK[l-1],parent,node,l);
+                else if((parent->LINK[l-1])->K < (parent->LINK[l+1])->K) 
+                    borrowRightSibling(NTYPE::IM,node,parent,parent->LINK[l+1],l);
+                else
+                    if((parent->LINK[l-1])->K > (O/2)) 
+                        borrowLeftSibling(NTYPE::IM,parent->LINK[l-1],parent,node,l);
+                    else 
+                        mergeLeftSibling(NTYPE::IM,parent->LINK[l-1],parent,node,l);
+        }
     }
 }
 
@@ -516,22 +514,6 @@ void BTREE<D>::deletecase(NTYPE NT, BTnode<D>* node, unsigned short i , unsigned
             else
                 inorderPredecessor(pred,node,i,true);
             break;
-    
-        // case NTYPE::RT :
-        //     BTnode<D>* pred=node->LINK[i];
-        //     while(pred->LINK[0]) pred=pred->LINK[pred->K]; 
-        //     if(pred->K > (O/2)) return IOP;
-
-        //     BTnode<D>* succ=node->LINK[i+1];
-        //     while(succ->LINK[0]) succ=succ->LINK[0]; 
-        //     if(succ->K > (O/2)) return IOS;
-
-        //     if(pred == node->LINK[i]) return MLR;
-        //     else
-        //         if(node->K == 1) return SKH;
-        //         else return LPR;
-
-        //     break;
     }
 }
 
@@ -556,15 +538,13 @@ bool BTREE<D>::remove(D item){
                 ptr->KEY[i]=ptr->KEY[i+1]; i++;
             }
             ptr->KEY[i]=D(); ptr->K--;
+
+            if(ROOT->K==0){ delete[] (char*)ROOT; ROOT=nullptr; }
         }
         return true;
     }
 
-    if(ptr->LINK[0]){ 
-        deletecase(NTYPE::IM,ptr,i,l);
-        // if(ptr->K==(O/2)){
-
-        // }else{}
+    if(ptr->LINK[0]){ deletecase(NTYPE::IM,ptr,i,l);
     }else{
         if(ptr->K==(O/2)){
             deletecase(NTYPE::LF,ptr,i,l);
@@ -581,89 +561,175 @@ bool BTREE<D>::remove(D item){
 #include <iostream>
 using namespace std;
 
-int main(){
+int main() {
 
-    cout << "\n===== HIDDEN BUG ZONE TEST =====\n";
+    BTREE<int> T(4);
 
-BTREE<int> T(4);
+    // =========================
+    // PHASE 1: COMPLEX INSERT
+    // =========================
+    cout << "\n===== COMPLEX INSERT PHASE =====\n";
 
-// -----------------------------
-// STEP 1: Build controlled tree
-// (balanced but fragile layout)
-// -----------------------------
-int base[] = {
-    50,
+    int insertPhase[] = {
+        50, 20, 70, 10, 30, 60, 80,
+        5, 15, 25, 35, 55, 65, 75, 85,
+        2, 7, 12, 18, 22, 28, 32, 38,
+        52, 58, 62, 68, 72, 78, 82, 88,
+        90, 95, 98, 100
+    };
 
-    20, 80,
-
-    10, 30, 60, 90,
-
-    5, 15, 25, 35,
-    55, 65, 75, 85,
-    95, 100
-};
-
-for(int x : base)
-    T.insert(x);
-
-cout << "\n===== INITIAL TREE =====\n";
-T.viewBFS();
+    for(int x : insertPhase) {
+        cout << "insert " << x << endl;
+        T.insert(x);
+    }
+    T.viewBFS();
 
 
-// =============================
-// 🔥 STAGE 1: FORCE BORROW EDGE CASE
-// =============================
-cout << "\n===== BORROW EDGE CASE =====\n";
+    // =========================
+    // PHASE 2: COMPLEX DELETE
+    // =========================
+    cout << "\n\n===== COMPLEX DELETE PHASE =====\n";
 
-// removes from nodes with uneven siblings
-T.remove(5);     // left extreme
-T.remove(15);    // forces borrow from right sibling
-T.remove(25);    // middle-left imbalance
+    int deletePhase[] = {
+        5, 7, 12, 15, 18, 22, 25, 28,
+        30, 32, 35, 38,
+        50, 52, 55, 58,
+        60, 62, 65, 68,
+        70, 72, 75, 78,
+        80, 82, 85, 88,
+        90, 95, 98, 100
+    };
 
+    for(int x : deletePhase) {
+        cout << "delete " << x << endl;
+        T.remove(x);
+    }
+    T.viewBFS();
+
+
+    // =========================
+    // PHASE 3: REBUILD TREE
+    // =========================
+    cout << "\n\n===== REBUILD AFTER COLLAPSE =====\n";
+
+    int rebuild[] = {
+        40, 45, 42, 44, 41,
+        46, 47, 43, 49,
+        39, 37, 36, 34, 33
+    };
+
+    for(int x : rebuild) {
+        cout << "insert " << x << endl;
+        T.insert(x);
+    }
+    T.viewBFS();
+
+
+    // =========================
+    // PHASE 4: FINAL WIPE
+    // =========================
+    cout << "\n\n===== FINAL CASCADE WIPE =====\n";
+
+    int finalWipe[] = {
+        41, 42, 43, 44, 45,
+        46, 47, 49, 40,
+        39, 37, 36, 34, 33
+    };
+
+    for(int x : finalWipe) {
+        cout << "delete " << x << endl;
+        T.remove(x);
+    }
+    T.viewBFS();
+
+    cout << "\n\n===== TEST COMPLETE =====\n";
+
+    return 0;
+}
+
+// int main(){
+
+//     cout << "\n===== HIDDEN BUG ZONE TEST =====\n";
+
+// BTREE<int> T(4);
+
+// // -----------------------------
+// // STEP 1: Build controlled tree
+// // (balanced but fragile layout)
+// // -----------------------------
+// int base[] = {
+//     50,
+
+//     20, 80,
+
+//     10, 30, 60, 90,
+
+//     5, 15, 25, 35,
+//     55, 65, 75, 85,
+//     95, 100
+// };
+
+// for(int x : base)
+//     T.insert(x);
+
+// cout << "\n===== INITIAL TREE =====\n";
 // T.viewBFS();
 
 
-// =============================
-// 🔥 STAGE 2: FORCE WRONG SIBLING CHOICE
-// =============================
-cout << "\n===== SIBLING CHOICE TEST =====\n";
+// // =============================
+// // 🔥 STAGE 1: FORCE BORROW EDGE CASE
+// // =============================
+// cout << "\n===== BORROW EDGE CASE =====\n";
 
-T.remove(55);   // left of right subtree
-T.remove(65);   // adjacent internal shift
-T.remove(75);   // forces decision: left or right borrow?
+// // removes from nodes with uneven siblings
+// T.remove(5);     // left extreme
+// T.remove(15);    // forces borrow from right sibling
+// T.remove(25);    // middle-left imbalance
+
+// // T.viewBFS();
+
+
+// // =============================
+// // 🔥 STAGE 2: FORCE WRONG SIBLING CHOICE
+// // =============================
+// cout << "\n===== SIBLING CHOICE TEST =====\n";
+
+// T.remove(55);   // left of right subtree
+// T.remove(65);   // adjacent internal shift
+// T.remove(75);   // forces decision: left or right borrow?
+
+// // T.viewBFS();
+
+
+// // // =============================
+// // // 🔥 STAGE 3: FORCE MERGE CHAIN ACROSS LEVELS
+// // // =============================
+// cout << "\n===== CROSS-LEVEL MERGE =====\n";
+
+// T.remove(10); T.viewBFS();
+// T.remove(20); T.viewBFS();
+// T.remove(30); T.viewBFS();
+// T.remove(35);
+
+// // T.viewBFS();
+
+
+// // =============================
+// // 🔥 STAGE 4: ROOT SHRINK STRESS
+// // =============================
+// cout << "\n===== ROOT SHRINK STRESS =====\n";
+
+// T.remove(50); //T.viewBFS();
+// T.remove(60); T.viewBFS();
+// T.remove(80); T.viewBFS();
+// T.remove(90);
 
 // T.viewBFS();
 
 
 // // =============================
-// // 🔥 STAGE 3: FORCE MERGE CHAIN ACROSS LEVELS
+// // 🔥 STAGE 5: FINAL CASCADING COLLAPSE
 // // =============================
-cout << "\n===== CROSS-LEVEL MERGE =====\n";
-
-T.remove(10);
-T.remove(20);
-T.remove(30);
-T.remove(35);
-
-T.viewBFS();
-
-
-// =============================
-// 🔥 STAGE 4: ROOT SHRINK STRESS
-// =============================
-cout << "\n===== ROOT SHRINK STRESS =====\n";
-
-T.remove(50); //T.viewBFS();
-T.remove(60); T.viewBFS();
-T.remove(80); T.viewBFS();
-T.remove(90);
-
-T.viewBFS();
-
-
-// =============================
-// 🔥 STAGE 5: FINAL CASCADING COLLAPSE
-// =============================
 // cout << "\n===== FINAL CASCADE WIPE =====\n";
 
 // int wipe[] = {
@@ -675,12 +741,13 @@ T.viewBFS();
 
 // for(int x : wipe){
 //     T.remove(x); cout<<"\n-----------"<<x<<"\n";
-//     T.viewBFS();
+//     if(x==85 || x==95 || x==100) T.viewBFS();
 // }
+// // T.viewBFS();
 // cout << "\n===== TEST COMPLETE =====\n";
 
-    return 0;
-}
+//     return 0;
+// }
 
 // int main() {
 
