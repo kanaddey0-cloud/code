@@ -300,12 +300,27 @@
 
 #include <stdio.h>
 
+void fun(int *p){
+    (*p)++;
+}
+
 int main() {
-    int a=0, b=1, c;
-    for(int i=0; i<10; i++){
-        printf("%d\n",a);
-        c=a+b;
-        a=b; b=c;
-    }
+
+    int a=10; 
+    printf("%d\n",a);
+
+    fun(&a);
+    printf("%d\n",a);
+
+
+//    int arr[2][2]={{1,2},{3,4}};
+
+//     int arr2[2]={1,2};
+//    int (*p)[2]=&arr2;//1d pointer
+//    int *f=arr2;
+//    printf("%d\n",**(p));
+
+//    p=arr;//1d pointer
+//    printf("%d",p[0][0]);
     return 0;
 }

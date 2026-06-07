@@ -60,7 +60,7 @@
 #     echo "Meow"
 # fi
 # y=5; z=1
-# if [ $(( x > y  == z )) ]; then
+# if (( x > y  == z )); then   # if [ $(( x > y  == z )) ]; then
 #     echo "Equal"
 # fi
 
@@ -99,11 +99,71 @@
 #     echo $word
 # done
 
-for file in $(ls); do
-    echo $file
-done
+# for file in $(ls); do
+#     echo $file
+# done
 
 # for i in $(seq 1 5); do
 #     echo $i
 # done
 
+
+# Funtion
+
+# test() {
+#     x=10          # No print
+#     local y=20    # No print
+
+#     # $((x+1))      # No print
+
+#     echo x        # Print text x
+#     echo $x       # Print value of x
+#     echo $y       # Print value of y
+
+#     echo $((x+y)) # Print calculation result
+# }
+# rult=$(test)
+# echo $rult
+# # test
+
+# mew(){
+
+# }
+
+echo -----
+
+test() {
+    local x=10
+    echo $x
+}
+test
+
+echo $x
+
+square() {
+    echo $(($1 * $1))
+}
+square 5
+# result=$(square 5)
+# echo k-$result
+
+greet() {
+    echo "Hello"
+}
+msg=$(greet)
+echo "k$msg"
+
+check() {
+    if ((0 == 0)); then
+        return 7
+    fi
+    return 4
+}
+check
+echo $?
+
+# bash demo.sh A B C
+echo $0 $1 $2 $3
+echo $#
+echo $@
+echo $$

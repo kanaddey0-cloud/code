@@ -13,25 +13,25 @@
 # lst_chars = a5.tolist()       # Convert to list of characters
 # print(lst_chars)
 
-from array import array
+# from array import array
 
-arr2D = [
-    array('i', [1, 2, 3]),
-    array('i', [4, 5, 6]),
-    array('i', [7, 8, 9])
-]
+# arr2D = [
+#     array('i', [1, 2, 3]),
+#     array('i', [4, 5, 6]),
+#     array('i', [7, 8, 9])
+# ]
 
-print(arr2D[1][2])  # 6
-print(arr2D[1])  # array('i', [4, 5, 6])
+# print(arr2D[1][2])  # 6
+# print(arr2D[1])  # array('i', [4, 5, 6])
 
-import numpy as np
+# import numpy as np
 
-arr = np.array([
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 9]
-])
+# arr = np.array([
+#     [1, 2, 3],
+#     [4, 5, 6],
+#     [7, 8, 9]
+# ])
 
-print(arr[1][2])  # 6
-print(arr[1])  # [4 5 6]
-print(dir(arr))
+# print(arr[1][2])  # 6
+# print(arr[1])  # [4 5 6]
+# print(dir(arr))

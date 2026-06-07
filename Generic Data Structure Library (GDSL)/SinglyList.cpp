@@ -379,7 +379,7 @@ int main() {
     list.insert(40);
     list.insert(50);
 
-    cout<<list;
+    // cout<<list;
     std::cout << "\n";
     list.view();
     std::cout << "\n\n";
