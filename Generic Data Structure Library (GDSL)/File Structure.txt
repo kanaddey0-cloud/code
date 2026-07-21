@@ -1,77 +1,49 @@
-C:\MinGW\include\GDSL>tree /f
-Folder PATH listing for volume Windows
-Volume serial number is 5655-2F2B
-C:.
-│   g++
-│   test.c
-│   test.exe
-│   test.py
+
+GDSL
 │
-├───bin
-│       gdsl.dll
+├── Linear
+│   ├── Array
+│   ├── List
+│   │   ├── SinglyList (Dup)
+│   │   ├── DoublyCircularList
+│   │   └── SkipList @
+│   ├── Stack
+│   └── Queue
+│       ├── SimpleQueue
+│       ├── CircularQueue
+│       ├── Deque
+│       └── PriorityQueue
 │
-├───c_api
-│   ├───include
-│   │       gdsl_avl.h
-│   │       gdsl_bst.h
-│   │       gdsl_btree.h
-│   │       GDSL_C.h
-│   │       gdsl_config.h
-│   │       gdsl_list.h
-│   │       gdsl_mode.h
-│   │       gdsl_queue.h
-│   │       gdsl_stack.h
+├── NonLinear
+│   ├── Tree
+│   │   ├── BinaryTree
+│   │   ├── BinarySearchTree
+│   │   ├── AVL
+│   │   ├── BinaryHeap
+│   │   ├── FibonacciHeap @ (advanced priority queue)
+│   │   ├── Splay
+│   │   ├── Trie
+│   │   ├── RTree @
+│   │   ├── SuffixTree @
+│   │   ├── BTree
+│   │   └── BPlusTree
 │   │
-│   └───src
-│           gdsl_avl.cpp
-│           gdsl_bst.cpp
-│           gdsl_btree.cpp
-│           gdsl_list.cpp
-│           gdsl_queue.cpp
-│           gdsl_stack.cpp
+│   └── Graph
+│       ├── DirectedGraph
+│       ├── UndirectedGraph
+│       ├── WeightedDirectedGraph
+│       └── WeightedUndirectedGraph
 │
-├───include
-│   ├───Linear
-│   │   │   Stack.hpp
-│   │   │
-│   │   ├───List
-│   │   │       SinglyList.hpp
-│   │   │
-│   │   └───Queue
-│   │           SimpleQueue.hpp
-│   │
-│   └───NonLinear
-│       └───Tree
-│               AdelsonVelskyLandisTree.hpp
-│               BalancedTree.hpp
-│               BinarySearchTree.hpp
-│               Mode.hpp
+├── Hashing
+│   ├── HashMap
+│   └── HashSet
 │
-├───lib
-│       libgdsl.a
-│
-└───src
-    ├───Linear
-    │   │   Stack.tpp
-    │   │
-    │   ├───List
-    │   │       SinglyList.tpp
-    │   │
-    │   └───Queue
-    │           SimpleQueue.tpp
-    │
-    └───NonLinear
-        └───Tree
-                AdelsonVelskyLandisTree.tpp
-                BalancedTree.tpp
-                BinarySearchTree.tpp
+└── Advanced
+    ├── DisjointSet
+    ├── SegmentTree
+    └── FenwickTree
 
-
-C:\MinGW\include\GDSL>
-
-
-___________________________________________________________________________________________________________
-imagins structure
+//-----------------------------------------------------------------------------------
 
 C:\
 └── MinGW\
@@ -186,7 +158,8 @@ C:\
             │   │   ├── List/
             │   │   │   ├── SinglyList.hpp
             │   │   │   ├── DoublyList.hpp
-            │   │   │   └── CircularList.hpp
+            │   │   │   ├── CircularList.hpp
+            │   │   │   └── SkipList.hpp
             │   │   ├── Stack.hpp
             │   │   └── Queue/
             │   │       ├── SimpleQueue.hpp
@@ -201,6 +174,7 @@ C:\
             │   │   │   ├── AVL.hpp
             │   │   │   ├── RedBlack.hpp
             │   │   │   ├── Heap.hpp
+            │   │   │   ├── FibonacciHeap.hpp
             │   │   │   ├── Splay.hpp
             │   │   │   ├── Trie.hpp
             │   │   │   ├── R.hpp
@@ -217,9 +191,9 @@ C:\
             │   │   └── HashSet.hpp
             │   │
             │   └── Advanced/
-            │   │   ├── DisjointSet.hpp
-            │       ├── SegmentTree.hpp
-            │       └── FenwickTree.hpp
+            │         ├── DisjointSet.hpp
+            │         ├── SegmentTree.hpp
+            │         └── FenwickTree.hpp
             │
             │
             ├── src/                              <-- Template implementations (.tpp)
@@ -228,7 +202,8 @@ C:\
             │   │   ├── LinkedList/
             │   │   │   ├── SinglyList.tpp
             │   │   │   ├── DoublyList.tpp
-            │   │   │   └── CircularList.tpp
+            │   │   │   ├── CircularList.tpp
+            │   │   │   └── SkipList.tpp
             │   │   ├── Stack.tpp
             │   │   └── Queue/
             │   │       ├── SimpleQueue.tpp
@@ -243,6 +218,7 @@ C:\
             │   │   │   ├── AVL.tpp
             │   │   │   ├── RedBlack.tpp
             │   │   │   ├── Heap.tpp
+            │   │   │   ├── FibonacciHeap.tpp
             │   │   │   ├── Splay.tpp
             │   │   │   ├── Trie.tpp
             │   │   │   ├── R.hpp
@@ -269,6 +245,7 @@ C:\
             ├── GDSLqueue.hpp       ┴
             ├── GDSLavl.hpp
             ├── GDSLbst.hpp
+            ├── GDSLbtree.hpp
             │                                                              
             ├── GDSLtree.hpp        ┬
             ├── GDSLgraph.hpp       │ aggregated headers

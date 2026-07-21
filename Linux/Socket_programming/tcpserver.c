@@ -4,6 +4,9 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
+#define PORT 8080
+// #define IPv4 "127.0.0.1"
+
 int main()
 {
     int server_fd, client_fd;
@@ -23,10 +26,10 @@ int main()
     address.sin_port = htons(8080);
 
     // Bind
-    bind(server_fd, (struct sockaddr *)&address, sizeof(address));
-
-    // Listen
-    listen(server_fd, 3);      printf("Server waiting for connection...\n");
+    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) { perror("bind"); exit(EXIT_FAILURE); }
+    
+    if (listen(server_fd, 3) < 0) { perror("listen"); exit(EXIT_FAILURE); }      
+    printf("Server waiting for connection...\n");
 
     size_t client_count = 0;
     while(1)

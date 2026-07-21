@@ -155,3 +155,4 @@ int main(){
 // }
 
     // if(unSign(cx2)*unSign(c) == cx){ ABequalC();  return result; }
+

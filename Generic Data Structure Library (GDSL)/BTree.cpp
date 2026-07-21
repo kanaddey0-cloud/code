@@ -1,6 +1,7 @@
 #include <iostream>
-#include <GDSLstack.hpp>
-#include <GDSLqueue.hpp>
+#include <gdsl_stack>
+#include <gdsl_queue>
+#include <cstdint>
 
 enum class NTYPE : char { LF='l', RT='r', IM='m' };
 
@@ -79,20 +80,20 @@ BTREE<D>::~BTREE(){
 }
 
 template<typename D>
-void BTREE<D>::print_BTnode(BTnode<D>* ptr, bool f){ int i;
+void BTREE<D>::print_BTnode(BTnode<D>* ptr, bool f){  int i;
 
     if(f){
 
-        if(ptr->P) std::cout<<"P["<<(std::uintptr_t)ptr->P<<"]\n"; 
-        else std::cout<<"P[NULL]\n";
+        if(ptr->P) std::cout<<"P ["<<(std::uintptr_t)ptr->P<<"]\n"; 
+        else std::cout<<"P [NULL]\n";
 
-        std::cout<<"K[";
+        std::cout<<"K [";
         for(i=0; i<ptr->K; i++){ 
             std::cout<<ptr->KEY[i]; if(i<(ptr->K -1)) std::cout<<"|";
         }
         std::cout<<"]\n";
 
-        std::cout<<"L[";
+        std::cout<<"L [";
         for(i=0; i<=ptr->K; i++){ 
             if(ptr->LINK[i]){ std::cout<<(std::uintptr_t)ptr->LINK[i]; if(i<ptr->K) std::cout<<"|"; }
             else{ std::cout<<"NULL"; if(i<ptr->K) std::cout<<"|"; } 
@@ -103,16 +104,16 @@ void BTREE<D>::print_BTnode(BTnode<D>* ptr, bool f){ int i;
 
     }else{
 
-        if(ptr->P) std::cout<<"P["<<ptr->P<<"]\n"; 
-        else std::cout<<"P[NULL]\n";
+        if(ptr->P) std::cout<<"P ["<<ptr->P<<"]\n"; 
+        else std::cout<<"P [NULL]\n";
 
-        std::cout<<"K[";
+        std::cout<<"K [";
         for(i=0; i<ptr->K; i++){ 
             std::cout<<ptr->KEY[i]; if(i<(ptr->K -1)) std::cout<<"|";
         }
         std::cout<<"]\n";
 
-        std::cout<<"L[";
+        std::cout<<"L [";
         for(i=0; i<=ptr->K; i++){ 
             if(ptr->LINK[i]){ std::cout<<ptr->LINK[i]; if(i<ptr->K) std::cout<<"|"; }
             else{ std::cout<<"NULL"; if(i<ptr->K) std::cout<<"|"; } 
@@ -582,7 +583,7 @@ int main() {
         cout << "insert " << x << endl;
         T.insert(x);
     }
-    T.viewBFS();
+    T.viewBFS(true);
 
 
     // =========================
@@ -640,7 +641,7 @@ int main() {
         cout << "delete " << x << endl;
         T.remove(x);
     }
-    T.viewBFS();
+    T.viewBFS(true);
 
     cout << "\n\n===== TEST COMPLETE =====\n";
 

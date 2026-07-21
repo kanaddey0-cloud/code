@@ -1,5 +1,5 @@
-#include <GDSLstack.hpp>
-#include <GDSLqueue.hpp>
+#include <gdsl_stack>
+#include <gdsl_queue>
 
 enum class MODE : char {
     DFS='w', BFS='x', DFS_LR='y', BFS_RL='z',
@@ -224,14 +224,16 @@ public:
     BSTREE(BSTREE<D>&& other) noexcept;
     BSTREE& operator=(const BSTREE& other);
     BSTREE& operator=(BSTREE&& other) noexcept;
-    D& operator[](const long int index);
+    // D& operator[](const long int index);
     const D& operator[](const long int index) const;
     long int size() const { return elem; }
     bool insert(D item);
     void insert_array(D arr[], size_t SIZE);
-    void insert_index(D arr[], size_t LOW, size_t HIGH);
+    void insert_array_(D arr[], size_t LOW, size_t HIGH);
     bool search(D item);
     bool remove(D item);
+    bool remove_index(long int index, MODE mode=MODE::DEF);
+    void clear();
     bool add(const BSTREE<D>& root);
     void view(MODE mode=MODE::DEF) const;
     void viewDFS(bool order=false) const;
@@ -535,14 +537,14 @@ BSTnode<D>* BSTREE<D>::pointer(long int index, MODE mode) const{
     }
 }
 
-template<typename D>  
-D& BSTREE<D>::operator[](const long int index){
-    if(!ROOT) throw std::runtime_error("Tree is empty"); 
+// template<typename D>  
+// D& BSTREE<D>::operator[](const long int index){
+//     if(!ROOT) throw std::runtime_error("Tree is empty"); 
 
-    BSTnode<D>* ptr=pointer(index);
-    if(!ptr) throw std::out_of_range("Index out of bounds"); 
-    return ptr->K;
-}
+//     BSTnode<D>* ptr=pointer(index);
+//     if(!ptr) throw std::out_of_range("Index out of bounds"); 
+//     return ptr->K;
+// }
 
 template<typename D>  
 const D& BSTREE<D>::operator[](const long int index) const{
@@ -602,6 +604,18 @@ bool BSTREE<D>::remove(D item){
 }
 
 template<typename D>
+bool BSTREE<D>::remove_index(long int index, MODE mode){
+    if(!ROOT) return false;
+    BSTnode<D>* tmp=pointer(index,mode);
+    if(!tmp) throw std::out_of_range("Index out of bounds"); 
+     
+    return remove(tmp->K);
+}
+
+template<typename D>
+void BSTREE<D>::clear(){ freelink(ROOT); delete ROOT; ROOT=nullptr; }
+
+template<typename D>
 bool BSTREE<D>::freelink(BSTnode<D>*& root){
     if(!root) return false;
     QUEUE<BSTnode<D>*> Q; 
@@ -658,15 +672,15 @@ bool BSTREE<D>::insert(D item){
 }
 
 template<typename D>
-void BSTREE<D>::insert_index(D arr[], size_t LOW, size_t HIGH){
+void BSTREE<D>::insert_array_(D arr[], size_t LOW, size_t HIGH){
     if(LOW == HIGH){ insert(arr[LOW]); return; }
     else if((1+LOW) == HIGH){ 
         insert(arr[LOW]); insert(arr[HIGH]); return;
     }else{
         size_t MID=(LOW+HIGH)/2;
         insert(arr[MID]);
-        insert_index(arr,LOW,(MID-1));
-        insert_index(arr,(1+MID),HIGH);
+        insert_array_(arr,LOW,(MID-1));
+        insert_array_(arr,(1+MID),HIGH);
     }
 }
 
@@ -798,6 +812,21 @@ using namespace std;
 //     return 0;
 // }
 
+// int main() {
+//     BSTREE<int> tree;
+
+//     tree.insert(50);
+//     tree.insert(30);
+//     tree.insert(70);
+
+//     std::cout << "Before: " << tree[0] << "\n";
+//     tree.view(MODE::IN);
+
+//     // tree[0] = 100;    // Smallest node becomes 100
+
+//     std::cout << "\n\nAfter " << tree[0] << "\n";
+//     tree.view(MODE::IN);
+// }
 
 int main() {
     BSTREE<int> tree;
@@ -813,7 +842,6 @@ int main() {
     cout<<tree;
     std::cout << "\nTree (INORDER view):\n";
     tree.view(MODE::IN);
-    tree.M=MODE::
     std::cout << "\n\n";
 
     std::cout << "=== SIZE ===\n";

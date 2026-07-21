@@ -153,5 +153,27 @@ print("Infix   :", exp)
 print("Postfix :", postfix)
 print("Prefix  :", prefix)
 
-print("\nPostfix Eval:", evaluate_postfix(postfix))
+print("Postfix Eval:", evaluate_postfix(postfix))
 print("Prefix Eval :", evaluate_prefix(prefix))
+
+
+
+print()
+def check_brackets(expr):
+    stack = []
+    pairs = {')': '(', '}': '{', ']': '['}
+    
+    for ch in expr:
+        if ch in "({[":
+            stack.append(ch)
+        elif ch in ")}]":
+            if not stack or stack[-1] != pairs[ch]:
+                return "Non-Matching!"
+            stack.pop()
+    
+    return "Matching!" if not stack else "Non-Matching!"
+
+# Test cases
+print(check_brackets("(A+B)+C"))     # Matching!
+print(check_brackets("(A+B)+C)"))    # Non-Matching!
+print(check_brackets("((A+B)+C+(E*F)")) # Non-Matching!

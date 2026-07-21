@@ -1,0 +1,5 @@
+#pragma once
+
+#include <GDSL/include/NonLinear/Tree/BinarySearchTree.hpp>
+#include <GDSL/include/NonLinear/Tree/AdelsonVelskyLandisTree.hpp>
+#include <GDSL/include/NonLinear/Tree/BalancedTree.hpp>

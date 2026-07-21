@@ -4,6 +4,9 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
+#define PORT 8080
+#define IPv4 "127.0.0.1"
+
 struct Student {
     char name[50];
     int cs, it, ece, mec, ce;
@@ -34,7 +37,7 @@ int main()
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
 
     servaddr.sin_family = AF_INET;
-    servaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    servaddr.sin_addr.s_addr = inet_addr("127.0.0.1");  // IP -> binary bit’s (Old)
     servaddr.sin_port = htons(8080);
 
     takeInput(&sd);

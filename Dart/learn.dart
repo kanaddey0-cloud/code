@@ -1,40 +1,45 @@
-// // Named parameters
-// void user1({required String name, int age = 18}) {
-//   print("$name $age");
-// }
-// // Positional parameters
-// void user2(String name, [int age = 18]) {
-//   print("$name $age");
-// }
+// class Student {
+//   final String name = getName();   // ❌ Error
 
-// void user3(String name, int age) {
-//   print("$name $age");
+//   String getName() {
+//     print("Creating...");
+//     return "Kanad";
+//   }
 // }
 
-// void main() {
-//   user1(name: "Kanad", age: 22);
-//   user1(age: 24, name: "Kanad");  // order does not mattter
-//   user1(name: "Kanad");
-//                           print("-------------");
-//   user2("Kanad", 22);
-//   user2("Kanad");
-//                           print("-------------");
-//   user3("Kanad", 22);
+// class Student {
+//   final String name = Student.getName();
+
+//   static String getName() {
+//     print("Creating...");
+//     return "Kanad";
+//   }
 // }
 
-void main() {
-  int? x;
-  print(x);
+// class Student {
+//   final String name;
 
-  var y;
-  y = 10;         print(y);
-  y = "Kanad";    print(y);
-  y = true;       print(y);
+//   Student() : name = getName();
 
-  var w = 10;     print(w);
-                              print("-------------");
-  dynamic z = 10; print(z);
-  z = "Kanad";    print(z);
-  z = true;       print(z);
+//   static String getName() {
+//     print("Creating...");
+//     return "Kanad";
+//   }
+// }
+
+class Student {
+  late final String name = getName();
+
+  String getName() {
+    print("Creating...");
+    return "Kanad";
+  }
 }
 
+void main() {
+  Student s = Student();
+
+  print("Object Created");
+
+  print(s.name);
+}

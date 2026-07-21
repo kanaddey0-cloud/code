@@ -10,6 +10,9 @@ int main()
     
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
+// SO_REUSEADDR is used to allow bind() to reuse the same IP address and port immediately.
+// Even if the previous socket is still in the TIME_WAIT state.
+
     setsockopt(
         sockfd,         // Socket on which the option will be set
         SOL_SOCKET,     // Level: socket-level options

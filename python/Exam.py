@@ -204,20 +204,87 @@
 # print('a1-> ',a1.x,a1.y,a1.mew)
 # print('a2-> ',a2.x,a2.y,a2.mew)
 
-class A: 
-    x = 10;   y = 100 
-    def show(self): 
-        print("A") 
+# class A: 
+#     x = 10;   y = 100 
+#     def show(self): 
+#         print("A") 
  
-class B(A): 
-    x = 20 
-    def show(self): 
-        print("B->",self.x) 
+# class B(A): 
+#     x = 20 
+#     def show(self): 
+#         print("B->",self.x) 
 
-class C(B): 
-    x = 30 
+# class C(B): 
+#     x = 30 
 
  
-obj = C() 
-print(obj.x, "\n", obj.y) 
-obj.show()
+# obj = C() 
+# print(obj.x, "\n", obj.y) 
+# obj.show()
+
+
+# class PriorityQueue:
+#     def __init__(self):
+#         self.queue = []
+
+#     def enqueue(self, item, priority):
+#         self.queue.append((item, priority))
+
+#     def dequeue(self):
+#         if not self.queue:
+#             return None
+
+#         max_idx = 0
+#         for i in range(1, len(self.queue)):
+#             if self.queue[i][1] > self.queue[max_idx][1]:
+#                 max_idx = i
+
+#         return self.queue.pop(max_idx)
+
+#     def display(self):
+#         for item, priority in self.queue:
+#             print(item, priority)
+
+# pq = PriorityQueue()
+
+# pq.enqueue("A", 2)
+# pq.enqueue("B", 5)
+# pq.enqueue("C", 1)
+# pq.enqueue("D", 4)
+# pq.enqueue("K", 5)
+# pq.enqueue("S", 4)
+
+# pq.display()
+
+# while pq.queue:
+#     print(pq.dequeue())
+
+class PQ:
+    def __init__(self):
+        self.Q = []
+
+    def enqueue(self, key, priority):
+        self.Q.append((key, priority))
+        self.Q.sort(key = lambda x: x[1], reverse = True)
+    
+    def dequeue(self):
+        if not self.Q:
+            return None
+        return self.Q.pop(0)
+    
+    def display(self):
+        for i in range(len(self.Q)):
+            print(self.Q[i])
+
+pq = PQ()
+pq.enqueue("A", 2)
+pq.enqueue("B", 5)
+pq.enqueue("C", 1)
+pq.enqueue("D", 4)
+pq.enqueue("K", 5)
+pq.enqueue("S", 4)
+
+pq.display()
+
+while pq.Q:
+    print(pq.dequeue())

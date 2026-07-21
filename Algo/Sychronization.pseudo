@@ -1,0 +1,116 @@
+// #include <stdatomic.h>
+// _Atomic int A, B;
+// void swap(void) {
+//     int tmp = atomic_exchange(&A, atomic_load(&B));
+//     atomic_store(&B, tmp);
+// }
+
+// struct Point {
+//     bool A = false;
+//     bool B = false;
+// };
+    // return (obj = (Point){obj.B, obj.A}).B;
+
+bool _Swap() {
+    bool tmp = A;
+    A = B;
+    B = tmp;
+    return B;
+}
+// initial A=B=FALSE
+// Every process:
+B = TRUE;
+while (_Swap());
+// CS
+A = FALSE;
+
+//---------------------------------------------------------------------
+
+"Queue-Based Hierarchical Two-State Toggle Critical Section Synchronization"
+// Every CS Have there own queue of Processes
+bool _Swap() {
+  A,B = B,A;
+  PQ.enqueue(this.sleep(B), B); // sleep when TRUE
+}                              // push when TRUE
+                              
+
+
+
+// Parent Thread             //
+while(!PQ.empty){           //
+  PQ.pop(!A).run() {       // pop when TRUE
+    B = TRUE;
+    _Swap();
+    // C_Section
+    A = FALSE;
+    PQ.pop().weakup();
+  }
+}
+
+
+________________________________________
+
+Parent process
+    |
+    +-- Child 1
+    |      |
+    |      +-- CS_A + Queue_A
+    |      +-- CS_B + Queue_B
+    |
+    +-- Child 2
+           |
+           +-- CS_A + Queue_A
+           +-- CS_C + Queue_C
+
+This algorithm proposes a queue-managed synchronization model where every critical section (CS) has its own dedicated waiting queue.
+Instead of using a single global lock for all processes, each resource/critical section maintains an independent queue of processes that want access to it.
+When a process requests a critical section:
+1.	It tries to acquire access using an atomic swap operation.
+2.	If the critical section is free, the process enters immediately.
+3.	If the critical section is already occupied, the process is placed into that CS's waiting queue and sleeps.
+4.	When the current process finishes, ownership is transferred to the next waiting process in the queue.
+This avoids busy waiting because waiting processes sleep instead of continuously checking the lock.
+The model is designed for systems where a parent process manages many child processes, and each child may have multiple sub-processes with different critical sections. 
+Each critical section has its own synchronization queue, reducing contention between unrelated resources.
+Structure:
+                 Parent Process
+                       |
+        +--------------+--------------+
+        |              |              |
+      Child 1        Child 2        Child 3
+        |              |              |
+   +----+----+    +----+----+    +----+----+
+   |         |    |         |    |         |
+  CS-A      CS-B CS-C      CS-D CS-E      CS-F
+   |         |    |         |    |         |
+ Queue-A  Queue-B Queue-C Queue-D Queue-E Queue-F
+   |
+ Processes waiting
+   |
+ P1 -> P2 -> P3
+
+
+Example:
+CS-A Queue:
+P1
+P2
+P3
+
+CS-B Queue:
+P4
+P5
+
+CS-C Queue:
+P6
+P7
+P8
+Each queue operates independently.
+Goals:
+•	Reduce lock contention
+•	Avoid CPU waste from busy waiting
+•	Allow independent critical sections to progress in parallel
+•	Provide FIFO ordering when queues are managed fairly
+•	Scale better for complex process trees
+________________________________________
+This presents it as a concept/architecture rather than claiming it is already a finished replacement for mutexes.
+

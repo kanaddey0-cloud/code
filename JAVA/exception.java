@@ -10,7 +10,7 @@
 //                 └── ArrayIndexOutOfBoundsException
 
 
-// public class Main {
+// public class exception {
 //     public static void main(String[] args) {
 //         try {
 //             int result = 10 / 0; // ArithmeticException
@@ -24,12 +24,14 @@
 // }
 
 
+
+
 // // 1. throw (used inside method)
 // //     👉 Used to actually throw an exception object
-// public class Main {
+// public class exception {
 //     static void checkAge(int age) {
 //         if (age < 18) {
-//             throw new ArithmeticException("Not eligible to vote");
+            // throw new ArithmeticException("Not eligible to vote");
 //         }
 //         System.out.println("Welcome");
 //     }
@@ -40,9 +42,11 @@
 // }
 
 
+
+
 // // throws (used in method signature)
 // //     👉 Used to declare an exception that a method might throw
-// public class Main {
+// public class exception {
 
 //     static void showElement() throws ArrayIndexOutOfBoundsException {
 //         int arr[] = {10, 20, 30};
@@ -53,21 +57,62 @@
 //         try {
 //             showElement();
 //         } catch (ArrayIndexOutOfBoundsException e) {
-//             System.out.println("Array index is out of bound!");
+//             System.out.println("Array index is out of bound! \n");
 //         }
+//         showElement();
 //     }
 // }
+
+
+
+
+// class exception {
+//     static void test() throws Exception {
+//         try {
+//             int x = 10 / 0;
+//         } catch (Exception e) {
+//             System.out.println("Caught inside test() "+e.getMessage());
+//             throw e;    // Rethrow
+//         }
+//     }
+//     public static void main(String[] args) {
+//         try {
+//             test();
+//         } catch (Exception e) {
+//             System.out.println("Caught in main()     "+e.getMessage());
+//         }
+//     }
+
+//     // public static void main(String[] args) {
+//     //     try {
+//     //         try {
+//     //             int x = 10 / 0;
+//     //         } catch (Exception e) {
+//     //             System.out.println("Caught inside try  "+e.getMessage());
+//     //             throw e;    // Rethrow
+//     //         }
+//     //     } catch (Exception e) {
+//     //         System.out.println("Caught outside try "+e.getMessage());
+//     //     }
+//     // }
+// }
+
+
 
 
 // // custom exception
 // class MyException extends Exception {
 //     MyException(String message) {
 //         super(message);
+//     }
+//     @Override
+//     public String getMessage() {
 //         System.out.println("own sms error");
+//         return super.getMessage();
 //     }
 // }
 
-// public class Main {
+// public class exception {
 
 //     static void checkAge(int age) throws MyException {
 //         if (age < 18) {
@@ -80,28 +125,32 @@
 //     public static void main(String[] args) {
 //         try {
 //             checkAge(15);
-//         } catch (MyException e) {
-//             System.out.println("Caught: " + e.getMessage());
+//         } catch (MyException me) {
+//             System.out.println("Caught: " + me.getMessage());
 //         }
 //     }
 // }
 
 
-// class Main {
-//     static void test() throws Exception {
-//         try {
-//             int x = 10 / 0;
-//         } catch (Exception e) {
-//             System.out.println("Caught inside test() "+e.getMessage());
-//             throw e;    // Rethrow
-//         }
-//     }
 
-//     public static void main(String[] args) {
-//         try {
-//             test();
-//         } catch (Exception e) {
-//             System.out.println("Caught in main() "+e.getMessage());
-//         }
-//     }
+
+// // Example of final 
+// final int x = 10; 
+
+// // Example of finally 
+// try { 
+//     int a = 10 / 0; 
+// } 
+// catch(Exception e) { 
+//     System.out.println("Error"); 
+// } 
+// finally { 
+//     System.out.println("Always executes"); 
+// } 
+
+// // Example of finalize() 
+// class Test { 
+//     protected void finalize() { 
+//         System.out.println("Object destroyed");
+//     } 
 // }

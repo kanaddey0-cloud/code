@@ -1,4 +1,4 @@
-#include <GDSLlist.hpp>
+#include <gdsl_list>
 
 template<typename D>
 class QUEUE{
@@ -37,9 +37,10 @@ void QUEUE<D>::view(bool v) const{
     long int index = Q.size();
     if(!index) return;
     if(v) std::cout << "Front->";
+    bool f=false;
     std::cout << "[";
-    for(long int i=0; i<index; i++){
-        std::cout << Q.value(i); if(i<(index-1)) std::cout<<", ";
+    for(auto x : Q){
+        if(f) std::cout<<", "<<x;  else{ std::cout<<x; f=true; }
     }
     std::cout << "]";
     if(v) std::cout << "<-Rear";

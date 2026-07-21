@@ -1,2 +1,2 @@
- = new Helper();
-        // h.help();
+ h = new Helper();
+        h.help();

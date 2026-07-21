@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -9,7 +10,6 @@ int main()
     char write_buffer[] = "Hello MCA Students";
     char read_buffer[100];
     char ch;
-
 /*
 0777 → rwx rwx rwx
 0644 → rw- r-- r--
@@ -63,11 +63,13 @@ fd = open("data.txt", O_CREAT | O_RDWR, 0777);
     write(fd, write_buffer, sizeof(write_buffer));
     printf("Data written into file\n");
 
+    lseek(fd, 0, SEEK_SET);   // Move to beginning
+    
     // STEP 4: Read from File
     read(fd, read_buffer, sizeof(read_buffer));
     printf("File Content: %s\n", read_buffer);
 
-
+    
 /*
 off_t lseek(int fd, off_t offset, int whence);
     offset = how many bytes to move

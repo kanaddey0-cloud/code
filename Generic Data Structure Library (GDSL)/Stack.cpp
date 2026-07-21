@@ -1,4 +1,4 @@
-#include <GDSLlist.hpp>
+#include <gdsl_list>
 
 template<typename D>
 class STACK{
@@ -21,14 +21,14 @@ template<typename D>
 bool STACK<D>::empty(){ return S.size()==0; }
 
 template<typename D>
-bool STACK<D>::push(D val){ return S.insert(val); }
+bool STACK<D>::push(D val){ return S.insert(val,0); }
 
 template<typename D>
 D STACK<D>::pop(){
     if(empty()) 
         throw std::runtime_error("Stack is empty");
 
-    return S.remove(-1);
+    return S.remove(0);
 }
 
 template<typename D>
@@ -36,9 +36,10 @@ void STACK<D>::view(bool v) const{
     long int index = S.size();
     if(!index) return;
     if(v) std::cout << "SP->";
+    bool f=false;
     std::cout << "[";
-    for(long int i=index-1; i>=0; i--){
-        std::cout << S.value(i); if(i > 0) std::cout<<", ";
+    for(auto x : S){
+        if(f) std::cout<<", "<<x;  else{ std::cout<<x; f=true; }
     }
     std::cout << "]";
 }
@@ -53,7 +54,7 @@ D STACK<D>::tos(){
 	if(!S.size())
         throw std::runtime_error("Stack is empty");
 		
-    return S.value(-1);
+    return S.value(0);
 }
 
 template<typename D>
@@ -76,15 +77,23 @@ int main() {
     s1.push(20);
     s1.push(30);
 
-    cout<<s1;   // expected: SP->[10, 20, 30]
+    // cout<<s1;   // expected: SP->[10, 20, 30]
     cout << endl;
 
-    cout << "Pop: " << s1.pop() << endl;  // 30
+int arr[4] = {9,2,35,4};
+arr[0]
+arr[1]
+arr[2]
+
+    s1.push(40);
     s1.view();
     cout << endl << endl;
+    cout << "Pop: " << s1.pop() << endl;  // 30
+    cout<< s1;
+    cout << "\n\nPop: " << s1.pop() << endl;  // 30
+    cout<< s1;
 
-
-    cout << "===== Test 2: STACK<string> =====" << endl;
+    cout << "\n\n===== Test 2: STACK<string> =====" << endl;
     STACK<string> s2;
 
     s2.push("A");

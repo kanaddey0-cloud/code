@@ -92,7 +92,7 @@ public:
     const D& value(long int index) const;
     long int index(D value) const;
     void reverse();
-    void view(bool v=true) const;
+    void view(bool v=false) const;
     iterator<D> begin() noexcept;
     iterator<D> begin() const noexcept;
     iterator<D> end() noexcept;
@@ -343,11 +343,11 @@ template<typename D>
 void LIST<D>::view(bool v) const{
     node<D> *iter=H;
     if(v) std::cout<<"head->";
-    std::cout<<"[";
+    bool f=false;
     while(iter){
-        std::cout<<iter->K; if(iter->P!=nullptr) std::cout<<", ";
+        if(f) std::cout<<"->["<<iter->K<<"]";  else{ std::cout<<"["<<iter->K<<"]"; f=true; }
         iter=iter->P;
-    } std::cout<<"]";
+    }
     if(v) std::cout<<"<-tail";
 }
 
@@ -378,10 +378,11 @@ int main() {
     list.insert(30);
     list.insert(40);
     list.insert(50);
-
+    list.insert(60);
+int arr[10];
     // cout<<list;
-    std::cout << "\n";
-    list.view();
+    // std::cout << list <<"\n";
+    list.view(true);
     std::cout << "\n\n";
 
     // std::cout << "=== INDEX TEST (+ve) ===\n";
@@ -430,7 +431,7 @@ int main() {
     // std::cout << "\n\n";
 
     // std::cout << "=== CONST RANGE FOR STYLE ===\n";
-    for(const auto &x : list) {
+    for(const auto x : list) {
         std::cout << x << " ";
     }
     // std::cout << "\n\n";

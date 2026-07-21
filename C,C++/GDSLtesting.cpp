@@ -1,12 +1,13 @@
 
 #include <iostream>
-#include <GDSLlist.hpp>
-#include <GDSLstack.hpp>
-#include <GDSLqueue.hpp>
-#include <GDSLtree.hpp>
-#include <GDSLbst.hpp>
-#include <GDSLavl.hpp>
-#include <GDSLbtree.hpp>
+#include <gdsl.hpp>
+#include <gdsl_list>
+#include <gdsl_stack>
+#include <gdsl_queue>
+#include <gdsl_tree>
+#include <gdsl_bst>
+#include <gdsl_avl>
+#include <gdsl_btree>
 
 template<typename D>
 std::ostream& operator<<(std::ostream& out, const node<D>& n){

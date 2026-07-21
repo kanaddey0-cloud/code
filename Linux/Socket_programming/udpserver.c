@@ -4,6 +4,9 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
+#define PORT 8080
+#define IPv4 "127.0.0.1"
+
 struct Student {
     char name[50];
     int cs, it, ece, mec, ce;

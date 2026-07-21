@@ -1,0 +1,523 @@
+Algorithm 1: Unified AVL Subtree Reconstruction
+
+Input : Imbalanced node AVL
+Output: Balanced subtree root
+
+Function Balance(AVL)
+
+    if Height(AVL.left) > Height(AVL.right) then
+        Node3 ← AVL
+        Link4 ← AVL.right
+        Left ← AVL.left
+
+        if Height(Left.left) < Height(Left.right) then    
+            Node1 ← Left
+            Node2 ← Left.right
+            Link1 ← Left.left
+            Link2 ← Node2.left
+            Link3 ← Node2.right
+        else                                                
+            Node2 ← Left
+            Node1 ← Left.left
+            Link1 ← Node1.left
+            Link2 ← Node1.right
+            Link3 ← Left.right
+        end if
+
+    else if height_of(AVL.left) < height_of(AVL.right) then                                                     
+        Node1 ← AVL
+        Link1 ← AVL.left
+        Right ← AVL.right
+
+        if Height(Right.left) < Height(Right.right) then   
+            Node2 ← Right
+            Node3 ← Right.right
+            Link2 ← Right.left
+            Link3 ← Node3.left
+            Link4 ← Node3.right
+        else                                             
+            Node3 ← Right
+            Node2 ← Right.left
+            Link2 ← Node2.left
+            Link3 ← Node2.right
+            Link4 ← Right.right
+        end if
+
+    end if
+
+    Node2.left  ← Node1
+    Node2.right ← Node3
+
+    Node1.left  ← Link1
+    Node1.right ← Link2
+
+    Node3.left  ← Link3
+    Node3.right ← Link4
+
+    UpdateHeight(Node1)
+    UpdateHeight(Node3)
+
+    if Node1.height == -1 then Node2.left = Balance(Node1)
+    if Node3.height == -1 then Node2.right = Balance(Node3)
+
+    UpdateHeight(Node2)
+
+    return Node2
+
+end Balance
+
+
+
+function height_of(Node)
+    return if Node = NULL then 0 
+                  else (Node.height + 1)
+end height_of
+
+
+
+function UpdateHeight(Node)
+
+    leftH = height_of(Node.left)
+    rightH = height_of(Node.right)
+    balanceH = leftH – rightH
+
+    if (balanceH < 2 and balanceH > -2) then
+        return (leftH > rightH ? leftH : rightH)
+    end if
+    return -1
+end UpdateHeight
+
+
+
+//-----------------------------------------------------
+
+Algorithm 2: AVL Insertion
+
+Procedure CreateNode(Key)
+
+    Node ← new AVLNode
+
+    Node.Key ← Key
+    Node.Height ← 0
+    Node.Left ← NULL
+    Node.Right ← NULL
+
+    return Node
+
+end CreateNode
+
+
+
+Input : Key
+Output: Updated AVL Tree
+
+Procedure Insert(Key)
+
+    if Root = NULL then
+        Root ← CreateNode(Key)
+    else
+        InsertRecursive(Root, Key)
+
+        if BalancedSubtree ≠ NULL then
+            Root ← BalancedSubtree
+            BalancedSubtree ← NULL
+        end if
+    end if
+
+end Insert
+
+
+
+Procedure InsertRecursive(Node, Key)
+
+    if Key < Node.Key then
+
+        if Node.Left = NULL then
+            Node.Left ← CreateNode(Key)
+            UpdateHeight(Node)
+            return TRUE
+        end if
+
+        if InsertRecursive(Node.Left, Key) then
+            UpdateHeight(Node)
+
+        else if BalancedSubtree ≠ NULL then
+            Node.Left or Node.Right ← BalancedSubtree
+            BalancedSubtree ← NULL
+            return FALSE
+
+        else
+            return FALSE
+        end if
+
+    else if Key > Node.Key then
+
+        if Node.Right = NULL then
+            Node.Right ← CreateNode(Key)
+            UpdateHeight(Node)
+            return TRUE
+        end if
+
+        if InsertRecursive(Node.Right, Key) then
+            UpdateHeight(Node)
+
+        else if BalancedSubtree ≠ NULL then
+            Node.Left or Node.Right ← BalancedSubtree
+            BalancedSubtree ← NULL
+            return FALSE
+
+        else
+            return FALSE
+        end if
+
+    else
+        return FALSE
+    end if
+
+    if Node is Balanced then
+        return TRUE
+    end if
+
+    BalancedSubtree ← Balance(Node)
+    return FALSE
+
+end InsertRecursive
+
+
+//-----------------------------------------------------
+
+Algorithm 3: AVL Deletion
+
+Input : Key
+Output: Updated AVL Tree
+
+Procedure Remove(Key)
+
+    if Root = NULL then
+        return FALSE
+    end if
+
+    if Root.Key = Key then
+
+        DeleteNode(Root)
+
+        if DeleteFlag = TRUE then
+            delete Root
+            Root ← NULL
+            DeleteFlag ← FALSE
+
+        else if BalancedSubtree ≠ NULL then
+            Root ← BalancedSubtree
+            BalancedSubtree ← NULL
+        end if
+
+    else
+
+        RemoveRecursive(Root, Key)
+
+        DeleteFlag ← FALSE
+
+        if BalancedSubtree ≠ NULL then
+            Root ← BalancedSubtree
+            BalancedSubtree ← NULL
+        end if
+
+    end if
+
+    return FALSE
+
+end Remove
+
+
+
+Procedure RemoveRecursive(Node, Key)
+
+    if Key < Node.Key then
+
+        if Node.Left = NULL then
+            return FALSE
+        end if
+
+        if RemoveRecursive(Node.Left, Key) then
+            delete Node.Left
+            Node.Left ← NULL
+
+        else if BalancedSubtree ≠ NULL then
+            Node.Left ← BalancedSubtree
+            BalancedSubtree ← NULL
+        end if
+
+    else if Key > Node.Key then
+
+        if Node.Right = NULL then
+            return FALSE
+        end if
+
+        if RemoveRecursive(Node.Right, Key) then
+            delete Node.Right
+            Node.Right ← NULL
+
+        else if BalancedSubtree ≠ NULL then
+            Node.Right ← BalancedSubtree
+            BalancedSubtree ← NULL
+        end if
+
+    else
+
+        DeleteNode(Node)
+
+        if DeleteFlag = TRUE then
+            return TRUE
+        end if
+
+        DeleteFlag ← TRUE
+
+    end if
+
+    if DeleteFlag then
+        UpdateHeight(Node)
+
+        if Node is Imbalanced then
+            BalancedSubtree ← Balance(Node)
+        end if
+    end if
+
+    return FALSE
+
+end RemoveRecursive
+
+
+
+Procedure DeleteNode(Node)
+
+    if Node has no children then
+        DeleteFlag ← TRUE
+        return Node.Key
+
+    else if Node has only left child then
+        Replace Node with Left Child
+
+    else if Node has only right child then
+        Replace Node with Right Child
+
+    else
+
+        if Height(Node.Left) ≥ Height(Node.Right) then
+            Replace Node using Inorder Predecessor
+        else
+            Replace Node using Inorder Successor
+        end if
+
+    end if
+
+    UpdateHeight(Node)
+
+    if Node is Imbalanced then
+        BalancedSubtree ← Balance(Node)
+    end if
+
+    return Node.Key
+
+end DeleteNode
+
+
+
+ Input     : imbalance node AVL
+ Output : balance subtree root
+
+
+function balance(AVL)
+
+    Node[3] = { NULL, NULL , NULL }
+    // Link[4] = { NULL, NULL , NULL, NULL }
+
+    if height_of(AVL.left) > height_of(AVL.right) then
+        Node[2] = AVL
+        // Node[2].right = AVL.right
+        Left = AVL.left
+
+      if height_of(Left.left) < height_of(Left.right) then      
+            // Node[0] = Left         Node[1] = Left.right
+            // Link[0] = Left.left   Link[1] = Node[1].left   Link[2] = Node[1].right
+
+            Node[0] = Left         Node[1] = Left.right
+            Node[0].right = Node[1].left   Node[2].left = Node[1].right
+        else                                               
+            // Node[1] = Left                  Node[0] = Left.left
+            // Link[0] = Node[0].left   Link[1] = Node[0].right   Link[2] = Left.right
+
+            Node[1] = Left                  Node[0] = Left.left
+            Node[2].left = Left.right    
+            
+        end if
+
+    else if height_of(AVL.left) < height_of(AVL.right) then            
+        Node[0] = AVL
+        // Node[0].left = AVL.left
+        Right = AVL.right
+
+        if height_of(Right.left) < height_of(Right.right) then   	
+            // Node[1] = Right         Node[2] = Right.right
+            // Link[1] = Right.left   Link[2] = Node[2].left   Link[3] = Node[2].right
+
+            Node[1] = Right         Node[2] = Right.right
+            Node[0].right = Right.left   
+        else                                                
+            // Node[2] = Right               Node[1] = Right.left
+            // Link[1] = Node[1].left   Link[2] = Node[1].right   Link[3] = Right.right
+
+            Node[2] = Right               Node[1] = Right.left
+            Node[0].right = Node[1].left   Node[2].left = Node[1].right  
+        end if
+    end if
+
+    Node[1].left = Node[0]   Node[1].right = Node[2]
+
+    // Node[0].left = Link[0]   Node[0].right = Link[1]
+    // Node[2].left = Link[2]   Node[2].right = Link[3]
+
+    UpdateHeight(Node[0])   UpdateHeight(Node[2])   
+
+    if Node[0].height == -1 then   Node[1].left = Balance(Node[0])
+    if Node[2].height == -1 then   Node[1].right = Balance(Node[2])
+
+    UpdateHeight(Node[1])
+
+    return Node[1]
+end Balance
+
+
+
+Deletion
+│
+├── Delete Target Node
+├── Return Through Recursion
+├── UpdateHeight(Node)
+├── Imbalance?
+│     ├── No → Return Node
+│     └── Yes
+│
+├── Balance(Node)
+├── Update Heights
+│
+└── Return Balanced Root
+
+
+
+
+function height_of(Node)
+    return if Node = NULL then 0 
+           else (Node.height + 1)
+end height_of
+
+
+
+function UpdateHeight(leftH, rightH)
+    balanceH = leftH – rightH
+
+    if (balanceH < 2 and balanceH > -2) then
+        return (leftH > rightH ? leftH : rightH)
+    end if
+    return -1
+end UpdateHeight
+
+
+
+
+function balance(AVL)
+
+    if height_of(AVL.left) > height_of(AVL.right) then
+        Left = AVL.left
+        LeftRight = Left.right
+
+      if height_of(Left.left) < height_of(LeftRight) then //----- LR
+            Left.right = LeftRight.left 
+            AVL.left = LeftRight.right
+            LeftRight.left = Left   
+            LeftRight.right = AVL
+
+            UpdateHeight(height_of(Left.left), height_of(Left.right))
+            UpdateHeight(height_of(AVL.left),  height_of(AVL.right))
+            AVL = LeftRight
+        else //-------------------------------------------------- LL
+            AVL.left = LeftRight
+            Left.right = AVL 
+
+            UpdateHeight(height_of(Left.left.left), height_of(Left.left.right))
+            UpdateHeight(height_of(AVL.left),       height_of(AVL.right))
+            AVL = Left
+        end if
+
+    else if height_of(AVL.left) < height_of(AVL.right) then         
+        Right = AVL.right
+        RightLeft = Right.left
+
+        if height_of(RightLeft) < height_of(Right.right) then  // RR	
+            AVL.right = RightLeft
+            Right.left = AVL
+
+            UpdateHeight(height_of(AVL.left),         height_of(AVL.right))
+            UpdateHeight(height_of(Right.right.left), height_of(Right.right.right))
+            AVL = Right
+        else //-------------------------------------------------- RL                      
+            AVL.right = RightLeft.left   
+            Right.left = RightLeft.right 
+            RightLeft.left = AVL   
+            RightLeft.right = Right
+
+            UpdateHeight(height_of(AVL.left),   height_of(AVL.right))
+            UpdateHeight(height_of(Right.left), height_of(Right.right))
+            AVL = RightLeft
+        end if
+    end if
+
+    if AVL.left.height == -1 then   AVL.left = Balance(AVL.left)
+    if AVL.right.height == -1 then   AVL.right = Balance(AVL.right)
+
+    UpdateHeight(height_of(AVL.left),        height_of(AVL.right))
+    return AVL
+
+end Balance
+
+
+
+Comparing only pointer/reference assignments (not height updates, comparisons, or AVL assignment):
+| Rotation | **Version 1** (Node[] + Link[]) | **Version 2** (Direct) |
+| -------- | ------------------------------: | ---------------------: |
+| **LL**   |                              11 |                      4 |
+| **RR**   |                              11 |                      4 |
+| **LR**   |                              14 |                      6 |
+| **RL**   |                              14 |                      6 |
+
+
+If we include :
+| Rotation | **Version 1** | **Version 2** |
+| -------- | ------------: | ------------: |
+| **LL**   |            14 |             5 |
+| **RR**   |            14 |             5 |
+| **LR**   |            16 |             7 |
+| **RL**   |            16 |             7 |
+
+
+| Version       |    Min |    Max |
+| ------------- | -----: | -----: |
+| **Version 1** | **14** | **16** |
+| **Version 2** |  **5** |  **7** |
+
+
+In real C++ code on GDSL
+| Metric                          | Algorithm 1 (Node[] + Link[]) |               Algorithm 2 (Direct)               |
+| ------------------------------- | :---------------------------: | :----------------------------------------------: |
+| Rotation logic                  |     Unified reconstruction    |                 Direct rotations                 |
+| Temporary pointer arrays        |  **2** (`node[3]`, `link[4]`) |                       **0**                      |
+| Local pointer variables         |       1 (`left`/`right`)      | 2 (`left` + `leftright` / `right` + `rightleft`) |
+| Pointer assignments (rotation)  |           **14–16**           |                     **5–7** ✅                    |
+| Pointer dereferences            |             Higher            |                       Lower                      |
+| Temporary memory footprint      |             Higher            |                       Lower                      |
+| **Cache locality**              |              Good             |                **Slightly Better**               |
+| Register pressure               |             Higher            |                       Lower                      |
+| Compiler optimization potential |              Good             |                      Better                      |
+| Time Complexity                 |              O(1)             |                       O(1)                       |
+| Space Complexity                |              O(1)             |                       O(1)                       |
+| AVL balancing result            |           Identical           |                     Identical                    |
+

@@ -1,0 +1,61 @@
+Input : imbalance node AVL
+Output: balance subtree root
+
+function balance(AVL)
+
+    if height_of(AVL.left) > height_of(AVL.right) then
+        Node[2] = AVL
+        Link[3] = AVL.right
+        Left = AVL.left
+
+        if height_of(Left.left) < height_of(Left.right) then      
+            Node[0] = Left        Node[1] = Left.right
+            Link[0] = Left.left   Link[1] = Node[1].left   Link[2] = Node[1].right
+        else                                               
+            Node[1] = Left           Node[0] = Left.left
+            Link[0] = Node[0].left   Link[1] = Node[0].right   Link[2] = Left.right
+        end if
+
+    else                                                   
+        Node[0] = AVL
+        Link[0] = AVL.left
+        Right = AVL.right
+
+        if height_of(Right.left) < height_of(Right.right) then   
+            Node[1] = Right        Node[2] = Right.right
+            Link[1] = Right.left   Link[2] = Node[2].left   Link[3] = Node[2].right
+        else                                                
+            Node[2] = Right          Node[1] = Right.left
+            Link[1] = Node[1].left   Link[2] = Node[1].right   Link[3] = Right.right
+        end if
+
+    end if
+
+    Node[1].left = Node[0]   Node[1].right = Node[2]
+
+    Node[0].left = Link[0]   Node[0].right = Link[1]
+    Node[2].left = Link[2]   Node[2].right = Link[3]
+
+    UpdateHeight(Node[0])   UpdateHeight(Node[2])   UpdateHeight(Node[1])
+
+    return Node[1]
+
+end Balance
+
+
+
+function height_of(Node)
+    return if Node = NULL then 0 else (Node.height + 1)
+end height_of
+
+
+function UpdateHeight(Node)
+    leftHeight = height_of(Node.left)
+    rightHeight = height_of(Node.right)
+
+    if (leftHeight - rightHeight) < 2 then
+        Node.height = max(leftHeight, rightHeight)
+    else
+        Node.height = INVALID
+    end if
+end UpdateHeight

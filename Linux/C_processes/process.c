@@ -8,6 +8,7 @@
 //     printf("I am %d before forking process\n", (int)getpid());
 //     pid_t pid = fork();
 
+//     printf("Parent: %d  ", (int)getppid());
 //     printf("Fork returned: %d\n", (int)pid);
 // }
 
@@ -60,8 +61,7 @@
 //         myppid = getppid();
 //         printf("Process id is %d and PPID is %d\n\n", mypid, myppid);
 //     }
-//     else{
-//         // Process
+//     else{ // Process
 //         sleep(2);
 //         printf("This is parent process with fork() = %d\n", pid);
 //         mypid = getpid();
@@ -85,6 +85,7 @@ As a result, the process remains as an entry in the process table.
 Simple Meaning:
 A zombie process is a dead child process whose parent is still alive and has not yet collected its exit information.
 */
+
 // #include <stdio.h>
 // #include <stdlib.h>
 // #include <sys/types.h>
@@ -101,14 +102,14 @@ A zombie process is a dead child process whose parent is still alive and has not
 //     else if(pid == 0){
 //         printf("Child Process\n");
 //         printf("Child PID = %d\n", getpid());
-//         printf("Child process terminated\n");
 //         exit(0);
+//         printf("Child process terminated\n");
 //     }
 //     else{
 //         printf("Parent Process\n");
 //         printf("Parent PID = %d\n", getpid());
-//         printf("Parent sleeping for 4 seconds\n");
-//         sleep(7);
+//         printf("Parent sleeping for 4 seconds\n\n");
+//         sleep(4);
 //         printf("\nParent process fork() after child dead : %d\n", (int)pid);
 //         printf("Parent process completed\n");
 //     }
@@ -127,6 +128,7 @@ The orphan process is subsequently adopted by the system's init process (PID 1) 
 Simple Meaning:
 An orphan process is a running child process whose parent has died, so the operating system assigns it a new parent.
 */
+
 // #include <stdio.h>
 // #include <stdlib.h>
 // #include <sys/types.h>
@@ -141,14 +143,16 @@ An orphan process is a running child process whose parent has died, so the opera
 //         exit(1);
 //     }
 //     else if (pid == 0){  // Child process
-//         sleep(7);  // Wait so parent can terminate first
-//         printf("Child Process\n");
+//         sleep(4);  // Wait so parent can terminate first
+//         printf("\nChild Process\n");
 //         printf("Child PID = %d\n", getpid());
-//         printf("New Parent PID = %d\n", getppid());
+//         printf("New Parent PPID = %d\n", getppid());
 //     }
 //     else{  // Parent process
 //         printf("Parent Process\n");
+//         printf("Parent Child ID = %d\n", pid);
 //         printf("Parent PID = %d\n", getpid());
+//         printf("Parent PPID = %d\n", getppid());
 //         printf("Parent process terminated\n");
 //         exit(0);
 //     }
@@ -159,6 +163,7 @@ An orphan process is a running child process whose parent has died, so the opera
 //----------------------------------------------
 
 // #include <stdio.h>
+// #include <stdlib.h>
 // #include <unistd.h>
 // #include <sys/wait.h>
 
@@ -201,13 +206,14 @@ An orphan process is a running child process whose parent has died, so the opera
 //     }        // integer exit status (0–255)
 //     else{
 //         printf("Parent waiting for child..!\n\n");
+        
 //         int status;
 //         wait(&status); // OS stores child result into `status`
 //         if (WIFEXITED(status)) {
-//             printf("Child exit status = %d\n", WEXITSTATUS(status));
+//             printf("Inside Parent, Child exit status = %d\n", WEXITSTATUS(status));
 //         }
 //     }   // status stores full child termination information like exit code, signal, and process state.
-//         // WEXITSTATUS(status) is a macro extracts the child process exit value Only
+//         // WEXITSTATUS(status) is a macro extracts the child process exit value Only.
 //     return 0;
 // }
 
@@ -225,16 +231,16 @@ An orphan process is a running child process whose parent has died, so the opera
 
 //     if (pid == 0) {
 //         printf("Child running... PID = %d\n", getpid());
-//         sleep(2);
+//         sleep(4);
 //         printf("Child exiting\n");
 
 //     } else {
 //         int status;
 //         printf("Parent waiting for child PID = %d\n", pid);
 
-//         // waitpid(pid, &status, 0);   // wait for specific child
+//         // waitpid(pid, &status, 0);   // defualt is 0 waiting wait for specific child
 //         waitpid(pid, &status, WNOHANG);  // (like server checking multiple children) — there it usefull & powerful.
-
+//                            // WNOHANG -> "Don't block (wait) if the child hasn't finished yet. Return immediately." 
 //         printf("Child finished : %d\n", WEXITSTATUS(status));
 //     }
 
@@ -253,14 +259,15 @@ An orphan process is a running child process whose parent has died, so the opera
 
 //     if (pid == 0) {
 //         printf("Child running... PID = %d\n", getpid());
-//         sleep(2);
-//         printf("Child exiting\n");
-//         exit(5);   // giving exit status
+//         // sleep(2);
+//         printf("\nChild exiting\n");
+//         exit(16);   // giving exit status
 //     } 
 //     else {
 //         int status;
 //         printf("Parent waiting for child PID = %d\n", pid);
 
+//         // pid_t ret = waitpid(pid, &status, 0);
 //         pid_t ret = waitpid(pid, &status, WNOHANG);
 
 //         printf("waitpid return = %d\n", ret);
@@ -367,27 +374,24 @@ An orphan process is a running child process whose parent has died, so the opera
 //     printf("My PID = %d\n", pid);
 
 //     sleep(2);
-
-//     printf("Stopping myself (SIGSTOP)\n");
-//     kill(pid, SIGSTOP);   // process will PAUSE here
+//     // kill(pid, SIGSTOP);  // SIGSTOP-> "cannot execute any more code until another process resumes it."
+//     printf("Stopping myself (SIGSTOP)\n");  // process will PAUSE here.
 
 //     printf("This will not print immediately\n");
 
 //     sleep(2);
-
+//     kill(pid, SIGCONT);  // resume process
 //     printf("Continuing myself (SIGCONT)\n");
-//     kill(pid, SIGCONT);   // resume process
 
 //     sleep(2);
-
+//     kill(pid, SIGTERM);  // polite termination
 //     printf("Now terminating using SIGTERM\n");
-//     kill(pid, SIGTERM);   // polite termination
 
 //     return 0;
 // }
 
-// // ✔ The OS (kernel) is the one that actually stops the process.
-// // parent → optional sender, not controller
+// ✔ The OS (kernel) is the one that actually stops the process.
+// parent → optional sender, not controller
 // #include <stdio.h>
 // #include <unistd.h>
 // #include <signal.h>
@@ -405,18 +409,17 @@ An orphan process is a running child process whose parent has died, so the opera
 //         }
 //     else {  sleep(4);
 
-//         printf("Parent sending SIGSTOP\n");
 //         kill(pid, SIGSTOP);  // Child process PAUSE 
+//         printf("Parent sending SIGSTOP\n");
 
 //         printf("\nParent sleepping!\n\n"); sleep(7);
 
-//         printf("Parent sending SIGCONT\n");
 //         kill(pid, SIGCONT);  // Child process RESUME 
+//         printf("Parent sending SIGCONT\n");
 
 //         sleep(4);
-
-//         printf("Parent sending SIGKILL\n");
 //         kill(pid, SIGKILL);  // Child process polite termination 
+//         printf("Parent sending SIGKILL\n");
 //     }
 
 //     return 0;
