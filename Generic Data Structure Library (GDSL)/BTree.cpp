@@ -44,6 +44,7 @@ protected:
     unsigned short link(BTnode<D>* node, BTnode<D>* parent);
     void fillMinimum(BTnode<D>* node, BTnode<D>* parent);
     void deletecase(NTYPE NT, BTnode<D>* node, unsigned short i, unsigned short l=65535);
+
 public:
     BTREE(unsigned short order);
     ~BTREE();

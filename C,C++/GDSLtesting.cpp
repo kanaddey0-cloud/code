@@ -1,6 +1,7 @@
 
 #include <iostream>
 #include <gdsl.hpp>
+#include <gdsl_array>
 #include <gdsl_list>
 #include <gdsl_stack>
 #include <gdsl_queue>
@@ -9,150 +10,152 @@
 #include <gdsl_avl>
 #include <gdsl_btree>
 
-template<typename D>
-std::ostream& operator<<(std::ostream& out, const node<D>& n){
-    return out << n.K;
-}
+int main(){ std::cout<<"\nLibrary Compile Successfully\n\n"; }
 
-#include <iostream>
-#include <stdexcept>
+// template<typename D>
+// std::ostream& operator<<(std::ostream& out, const LISTnode<D>& n){
+//     return out << n.K;
+// }
 
-// assume AVLTREE + MODE already included
-int main() {
+// #include <iostream>
+// #include <stdexcept>
 
-    std::cout << "==============================\n";
-    std::cout << "   BST LIBRARY FINAL TEST\n";
-    std::cout << "==============================\n\n";
+// // assume AVLTREE + MODE already included
+// int main() {
 
-    AVLTREE<int> tree;
+//     std::cout << "==============================\n";
+//     std::cout << "   BST LIBRARY FINAL TEST\n";
+//     std::cout << "==============================\n\n";
 
-    int arr[] = {10, 5, 20, 3, 7, 15, 30};
-    for(int x : arr)
-        tree.insert(x);
-    std::cout<<tree<<"\n\n";
-    // =========================================================
-    // 1. ITERATOR MULTI OBJECT TEST
-    // =========================================================
-    std::cout << "=== ITERATOR MULTI OBJECT TEST ===\n";
+//     AVLTREE<int> tree;
 
-    auto it1 = tree.begin();
-    auto it2 = tree.begin();
+//     int arr[] = {10, 5, 20, 3, 7, 15, 30};
+//     for(int x : arr)
+//         tree.insert(x);
+//     std::cout<<tree<<"\n\n";
+//     // =========================================================
+//     // 1. ITERATOR MULTI OBJECT TEST
+//     // =========================================================
+//     std::cout << "=== ITERATOR MULTI OBJECT TEST ===\n";
 
-    std::cout << "it1: ";
-    for(; it1 != tree.end(); ++it1)
-        std::cout << *it1 << " ";
+//     auto it1 = tree.begin();
+//     auto it2 = tree.begin();
 
-    std::cout << "\nit2: ";
-    for(; it2 != tree.end(); ++it2)
-        std::cout << *it2 << " ";
+//     std::cout << "it1: ";
+//     for(; it1 != tree.end(); ++it1)
+//         std::cout << *it1 << " ";
 
-    std::cout << "\n\n";
+//     std::cout << "\nit2: ";
+//     for(; it2 != tree.end(); ++it2)
+//         std::cout << *it2 << " ";
 
-    // =========================================================
-    // 2. TRAVERSAL TESTS (ALL MODES)
-    // =========================================================
-    std::cout << "=== TRAVERSAL TESTS ===\n\n";
+//     std::cout << "\n\n";
 
-    struct TestMode {
-        MODE m;
-        const char* name;
-    } tests[] = {
-        {MODE::IN, "INORDER"},
-        {MODE::PRE, "PREORDER"},
-        {MODE::POST, "POSTORDER"},
-        {MODE::BFS, "BFS"},
-        {MODE::DFS, "DFS"},
-        {MODE::DFS_LR, "DFS_LR"},
-        {MODE::BFS_RL, "BFS_RL"}
-    };
+//     // =========================================================
+//     // 2. TRAVERSAL TESTS (ALL MODES)
+//     // =========================================================
+//     std::cout << "=== TRAVERSAL TESTS ===\n\n";
 
-    for(auto &t : tests) {
-        tree.M = t.m;
+//     struct TestMode {
+//         MODE m;
+//         const char* name;
+//     } tests[] = {
+//         {MODE::IN, "INORDER"},
+//         {MODE::PRE, "PREORDER"},
+//         {MODE::POST, "POSTORDER"},
+//         {MODE::BFS, "BFS"},
+//         {MODE::DFS, "DFS"},
+//         {MODE::DFS_LR, "DFS_LR"},
+//         {MODE::BFS_RL, "BFS_RL"}
+//     };
 
-        std::cout << t.name << ":\n";
-        for(auto x : tree)
-            std::cout << x << " ";
+//     for(auto &t : tests) {
+//         tree.M = t.m;
 
-        std::cout << "\n\n";
-    }
+//         std::cout << t.name << ":\n";
+//         for(auto x : tree)
+//             std::cout << x << " ";
 
-    // =========================================================
-    // 3. SIZE TEST
-    // =========================================================
-    std::cout << "=== SIZE TEST ===\n";
-    std::cout << "Size: " << tree.size() << "\n\n";
+//         std::cout << "\n\n";
+//     }
 
-    // =========================================================
-    // 4. INDEX OPERATOR TEST
-    // =========================================================
-    std::cout << "=== INDEX TEST (INORDER) ===\n";
-    tree.M = MODE::IN;
+//     // =========================================================
+//     // 3. SIZE TEST
+//     // =========================================================
+//     std::cout << "=== SIZE TEST ===\n";
+//     std::cout << "Size: " << tree.size() << "\n\n";
 
-    for(int i = 0; i < tree.size(); i++)
-        std::cout << "tree[" << i << "] = " << tree[i] << "\n";
+//     // =========================================================
+//     // 4. INDEX OPERATOR TEST
+//     // =========================================================
+//     std::cout << "=== INDEX TEST (INORDER) ===\n";
+//     tree.M = MODE::IN;
 
-    std::cout << "\n";
+//     for(int i = 0; i < tree.size(); i++)
+//         std::cout << "tree[" << i << "] = " << tree[i] << "\n";
 
-    // negative index
-    std::cout << "Last element tree[-1] = " << tree[-1] << "\n\n";
+//     std::cout << "\n";
 
-    // =========================================================
-    // 5. SEARCH TEST
-    // =========================================================
-    std::cout << "=== SEARCH TEST ===\n";
-    std::cout << "search(15): " << tree.search(15) << "\n";
-    std::cout << "search(100): " << tree.search(100) << "\n\n";
+//     // negative index
+//     std::cout << "Last element tree[-1] = " << tree[-1] << "\n\n";
 
-    // =========================================================
-    // 6. REMOVE TEST
-    // =========================================================
-    std::cout << "=== REMOVE TEST ===\n";
-    tree.remove(20);
+//     // =========================================================
+//     // 5. SEARCH TEST
+//     // =========================================================
+//     std::cout << "=== SEARCH TEST ===\n";
+//     std::cout << "search(15): " << tree.search(15) << "\n";
+//     std::cout << "search(100): " << tree.search(100) << "\n\n";
 
-    tree.M = MODE::IN;
-    for(auto x : tree)
-        std::cout << x << " ";
+//     // =========================================================
+//     // 6. REMOVE TEST
+//     // =========================================================
+//     std::cout << "=== REMOVE TEST ===\n";
+//     tree.remove(20);
 
-    std::cout << "\n\n";
+//     tree.M = MODE::IN;
+//     for(auto x : tree)
+//         std::cout << x << " ";
 
-    // =========================================================
-    // 7. VIEW FUNCTION TEST
-    // =========================================================
-    std::cout << "=== VIEW TEST (BFS) ===\n";
-    tree.view(MODE::BFS);
+//     std::cout << "\n\n";
 
-    std::cout << "\n";
+//     // =========================================================
+//     // 7. VIEW FUNCTION TEST
+//     // =========================================================
+//     std::cout << "=== VIEW TEST (BFS) ===\n";
+//     tree.view(MODE::BFS);
 
-    std::cout << "=== VIEW TEST (DFS) ===\n";
-    tree.view(MODE::DFS);
+//     std::cout << "\n";
 
-    std::cout << "\n";
+//     std::cout << "=== VIEW TEST (DFS) ===\n";
+//     tree.view(MODE::DFS);
 
-    // =========================================================
-    // 8. CONST TEST
-    // =========================================================
-    std::cout << "=== CONST TEST ===\n";
-    const AVLTREE<int>& cref = tree;
+//     std::cout << "\n";
 
-    std::cout << "cref[0] = " << cref[0] << "\n";
-    std::cout << "cref[-1] = " << cref[-1] << "\n\n";
+//     // =========================================================
+//     // 8. CONST TEST
+//     // =========================================================
+//     std::cout << "=== CONST TEST ===\n";
+//     const AVLTREE<int>& cref = tree;
 
-    // =========================================================
-    // 9. EXCEPTION TEST
-    // =========================================================
-    std::cout << "=== EXCEPTION TEST ===\n";
+//     std::cout << "cref[0] = " << cref[0] << "\n";
+//     std::cout << "cref[-1] = " << cref[-1] << "\n\n";
 
-    try {
-        std::cout << tree[100] << "\n";
-    }
-    catch(const std::exception& e) {
-        std::cout << "Caught: " << e.what() << "\n";
-    }
+//     // =========================================================
+//     // 9. EXCEPTION TEST
+//     // =========================================================
+//     std::cout << "=== EXCEPTION TEST ===\n";
 
-    std::cout << "\n=== ALL TESTS COMPLETE ===\n";
+//     try {
+//         std::cout << tree[100] << "\n";
+//     }
+//     catch(const std::exception& e) {
+//         std::cout << "Caught: " << e.what() << "\n";
+//     }
 
-    return 0;
-}
+//     std::cout << "\n=== ALL TESTS COMPLETE ===\n";
+
+//     return 0;
+// }
 
 // using namespace std;
 // int main() {

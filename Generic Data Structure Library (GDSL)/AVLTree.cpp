@@ -16,6 +16,7 @@ class AVLiterator {
     AVLnode<D>* ptr, *ROOT, *last;
     STACK<AVLnode<D>*> S;
     QUEUE<AVLnode<D>*> Q;
+    
 public:
     MODE M;
     AVLiterator(MODE mode, AVLnode<D>* p = nullptr);
@@ -223,6 +224,7 @@ protected:
     char subH(AVLnode<D>* sub) const noexcept;
     char balanceH(char leftH, char rightH) const noexcept;
     AVLnode<D>* balance(AVLnode<D>* AVL);
+
 public:
     MODE M=MODE::IN;
     AVLTREE()=default;
@@ -671,7 +673,7 @@ AVLnode<D>* AVLTREE<D>::balance(AVLnode<D>* AVL){
             left->LINK[R]=leftright->LINK[L];  AVL->LINK[L]= leftright->LINK[R];
             leftright->LINK[L]=left;       leftright->LINK[R]=AVL;
             
-            left->H=balanceH(subH(left->LINK[L]),subH(left->LINK[R]));  
+            left->H=balanceH(subH(left->LINK[L]),subH(leftright));  
             AVL->H=balanceH(subH(AVL->LINK[L]),subH(AVL->LINK[R]));
             AVL=leftright; 
         } else { 
@@ -682,7 +684,7 @@ AVLnode<D>* AVLTREE<D>::balance(AVLnode<D>* AVL){
             AVL=left; 
         }
     }
-    else if(subH(AVL->LINK[L]) < subH(AVL->LINK[R])){ 
+    else { 
         AVLnode<D>* right=AVL->LINK[R];
         AVLnode<D>* rightleft=right->LINK[L];
 
@@ -698,7 +700,7 @@ AVLnode<D>* AVLTREE<D>::balance(AVLnode<D>* AVL){
             rightleft->LINK[L]=AVL;           rightleft->LINK[R]=right;
 
             AVL->H=balanceH(subH(AVL->LINK[L]), subH(AVL->LINK[R]));  
-            right->H=balanceH(subH(right->LINK[L]), subH(right->LINK[R]));
+            right->H=balanceH(subH(rightleft), subH(right->LINK[R]));
             AVL=rightleft; 
         } 
     }

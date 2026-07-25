@@ -16,6 +16,7 @@ class BSTiterator {
     BSTnode<D>* ptr, *ROOT, *last;
     STACK<BSTnode<D>*> S;
     QUEUE<BSTnode<D>*> Q;
+    
 public:
     MODE M;
     BSTiterator(MODE mode, BSTnode<D>* p = nullptr);
@@ -217,6 +218,7 @@ protected:
     BSTnode<D>* pointerIN(BSTnode<D>* root, const unsigned long int index, unsigned long int& count) const;
     BSTnode<D>* pointerPRE(BSTnode<D>* root, const unsigned long int index, unsigned long int& count) const;
     BSTnode<D>* pointerPOST(BSTnode<D>* root, const unsigned long int index, unsigned long int& count) const;
+
 public:
     MODE M=MODE::IN;
     BSTREE(bool l=false);

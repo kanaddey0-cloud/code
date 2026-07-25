@@ -1,30 +1,95 @@
+#include <iostream>
+#include <stdexcept>
+#include <new>
 #include <gdsl_list>
+#include <gdsl_array>
 
 template<typename D>
-class STACK{
-protected:
-    LIST<D> S;
-public:
-    long int size();
-    bool empty();
-    bool push(D val);
-    void view(bool v=true) const;
-    D tos();
-    D pop();
-    void clear();
+class STACK;
+
+template<typename D>
+union LIFO
+{
+    struct Continuous { friend class STACK<D>;
+    protected:
+        ::ARRAY<D> S;
+    public:
+        Continuous(size_t size=0) :S(size) {} 
+
+        size_t size();
+        bool empty();
+        bool push(D val);
+        D tos();
+        D pop();
+        void view(bool v) const;
+        void clear();
+
+        Continuous(const Continuous&) = default;
+        Continuous& operator=(const Continuous&) = default;
+
+        Continuous(Continuous&&) noexcept = default;
+        Continuous& operator=(Continuous&&) noexcept = default;
+    } array;
+
+    struct Linked { friend class STACK<D>;
+    protected:
+        ::LIST<D> S;
+    public:
+        Linked()=default;
+
+        size_t size();
+        bool empty();
+        bool push(D val);
+        D tos();
+        D pop();
+        void view(bool v) const;
+        void clear();
+
+        Linked(const Linked&) = default;
+        Linked& operator=(const Linked&) = default;
+
+        Linked(Linked&&) noexcept = default;
+        Linked& operator=(Linked&&) noexcept = default;
+    } list;
+
+    LIFO() {}
+    ~LIFO() {}
+
+    LIFO(const LIFO&)=delete;
+    LIFO& operator=(const LIFO&)=delete;
+
+    LIFO(LIFO&&)=delete;
+    LIFO& operator=(LIFO&&)=delete;
 };
 
 template<typename D>
-long int STACK<D>::size(){ return S.size(); }
+size_t LIFO<D>::Continuous::size(){ return S.size(); }
 
 template<typename D>
-bool STACK<D>::empty(){ return S.size()==0; }
+size_t LIFO<D>::Linked::size(){ return S.size(); }
 
 template<typename D>
-bool STACK<D>::push(D val){ return S.insert(val,0); }
+bool LIFO<D>::Continuous::empty(){ return S.size()==0; }
 
 template<typename D>
-D STACK<D>::pop(){
+bool LIFO<D>::Linked::empty(){ return S.size()==0; }
+
+template<typename D>
+bool LIFO<D>::Continuous::push(D val){ return S.insert(val); }
+
+template<typename D>
+bool LIFO<D>::Linked::push(D val){ return S.insert(val,0); }
+
+template<typename D>
+D LIFO<D>::Continuous::pop(){
+    if(empty()) 
+        throw std::runtime_error("Stack is empty");
+
+    return S.remove();
+}
+
+template<typename D>
+D LIFO<D>::Linked::pop(){
     if(empty()) 
         throw std::runtime_error("Stack is empty");
 
@@ -32,9 +97,12 @@ D STACK<D>::pop(){
 }
 
 template<typename D>
-void STACK<D>::view(bool v) const{
-    long int index = S.size();
-    if(!index) return;
+void LIFO<D>::Continuous::view(bool v) const{
+    if(v) std::cout << "SP->"; S.view();
+}
+
+template<typename D>
+void LIFO<D>::Linked::view(bool v) const{
     if(v) std::cout << "SP->";
     bool f=false;
     std::cout << "[";
@@ -45,115 +113,299 @@ void STACK<D>::view(bool v) const{
 }
 
 template<typename D>
-void STACK<D>::clear(){
-    while(S.size()) S.remove(S.size()-1);
+void LIFO<D>::Continuous::clear(){
+    while(!empty()) S.remove();
 }
 
 template<typename D>
-D STACK<D>::tos(){
-	if(!S.size())
+void LIFO<D>::Linked::clear(){
+    while(!empty()) S.remove(0);
+}
+
+template<typename D>
+D LIFO<D>::Continuous::tos(){
+	if(empty())
+        throw std::runtime_error("Stack is empty");
+		
+    return S[-1];
+}
+
+template<typename D>
+D LIFO<D>::Linked::tos(){
+	if(empty())
         throw std::runtime_error("Stack is empty");
 		
     return S.value(0);
 }
 
-template<typename D>
-std::ostream& operator<<(std::ostream& out, const STACK<D>& S){  S.view(false); return out;  }
 
 template<typename D>
-std::ostream& operator<<(std::ostream& out, const node<D>& n){
-    return out << n.K;
+class STACK{
+protected:
+    bool C;
+    LIFO<D> Stack;
+public:
+    STACK(size_t size=0);
+    ~STACK();
+
+    bool resize(size_t size, bool force=false);
+    size_t size();
+    bool empty();
+    bool push(D val);
+    void view(bool v=false) const;
+    D tos();
+    D pop();
+    void clear();
+
+    STACK(const STACK&);
+    STACK& operator=(const STACK&);
+
+    STACK(STACK&&) noexcept;
+    STACK& operator=(STACK&&) noexcept;
+};
+
+template<typename D>
+STACK<D>::STACK(size_t size)
+{
+    if(size){
+        new (&Stack.array) typename LIFO<D>::Continuous(size);
+        C=true;
+    }else{
+        new (&Stack.list) typename LIFO<D>::Linked();
+        C=false;
+    }
 }
 
-#include <iostream>
-using namespace std;
+template<typename D>
+STACK<D>::~STACK()
+{
+    if(C)
+        Stack.array.~Continuous();
+    else
+        Stack.list.~Linked();
+}
 
-int main() {
+template<typename D>
+STACK<D>::STACK(const STACK& other) 
+{
+    C=other.C;
+    if(C)
+        new (&Stack.array) typename LIFO<D>::Continuous(other.Stack.array);
+    else
+        new (&Stack.list) typename LIFO<D>::Linked(other.Stack.list);
+}
 
-    cout << "===== Test 1: STACK<int> =====" << endl;
-    STACK<int> s1;
+template<typename D>
+STACK<D>& STACK<D>::operator=(const STACK& other) 
+{
+    if(this == &other) return *this;
 
-    s1.push(10);
-    s1.push(20);
-    s1.push(30);
+    if(C)
+        Stack.array.~Continuous();
+    else
+        Stack.list.~Linked();
 
-    // cout<<s1;   // expected: SP->[10, 20, 30]
-    cout << endl;
+    C=other.C;
+    if(C)
+        new (&Stack.array) typename LIFO<D>::Continuous(other.Stack.array);
+    else
+        new (&Stack.list) typename LIFO<D>::Linked(other.Stack.list);
 
-int arr[4] = {9,2,35,4};
-arr[0]
-arr[1]
-arr[2]
+    return *this;
+}
 
-    s1.push(40);
-    s1.view();
-    cout << endl << endl;
-    cout << "Pop: " << s1.pop() << endl;  // 30
-    cout<< s1;
-    cout << "\n\nPop: " << s1.pop() << endl;  // 30
-    cout<< s1;
+template<typename D>
+STACK<D>::STACK(STACK&& other) noexcept
+{
+    C=other.C;
+    if(C)
+        new (&Stack.array) typename LIFO<D>::Continuous(std::move(other.Stack.array));
+    else
+        new (&Stack.list) typename LIFO<D>::Linked(std::move(other.Stack.list));
+}
 
-    cout << "\n\n===== Test 2: STACK<string> =====" << endl;
-    STACK<string> s2;
+template<typename D>
+STACK<D>& STACK<D>::operator=(STACK&& other) noexcept
+{
+    if(this == &other) return *this;
 
-    s2.push("A");
-    s2.push("B");
-    s2.push("C");
+    if(C)
+        Stack.array.~Continuous();
+    else
+        Stack.list.~Linked();
 
-    s2.view();   // SP->[A, B, C]
-    cout << endl;
+    C=other.C;
+    if(C)
+        new (&Stack.array) typename LIFO<D>::Continuous(std::move(other.Stack.array));
+    else
+        new (&Stack.list) typename LIFO<D>::Linked(std::move(other.Stack.list));
 
-    cout << "Pop: " << s2.pop() << endl;  // C
-    s2.view();
-    cout << endl << endl;
+    return *this;
+}
 
+template<typename D>
+size_t STACK<D>::size()
+{
+    return C? Stack.array.size()
+            : Stack.list.size();
+}
 
-    cout << "===== Test 3: STACK<node<int>> =====" << endl;
-    STACK<node<int>> s3;
+template<typename D>
+bool STACK<D>::empty()
+{
+    return C? Stack.array.empty()
+            : Stack.list.empty();
+}
 
-    s3.push({100, nullptr});
-    s3.push({200, nullptr});
-    s3.push({300, nullptr});
+template<typename D>
+bool STACK<D>::push(D val)
+{
+    return C? Stack.array.push(val)
+            : Stack.list.push(val);
+}
 
-    s3.view(false);   // SP->[100, 200, 300]
-    cout << endl;
+template<typename D>
+void STACK<D>::view(bool v) const
+{
+    C? Stack.array.view(v)
+     : Stack.list.view(v);
+}
 
-    cout << "Pop: " << s3.pop().K << endl;  // 300
-    s3.view(false);
-    cout << endl << endl;
+template<typename D>
+D STACK<D>::tos()
+{
+    return C? Stack.array.tos()
+            : Stack.list.tos();
+}
 
+template<typename D>
+D STACK<D>::pop()
+{
+    return C? Stack.array.pop()
+            : Stack.list.pop();
+}
 
-    cout << "===== Test 4: Empty Stack =====" << endl;
-    STACK<int> s4;
+template<typename D>
+void STACK<D>::clear()
+{
+    C? Stack.array.clear()
+     : Stack.list.clear();
+}
 
-    try {
-        s4.pop();   // should throw
-    } catch(const exception& e) {
-        cout << "Exception: " << e.what() << endl;
+template<typename D>
+bool STACK<D>::resize(size_t size, bool force)
+{
+    if(!C) return false;
+
+    if(Stack.array.S.capacity() < size && force){
+        Stack.array.S.capacity(size);
+        return true;
     }
+    else if(Stack.array.S.capacity() < size) return false;
+    return true;
+}
+
+template<typename D>
+std::ostream& operator<<(std::ostream& out, const STACK<D>& S){ S.view(false); return out; }
+
+// int main(){ return 0; }
+
+
+int main()
+{
+    std::cout << "==============================\n";
+    std::cout << " ARRAY BASED STACK TEST\n";
+    std::cout << "==============================\n";
+
+    STACK<int> A(10);   // Continuous (ARRAY)
+
+    std::cout << "Empty : " << std::boolalpha << A.empty() << '\n';
+
+    for(int i=1;i<=5;i++)
+        A.push(i*10);
+
+    std::cout << "Stack : ";
+    A.view();
+    std::cout << '\n';
+
+    std::cout << "Size  : " << A.size() << '\n';
+    std::cout << "TOS   : " << A.tos() << '\n';
+
+    std::cout << "Pop   : " << A.pop() << '\n';
+
+    std::cout << "After Pop : ";
+    A.view(true);
+    std::cout << '\n';
+
+    std::cout << "Resize(20,false) : "
+              << A.resize(20,false) << '\n';
+
+    std::cout << "Resize(20,true)  : "
+              << A.resize(20,true) << '\n';
+
+    A.clear();
+
+    std::cout << "After Clear : ";
+    A.view();
+    std::cout << "\nEmpty : " << A.empty() << '\n';
+
+
+    std::cout << "\n\n==============================\n";
+    std::cout << " LINKED LIST BASED STACK TEST\n";
+    std::cout << "==============================\n";
+
+    STACK<int> L;      // Linked
+
+    std::cout << "Empty : " << std::boolalpha << L.empty() << '\n';
+
+    for(int i=1;i<=5;i++)
+        L.push(i*100);
+
+    std::cout << "Stack : ";
+    L.view();
+    std::cout << '\n';
+
+    std::cout << "Size  : " << L.size() << '\n';
+    std::cout << "TOS   : " << L.tos() << '\n';
+
+    std::cout << "Pop   : " << L.pop() << '\n';
+
+    std::cout << "After Pop : ";
+    L.view(true);
+    std::cout << '\n';
+
+    std::cout << "Resize(20,true) : "
+              << L.resize(20,true)
+              << " (expected false)\n";
+
+    L.clear();
+
+    std::cout << "After Clear : ";
+    L.view();
+    std::cout << "\nEmpty : " << L.empty() << '\n';
 
     return 0;
 }
 
-// int main() {
-//     STACK<node<int>> a;
 
-//     a.push({10, nullptr});
-//     a.push({20, nullptr});
-//     a.push({30, nullptr});
-//     a.push({40, nullptr});
-//     a.push({50, nullptr});
-//     a.push({60, nullptr});
-//     a.push({70, nullptr});
+//----------------------------------------------------------------------
 
-//     a.view();
+// template<typename D>
+// class STACK{
+// protected:
+//     LIST<D> Stack;
+// public:
+//     long int size();
+//     bool empty();
+//     bool push(D val);
+//     void view(bool v=true) const;
+//     D tos();
+//     D pop();
+//     void clear();
+// };
 
-//     a.pop();
-//     a.pop();
-//     a.pop();
 
-//     cout << endl;
-//     a.view();
-
-//     return 0;
+// template<typename D>
+// std::ostream& operator<<(std::ostream& out, const node<D>& n){
+//     return out << n.K;
 // }

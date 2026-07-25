@@ -1,0 +1,114 @@
+INSERT  GrowthInsert++
+
+if (S == C) {
+    if (C < 10) {
+        NewCapacity = C * 2
+    } else {
+        TotalOperations = GrowthInsert + GrowthDelete + GrowthSearch
+        Activity = GrowthInsert / TotalOperations
+        Confidence = min(1, TotalOperations / C)
+        GrowthRate = 10 + (90 × Activity × Confidence)
+        NewCapacity = C + (C × GrowthRate / 100)
+    }
+}
+
+
+
+DELETE  GrowthDelete++
+
+if (C > 2) and (S <= C / 4)
+{
+    NewCapacity = max(2, C / 2);
+}
+
+
+
+SEARCH  GrowthSearch++
+
+
+//--------------------------------------------------------
+
+// Operation Counters
+size_t GrowthInsert;
+size_t GrowthDelete;
+size_t GrowthSearch;
+
+// Resize Calculation
+size_t TotalOperations;
+float Activity;
+float Confidence;
+float GrowthRate;
+
+// Capacity
+size_t NewCapacity;
+
+----------------------------
+
+TotalOperations =
+    GrowthInsert + GrowthDelete + GrowthSearch;
+
+Activity =
+    static_cast<float>(GrowthInsert) / TotalOperations;
+
+Confidence =
+    std::min(1.0, static_cast<float>(TotalOperations) / C);
+
+GrowthRate =
+    10.0 + (90.0 * Activity * Confidence);
+
+NewCapacity =
+    C + static_cast<size_t>(C * GrowthRate / 100.0);
+
+----------------------------
+
+NewCapacity = std::max<size_t>(2, C / 2);
+
+
+----------------------------------------------------------
+
+========== Simple Sorting Algorithms ==========
+
+1. Bubble Sort
+2. Selection Sort
+3. Insertion Sort
+
+
+========== Divide and Conquer Algorithms ==========
+
+4. Merge Sort
+5. Quick Sort
+
+
+========== Heap Based Algorithms ==========
+
+6. Heap Sort
+7. Intro Sort
+
+
+========== Gap Based Algorithms ==========
+
+8. Shell Sort
+9. Comb Sort
+
+
+========== Hybrid Algorithms ==========
+
+10. Tim Sort
+
+
+========== Distribution Based Algorithms ==========
+
+11. Counting Sort
+12. Radix Sort
+13. Bucket Sort
+
+
+========== Other Sorting Algorithms ==========
+
+14. Cocktail Sort
+15. Gnome Sort
+16. Odd-Even Sort
+17. Cycle Sort
+18. Pancake Sort
+19. Stooge Sort
+20. Bogo Sort
