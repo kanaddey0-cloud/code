@@ -1,11 +1,11 @@
 #include <gdsl_stack>
 #include <gdsl_queue>
 
-enum class MODE :char {
-    DFS='w', BFS='x', DFS_LR='y', BFS_RL='z',
-    IN='a', PRE='b', POST='c',
+enum class MODE : char {
+    DFS='w', BFS='x', DFS_RL='y', BFS_RL='z',
+    IN='a', R_IN='e', PRE='b', POST='c',
     DEF='d'
-}; 
+};
 enum { L, R };
 
 template<typename D>
@@ -16,28 +16,35 @@ class AVLiterator {
     AVLnode<D>* ptr, *ROOT, *last;
     STACK<AVLnode<D>*> S;
     QUEUE<AVLnode<D>*> Q;
-    
+
 public:
     MODE M;
-    AVLiterator(MODE mode, AVLnode<D>* p = nullptr);
+    AVLiterator(MODE mode, size_t capacity, AVLnode<D>* p = nullptr);
+	
     AVLnode<D>* increment();
     AVLnode<D>* incrementBFS();
     AVLnode<D>* incrementDFS();
     AVLnode<D>* incrementIN();
+    AVLnode<D>* incrementR_IN();
     AVLnode<D>* incrementPRE();
     AVLnode<D>* incrementPOST();
+	
     D& operator*();
     const D& operator*() const;
+	
     AVLiterator& operator++() noexcept;
     AVLiterator operator++(int) noexcept;
+	
     bool operator!=(const AVLiterator& other) const noexcept;
     bool operator==(const AVLiterator& other) const noexcept;
+	
     D* operator->();
     const D* operator->() const;
 };
 
 template<typename D>
-AVLiterator<D>::AVLiterator(MODE mode, AVLnode<D>* p) : ptr(nullptr), last(nullptr), ROOT(p), M(mode) {
+AVLiterator<D>::AVLiterator(MODE mode, size_t capacity, AVLnode<D>* p) 
+                            : ptr(nullptr), last(nullptr), ROOT(p), M(mode), S(capacity), Q(capacity) {
     if(!ROOT) return;
 
     switch(M){
@@ -46,7 +53,7 @@ AVLiterator<D>::AVLiterator(MODE mode, AVLnode<D>* p) : ptr(nullptr), last(nullp
             Q.enqueue(ROOT); break;
 
         case MODE::DFS:
-        case MODE::DFS_LR:
+        case MODE::DFS_RL:
 
         case MODE::PRE:
             S.push(ROOT); break;
@@ -60,6 +67,15 @@ AVLiterator<D>::AVLiterator(MODE mode, AVLnode<D>* p) : ptr(nullptr), last(nullp
                 temp = temp->LINK[L];
             } break;
         }
+		
+        case MODE::R_IN:
+        {
+            AVLnode<D>* temp = ROOT;
+            while(temp){
+                S.push(temp);
+                temp = temp->LINK[R];
+            } break;
+        }
 
         default: break;
     }
@@ -68,31 +84,31 @@ AVLiterator<D>::AVLiterator(MODE mode, AVLnode<D>* p) : ptr(nullptr), last(nullp
 template <typename D>
 AVLnode<D>* AVLiterator<D>::incrementBFS(){
     if(Q.empty()) return nullptr;
-    AVLnode<D>* temp = Q.dequeue();
+    AVLnode<D>* tmp = Q.dequeue();
 
     if(M == MODE::BFS){
-        if(temp->LINK[L]) Q.enqueue(temp->LINK[L]);
-        if(temp->LINK[R]) Q.enqueue(temp->LINK[R]);
+        if(tmp->LINK[L]) Q.enqueue(tmp->LINK[L]);
+        if(tmp->LINK[R]) Q.enqueue(tmp->LINK[R]);
     }else{
-        if(temp->LINK[R]) Q.enqueue(temp->LINK[R]);
-        if(temp->LINK[L]) Q.enqueue(temp->LINK[L]);
+        if(tmp->LINK[R]) Q.enqueue(tmp->LINK[R]);
+        if(tmp->LINK[L]) Q.enqueue(tmp->LINK[L]);
     }
-    return temp;
+    return tmp;
 }
 
 template<typename D>
 AVLnode<D>* AVLiterator<D>::incrementDFS(){
     if(S.empty()) return nullptr;
-    AVLnode<D>* temp = S.pop();
+    AVLnode<D>* tmp = S.pop();
 
     if(M == MODE::DFS){
-        if(temp->LINK[L]) S.push(temp->LINK[L]);
-        if(temp->LINK[R]) S.push(temp->LINK[R]);
+        if(tmp->LINK[R]) S.push(tmp->LINK[R]);
+        if(tmp->LINK[L]) S.push(tmp->LINK[L]);
     }else{
-        if(temp->LINK[R]) S.push(temp->LINK[R]);
-        if(temp->LINK[L]) S.push(temp->LINK[L]);
+        if(tmp->LINK[L]) S.push(tmp->LINK[L]);
+        if(tmp->LINK[R]) S.push(tmp->LINK[R]);
     }
-    return temp;
+    return tmp;
 }
 
 template<typename D>
@@ -104,6 +120,19 @@ AVLnode<D>* AVLiterator<D>::incrementIN(){
     while(tmp){
         S.push(tmp);
         tmp = tmp->LINK[L];
+    }
+    return node;
+}
+
+template<typename D>
+AVLnode<D>* AVLiterator<D>::incrementR_IN(){
+    if(S.empty()) return nullptr;
+    AVLnode<D>* node = S.pop();
+
+    AVLnode<D>* tmp = node->LINK[L];
+    while(tmp){
+        S.push(tmp);
+        tmp = tmp->LINK[R];
     }
     return node;
 }
@@ -147,10 +176,11 @@ AVLnode<D>* AVLiterator<D>::increment(){
             return incrementBFS();
 
         case MODE::DFS: 
-        case MODE::DFS_LR: 
+        case MODE::DFS_RL: 
             return incrementDFS();
 
         case MODE::IN:   return incrementIN();
+        case MODE::R_IN: return incrementR_IN();
         case MODE::PRE:  return incrementPRE();
         case MODE::POST: return incrementPOST();
 
@@ -204,61 +234,72 @@ const D* AVLiterator<D>::operator->() const{
 template<typename D>
 class AVLTREE{
 protected:
-    unsigned long int elem=0;
+    size_t elem=0;
     AVLnode<D>* ROOT=nullptr, *AVL=nullptr;
     bool f0=false;
+	
     AVLnode<D>* create(D item);
     void print_Key_L_C_R(const AVLnode<D>* tmp) const;
     bool insert_(D item, AVLnode<D>* root);
     bool remove_(D item, AVLnode<D>* root);
     D deleting(AVLnode<D>* point, bool f1, bool f2=false);
     bool freelink(AVLnode<D>*& root);
-    unsigned long int addlink(AVLnode<D>*& root, const AVLnode<D>*& other);
-    AVLnode<D>* pointer(long int index, MODE mode=MODE::DEF) const;
-    AVLnode<D>* pointerBFS(const unsigned long int index, bool order=false) const;
-    AVLnode<D>* pointerDFS(const unsigned long int index, bool order=false) const;
-    AVLnode<D>* pointerIN(AVLnode<D>* root, const unsigned long int index, unsigned long int& count) const;
-    AVLnode<D>* pointerPRE(AVLnode<D>* root, const unsigned long int index, unsigned long int& count) const;
-    AVLnode<D>* pointerPOST(AVLnode<D>* root, const unsigned long int index, unsigned long int& count) const;
-//-------------------BALANCE_TREE
-    char subH(AVLnode<D>* sub) const noexcept;
+    size_t addlink(AVLnode<D>*& root, const AVLnode<D>*& other);
+	
+	char subH(AVLnode<D>* sub) const noexcept;
     char balanceH(char leftH, char rightH) const noexcept;
     AVLnode<D>* balance(AVLnode<D>* AVL);
-
+	
+    void _viewIN(const AVLnode<D>* root) const;
+    void _viewR_IN(const AVLnode<D>* root) const;
+    void _viewPRE(const AVLnode<D>* root) const;
+    void _viewPOST(const AVLnode<D>* root) const;
+    AVLnode<D>* pointer(std::ptrdiff_t index, MODE mode=MODE::DEF) const;
+    AVLnode<D>* pointerBFS(const size_t index, bool order=true) const;
+    AVLnode<D>* pointerDFS(const size_t index, bool order=true) const;
+    AVLnode<D>* pointerIN(AVLnode<D>* root, const size_t index, size_t& count) const;
+    AVLnode<D>* pointerR_IN(AVLnode<D>* root, const size_t index, size_t& count) const;
+    AVLnode<D>* pointerPRE(AVLnode<D>* root, const size_t index, size_t& count) const;
+    AVLnode<D>* pointerPOST(AVLnode<D>* root, const size_t index, size_t& count) const;
+	
 public:
     MODE M=MODE::IN;
     AVLTREE()=default;
     AVLTREE(const AVLTREE<D>& other);
     AVLTREE(AVLTREE<D>&& other) noexcept;
+    ~AVLTREE();
+
     AVLTREE& operator=(const AVLTREE& other);
     AVLTREE& operator=(AVLTREE&& other) noexcept;
-    D& operator[](const long int index);
-    const D& operator[](const long int index) const;
+    const D& operator[](const std::ptrdiff_t index) const;
+	
     long int size() const { return elem; }
     bool search(D item);
     void insert(D item);
     bool remove(D item);
-    bool remove_index(long int index, MODE mode=MODE::DEF);
-    void clear();
+    bool remove_index(std::ptrdiff_t index, MODE mode=MODE::DEF);
+	void clear();
     bool add(const AVLTREE<D>& root);
     void view(MODE mode=MODE::DEF) const;
-    void viewDFS(bool order=false) const;
-    void viewBFS(bool order=false) const;
-    void viewIN(const AVLnode<D>* root) const;
-    void viewPRE(const AVLnode<D>* root) const;
-    void viewPOST(const AVLnode<D>* root) const;
+    void viewDFS(bool order=true) const;
+    void viewBFS(bool order=true) const;
+    void viewIN() const;
+    void viewR_IN() const;
+    void viewPRE() const;
+    void viewPOST() const;
+	
     AVLiterator<D> begin() noexcept;
     AVLiterator<D> begin() const noexcept;
     AVLiterator<D> end() noexcept;
     AVLiterator<D> end() const noexcept;
-    ~AVLTREE();
 };
+
 
 template<typename D>
 AVLTREE<D>::AVLTREE(const AVLTREE<D>& other) :AVLTREE<D>(){
     M=other.M;
     if(!other.ROOT) return; 
-    QUEUE<AVLnode<D>*> Q; 
+    QUEUE<AVLnode<D>*> Q(other.elem); 
     AVLnode<D>* tmp;
     Q.enqueue(other.ROOT);
     while(!Q.empty()){
@@ -283,7 +324,7 @@ AVLTREE<D>& AVLTREE<D>::operator=(const AVLTREE<D>& other){
     elem=0; 
     if(!other.ROOT) return *this;
     
-    QUEUE<AVLnode<D>*> Q; 
+    QUEUE<AVLnode<D>*> Q(other.elem); 
     AVLnode<D>* tmp;
     Q.enqueue(other.ROOT);
     while(!Q.empty()){
@@ -314,10 +355,10 @@ AVLTREE<D>::~AVLTREE(){
 }
 
 template<typename D>
-unsigned long int AVLTREE<D>::addlink(AVLnode<D>*& root, const AVLnode<D>*& other){
+size_t AVLTREE<D>::addlink(AVLnode<D>*& root, const AVLnode<D>*& other){
     if(!root || !other) return 0;
     QUEUE<const AVLnode<D>*> Q; 
-    AVLnode<D>* ptr, *tmp, *key; D item; unsigned long int count=0;
+    AVLnode<D>* ptr, *tmp, *key; D item; size_t count=0;
     Q.enqueue(other);
     while(!Q.empty()){
         key=Q.dequeue();
@@ -342,7 +383,7 @@ template<typename D>
 bool AVLTREE<D>::add(const AVLTREE<D>& root){
     if(this == &root) return false;
     if(!root.ROOT) return false;
-    QUEUE<AVLnode<D>*> Q; 
+    QUEUE<AVLnode<D>*> Q(root.elem); 
     AVLnode<D>* tmp;
     Q.enqueue(root.ROOT);
     while(!Q.empty()){
@@ -367,17 +408,17 @@ void AVLTREE<D>::print_Key_L_C_R(const AVLnode<D>* tmp) const{
 template<typename D>
 void AVLTREE<D>::viewBFS(bool order) const{
     if(!ROOT){ std::cout<<"Tree is empty"; return; }
-    QUEUE<AVLnode<D>*> Q; 
+    QUEUE<AVLnode<D>*> Q(elem); 
     AVLnode<D>* tmp;
     Q.enqueue(ROOT);
     while(!Q.empty()){
         tmp=Q.dequeue();
         if(order){
-            if(tmp->LINK[R]) Q.enqueue(tmp->LINK[R]);
             if(tmp->LINK[L]) Q.enqueue(tmp->LINK[L]);
+            if(tmp->LINK[R]) Q.enqueue(tmp->LINK[R]);
         }else{
-            if(tmp->LINK[L]) Q.enqueue(tmp->LINK[L]);
             if(tmp->LINK[R]) Q.enqueue(tmp->LINK[R]);
+            if(tmp->LINK[L]) Q.enqueue(tmp->LINK[L]);
         }
         print_Key_L_C_R(tmp); std::cout<<"\n";
     }
@@ -386,7 +427,7 @@ void AVLTREE<D>::viewBFS(bool order) const{
 template<typename D>
 void AVLTREE<D>::viewDFS(bool order) const{
     if(!ROOT){ std::cout<<"Tree is empty"; return; }
-    STACK<AVLnode<D>*> S; 
+    STACK<AVLnode<D>*> S(elem); 
     AVLnode<D>* tmp;
     S.push(ROOT);
     while(!S.empty()){
@@ -403,24 +444,43 @@ void AVLTREE<D>::viewDFS(bool order) const{
 }
 
 template<typename D>
-void AVLTREE<D>::viewIN(const AVLnode<D>* root) const{
+void AVLTREE<D>::viewPRE() const{ _viewPRE(ROOT); }
+
+template<typename D>
+void AVLTREE<D>::viewIN() const{ _viewIN(ROOT); }
+
+template<typename D>
+void AVLTREE<D>::viewR_IN() const{ _viewR_IN(ROOT); }
+
+template<typename D>
+void AVLTREE<D>::viewPOST() const{ _viewPOST(ROOT); }
+
+template<typename D>
+void AVLTREE<D>::_viewPRE(const AVLnode<D>* root) const{
     if(!root) return;
 
-    viewIN(root->LINK[L]);  print_Key_L_C_R(root); std::cout<<"\n";  viewIN(root->LINK[R]);
+    print_Key_L_C_R(root); std::cout<<"\n";  _viewPRE(root->LINK[L]);  _viewPRE(root->LINK[R]);
 }
 
 template<typename D>
-void AVLTREE<D>::viewPRE(const AVLnode<D>* root) const{
+void AVLTREE<D>::_viewIN(const AVLnode<D>* root) const{
     if(!root) return;
 
-    print_Key_L_C_R(root); std::cout<<"\n";  viewPRE(root->LINK[L]);  viewPRE(root->LINK[R]);
+    _viewIN(root->LINK[L]);  print_Key_L_C_R(root); std::cout<<"\n";  _viewIN(root->LINK[R]);
 }
 
 template<typename D>
-void AVLTREE<D>::viewPOST(const AVLnode<D>* root) const{
+void AVLTREE<D>::_viewR_IN(const AVLnode<D>* root) const{
     if(!root) return;
 
-    viewPOST(root->LINK[L]);  viewPOST(root->LINK[R]);  print_Key_L_C_R(root); std::cout<<"\n";
+    _viewR_IN(root->LINK[R]);  print_Key_L_C_R(root); std::cout<<"\n";  _viewR_IN(root->LINK[L]);
+}
+
+template<typename D>
+void AVLTREE<D>::_viewPOST(const AVLnode<D>* root) const{
+    if(!root) return;
+
+    _viewPOST(root->LINK[L]);  _viewPOST(root->LINK[R]);  print_Key_L_C_R(root); std::cout<<"\n";
 }
 
 template<typename D>
@@ -431,18 +491,13 @@ void AVLTREE<D>::view(MODE mode) const{
         case MODE::DFS: viewDFS(); break;
         case MODE::BFS: viewBFS(); break;
 
-        case MODE::IN:
-            if(ROOT) viewIN(ROOT);
-            break;
-        case MODE::PRE:
-            if(ROOT) viewPRE(ROOT);
-            break;
-        case MODE::POST:
-            if(ROOT) viewPOST(ROOT);
-            break;
+        case MODE::IN:   viewIN();   break;
+        case MODE::R_IN: viewR_IN(); break;
+        case MODE::PRE:  viewPRE();  break;
+        case MODE::POST: viewPOST(); break;
 
-        case MODE::DFS_LR: viewDFS(true); break;
-        case MODE::BFS_RL: viewBFS(true); break;
+        case MODE::DFS_RL: viewDFS(false); break;
+        case MODE::BFS_RL: viewBFS(false); break;
 
         default:
             throw std::runtime_error("Invalid traversal mode");
@@ -450,8 +505,7 @@ void AVLTREE<D>::view(MODE mode) const{
 }
 
 template<typename D>
-AVLnode<D>* AVLTREE<D>::pointerIN(AVLnode<D>* root, const unsigned long int index, 
-                                                          unsigned long int& count) const{
+AVLnode<D>* AVLTREE<D>::pointerIN(AVLnode<D>* root, const size_t index, size_t& count) const{
     if(!root) return nullptr;
 
     AVLnode<D>* left=pointerIN(root->LINK[L], index, count);  if(left) return left;
@@ -460,8 +514,16 @@ AVLnode<D>* AVLTREE<D>::pointerIN(AVLnode<D>* root, const unsigned long int inde
 }
 
 template<typename D>
-AVLnode<D>* AVLTREE<D>::pointerPRE(AVLnode<D>* root, const unsigned long int index, 
-                                                           unsigned long int& count) const{
+AVLnode<D>* AVLTREE<D>::pointerR_IN(AVLnode<D>* root, const size_t index, size_t& count) const{
+    if(!root) return nullptr;
+
+    AVLnode<D>* right=pointerR_IN(root->LINK[R], index, count);  if(right) return right;
+    if(count == index) return root;  count++;
+    return pointerR_IN(root->LINK[L], index, count);
+}
+
+template<typename D>
+AVLnode<D>* AVLTREE<D>::pointerPRE(AVLnode<D>* root, const size_t index, size_t& count) const{
     if(!root) return nullptr;
 
     if(count == index) return root;  count++;
@@ -470,8 +532,7 @@ AVLnode<D>* AVLTREE<D>::pointerPRE(AVLnode<D>* root, const unsigned long int ind
 }
 
 template<typename D>
-AVLnode<D>* AVLTREE<D>::pointerPOST(AVLnode<D>* root, const unsigned long int index, 
-                                                            unsigned long int& count) const{
+AVLnode<D>* AVLTREE<D>::pointerPOST(AVLnode<D>* root, const size_t index, size_t& count) const{
     if(!root) return nullptr;
 
     AVLnode<D>* left = pointerPOST(root->LINK[L], index, count);  if(left) return left;
@@ -480,30 +541,30 @@ AVLnode<D>* AVLTREE<D>::pointerPOST(AVLnode<D>* root, const unsigned long int in
 }
 
 template<typename D>
-AVLnode<D>* AVLTREE<D>::pointerBFS(const unsigned long int index, bool order) const{
+AVLnode<D>* AVLTREE<D>::pointerBFS(const size_t index, bool order) const{
     if(!ROOT) return nullptr;
-    unsigned long int count=0;
-    QUEUE<AVLnode<D>*> Q; Q.enqueue(ROOT);
+    size_t count=0;
+    QUEUE<AVLnode<D>*> Q(elem); Q.enqueue(ROOT);
     AVLnode<D>* tmp;
     while(!Q.empty()){
         tmp=Q.dequeue();
         if(index == count) return tmp;   count++;
         if(order){
-            if(tmp->LINK[R]) Q.enqueue(tmp->LINK[R]);
             if(tmp->LINK[L]) Q.enqueue(tmp->LINK[L]);
+            if(tmp->LINK[R]) Q.enqueue(tmp->LINK[R]);
         }else{
-            if(tmp->LINK[L]) Q.enqueue(tmp->LINK[L]);
             if(tmp->LINK[R]) Q.enqueue(tmp->LINK[R]);
+            if(tmp->LINK[L]) Q.enqueue(tmp->LINK[L]);
         }
     }
     return nullptr;
 }
 
 template<typename D>
-AVLnode<D>* AVLTREE<D>::pointerDFS(const unsigned long int index, bool order) const{
+AVLnode<D>* AVLTREE<D>::pointerDFS(const size_t index, bool order) const{
     if(!ROOT) return nullptr; 
-    unsigned long int count=0;
-    STACK<AVLnode<D>*> S; S.push(ROOT);
+    size_t count=0;
+    STACK<AVLnode<D>*> S(elem); S.push(ROOT);
     AVLnode<D>* tmp;
     while(!S.empty()){
         tmp=S.pop();
@@ -520,21 +581,22 @@ AVLnode<D>* AVLTREE<D>::pointerDFS(const unsigned long int index, bool order) co
 }
 
 template<typename D>
-AVLnode<D>* AVLTREE<D>::pointer(long int index, MODE mode) const{
-    index = index<0 ? elem+index : index;
-    if(index>=elem || index<0) return nullptr;
+AVLnode<D>* AVLTREE<D>::pointer(std::ptrdiff_t index, MODE mode) const{
+    if(index < 0) index = static_cast<std::ptrdiff_t>(elem) + index;
+    if(index<0 || static_cast<size_t>(index)>=elem) return nullptr;
 
-    unsigned long int count = 0;  if(mode == MODE::DEF) mode=M;
+    size_t count = 0;  if(mode == MODE::DEF) mode=M;
     switch(mode){
-        case MODE::DFS: return pointerDFS(index);
-        case MODE::BFS: return pointerBFS(index);
+        case MODE::DFS: return pointerDFS(static_cast<size_t>(index));
+        case MODE::BFS: return pointerBFS(static_cast<size_t>(index));
 
-        case MODE::IN:   return pointerIN(ROOT,index,count);
-        case MODE::PRE:  return pointerPRE(ROOT,index,count);
-        case MODE::POST: return pointerPOST(ROOT,index,count);
+        case MODE::IN:   return pointerIN(ROOT, static_cast<size_t>(index), count);
+        case MODE::R_IN: return pointerR_IN(ROOT, static_cast<size_t>(index), count);
+        case MODE::PRE:  return pointerPRE(ROOT, static_cast<size_t>(index), count);
+        case MODE::POST: return pointerPOST(ROOT, static_cast<size_t>(index), count);
 
-        case MODE::DFS_LR: return pointerDFS(index,true);
-        case MODE::BFS_RL: return pointerBFS(index,true);
+        case MODE::DFS_RL: return pointerDFS(static_cast<size_t>(index), false);
+        case MODE::BFS_RL: return pointerBFS(static_cast<size_t>(index), false);
 
         default:
             throw std::runtime_error("Invalid traversal mode");
@@ -542,16 +604,7 @@ AVLnode<D>* AVLTREE<D>::pointer(long int index, MODE mode) const{
 }
 
 template<typename D>  
-D& AVLTREE<D>::operator[](const long int index){
-    if(!ROOT) throw std::runtime_error("Tree is empty"); 
-
-    AVLnode<D>* ptr=pointer(index);
-    if(!ptr) throw std::out_of_range("Index out of bounds");
-    return ptr->K;
-}
-
-template<typename D>  
-const D& AVLTREE<D>::operator[](const long int index) const{
+const D& AVLTREE<D>::operator[](const std::ptrdiff_t index) const{
     if(!ROOT) throw std::runtime_error("Tree is empty"); 
 
     const AVLnode<D>* ptr=pointer(index);
@@ -589,19 +642,19 @@ bool AVLTREE<D>::search(D item){
 
 template<typename D>
 AVLiterator<D> AVLTREE<D>::begin() noexcept{
-    AVLiterator<D> it(M,ROOT);  return ++it;
+    AVLiterator<D> it(M,elem,ROOT);  return ++it;
 }
 
 template<typename D>
-AVLiterator<D> AVLTREE<D>::end() noexcept{ return AVLiterator<D>(M,nullptr); }
+AVLiterator<D> AVLTREE<D>::end() noexcept{ return AVLiterator<D>(M,0,nullptr); }
 
 template<typename D>
 AVLiterator<D> AVLTREE<D>::begin() const noexcept{
-        AVLiterator<D> it(M,ROOT);  return ++it;
+        AVLiterator<D> it(M,elem,ROOT);  return ++it;
 }
 
 template<typename D>
-AVLiterator<D> AVLTREE<D>::end() const noexcept{ return AVLiterator<D>(M,nullptr); }
+AVLiterator<D> AVLTREE<D>::end() const noexcept{ return AVLiterator<D>(M,0,nullptr); }
 
 template<typename D>
 char AVLTREE<D>::subH(AVLnode<D>* sub) const noexcept{ if(!sub) return 0;   return 1+ sub->H; }
@@ -835,7 +888,7 @@ bool AVLTREE<D>::remove(D item){
 }
 
 template<typename D>
-bool AVLTREE<D>::remove_index(long int index, MODE mode){
+bool AVLTREE<D>::remove_index(std::ptrdiff_t index, MODE mode){
     if(!ROOT) return false;
     AVLnode<D>* tmp=pointer(index,mode);
     if(!tmp) throw std::out_of_range("Index out of bounds"); 
@@ -904,10 +957,176 @@ void AVLTREE<D>::insert(D item){
 template<typename D>
 std::ostream& operator<<(std::ostream& out, const AVLTREE<D>& AVL){  AVL.view(); return out;  }
 
+int main() {
+
+    AVLTREE<int> tree;
+
+    //              50
+    //            /    \
+    //          30      70
+    //         /  \    /  \
+    //       20   40  60   80
+
+    tree.insert(50);
+    tree.insert(30);
+    tree.insert(70);
+    tree.insert(20);
+    tree.insert(40);
+    tree.insert(60);
+    tree.insert(80);
 
 
-#include <iostream>
-using namespace std;
+    // =========================================================
+    // BFS
+    // =========================================================
+
+    tree.M = MODE::BFS;
+
+    std::cout << "\n========== BFS VIEW ==========\n";
+
+    // Default: order = true
+    std::cout << "\n--- viewBFS() [default / true] ---\n";
+    tree.viewBFS();
+
+    // Explicit false
+    std::cout << "\n--- viewBFS(false) ---\n";
+    tree.viewBFS(false);
+
+
+    std::cout << "\n========== BFS INDEXING ==========\n";
+
+    std::cout << "tree[0] = " << tree[0] << '\n';
+    std::cout << "tree[1] = " << tree[1] << '\n';
+    std::cout << "tree[2] = " << tree[2] << '\n';
+    std::cout << "tree[6] = " << tree[6] << '\n';
+
+    std::cout << "tree[-1] = " << tree[-1] << '\n';
+    std::cout << "tree[-2] = " << tree[-2] << '\n';
+    std::cout << "tree[-3] = " << tree[-3] << '\n';
+
+    std::cout << "BFS range: ";
+
+    for (const auto& x : tree) {
+        std::cout << x << ' ';
+    }
+
+    std::cout << '\n';
+
+
+    // =========================================================
+    // BFS_RL
+    // =========================================================
+
+    tree.M = MODE::BFS_RL;
+
+    std::cout << "\n========== BFS_RL VIEW ==========\n";
+
+    // Explicit false
+    std::cout << "\n--- viewBFS(false) ---\n";
+    tree.viewBFS(false);
+
+    // Default: order = true
+    std::cout << "\n--- viewBFS() [default / true] ---\n";
+    tree.viewBFS();
+
+
+    std::cout << "\n========== BFS_RL INDEXING ==========\n";
+
+    std::cout << "tree[0] = " << tree[0] << '\n';
+    std::cout << "tree[1] = " << tree[1] << '\n';
+    std::cout << "tree[2] = " << tree[2] << '\n';
+    std::cout << "tree[6] = " << tree[6] << '\n';
+
+    std::cout << "tree[-1] = " << tree[-1] << '\n';
+    std::cout << "tree[-2] = " << tree[-2] << '\n';
+    std::cout << "tree[-3] = " << tree[-3] << '\n';
+
+    std::cout << "BFS_RL range: ";
+
+    for (const auto& x : tree) {
+        std::cout << x << ' ';
+    }
+
+    std::cout << '\n';
+
+
+    // =========================================================
+    // DFS
+    // =========================================================
+
+    tree.M = MODE::DFS;
+
+    std::cout << "\n========== DFS VIEW ==========\n";
+
+    // Default: order = true
+    std::cout << "\n--- viewDFS() [default / true] ---\n";
+    tree.viewDFS();
+
+    // Explicit false
+    std::cout << "\n--- viewDFS(false) ---\n";
+    tree.viewDFS(false);
+
+
+    std::cout << "\n========== DFS INDEXING ==========\n";
+
+    std::cout << "tree[0] = " << tree[0] << '\n';
+    std::cout << "tree[1] = " << tree[1] << '\n';
+    std::cout << "tree[2] = " << tree[2] << '\n';
+    std::cout << "tree[6] = " << tree[6] << '\n';
+
+    std::cout << "tree[-1] = " << tree[-1] << '\n';
+    std::cout << "tree[-2] = " << tree[-2] << '\n';
+    std::cout << "tree[-3] = " << tree[-3] << '\n';
+
+    std::cout << "DFS range: ";
+
+    for (const auto& x : tree) {
+        std::cout << x << ' ';
+    }
+
+    std::cout << '\n';
+
+
+    // =========================================================
+    // DFS_RL
+    // =========================================================
+
+    tree.M = MODE::DFS_RL;
+
+    std::cout << "\n========== DFS_RL VIEW ==========\n";
+
+    // Explicit false
+    std::cout << "\n--- viewDFS(false) ---\n";
+    tree.viewDFS(false);
+
+    // Default: order = true
+    std::cout << "\n--- viewDFS() [default / true] ---\n";
+    tree.viewDFS();
+
+
+    std::cout << "\n========== DFS_RL INDEXING ==========\n";
+
+    std::cout << "tree[0] = " << tree[0] << '\n';
+    std::cout << "tree[1] = " << tree[1] << '\n';
+    std::cout << "tree[2] = " << tree[2] << '\n';
+    std::cout << "tree[6] = " << tree[6] << '\n';
+
+    std::cout << "tree[-1] = " << tree[-1] << '\n';
+    std::cout << "tree[-2] = " << tree[-2] << '\n';
+    std::cout << "tree[-3] = " << tree[-3] << '\n';
+
+    std::cout << "DFS_RL range: ";
+
+    for (const auto& x : tree) {
+        std::cout << x << ' ';
+    }
+
+    std::cout << '\n';
+
+
+    return 0;
+}
+// using namespace std;
 
 // int main() {
 
@@ -1075,59 +1294,59 @@ using namespace std;
 //     return 0;
 // }
 
-int main() {
+// int main() {
 
-    cout<<"\nTREE INSERT---------------\n";
-    AVLTREE<int> tree;
-    int arr[] = {14, 17, 11, 7, 53, 4, 13, 12, 8, 60, 19, 16, 20};
-    for(int x : arr){
-        tree.insert(x);
-    }   tree.view(MODE::BFS);
+//     cout<<"\nTREE INSERT---------------\n";
+//     AVLTREE<int> tree;
+//     int arr[] = {14, 17, 11, 7, 53, 4, 13, 12, 8, 60, 19, 16, 20};
+//     for(int x : arr){
+//         tree.insert(x);
+//     }   tree.view(MODE::BFS);
 
-    cout << "\n===== DELETION START =====\n";
-    // test deletions (mix of leaf, one-child, two-child)
-    int delArr[] = {8, 7, 11, 14, 53};
-    for(int x : delArr){
-        cout << x << " (DELETE) ---------\n";
-        tree.remove(x); // tree.view(MODE::BFS);
-    }   tree.view(MODE::BFS);
+//     cout << "\n===== DELETION START =====\n";
+//     // test deletions (mix of leaf, one-child, two-child)
+//     int delArr[] = {8, 7, 11, 14, 53};
+//     for(int x : delArr){
+//         cout << x << " (DELETE) ---------\n";
+//         tree.remove(x); // tree.view(MODE::BFS);
+//     }   tree.view(MODE::BFS);
 
-    cout<<"\n\nTREE1 INSERT---------------\n";
-    AVLTREE<int> tree1;
-    int arr1[] = {4, 2, 8, 1, 3, 6, 10, 5, 7, 11, 12};
-    for(int x : arr1) tree1.insert(x);
-    tree1.view(MODE::BFS);
-    cout << "\nDELETE TREE1\n";
-    int del1[] = {1, 6, 4};
-    for(int x : del1){
-        cout << x << " (DELETE) --------\n";
-        tree1.remove(x);
-    }   tree1.view(MODE::BFS);
+//     cout<<"\n\nTREE1 INSERT---------------\n";
+//     AVLTREE<int> tree1;
+//     int arr1[] = {4, 2, 8, 1, 3, 6, 10, 5, 7, 11, 12};
+//     for(int x : arr1) tree1.insert(x);
+//     tree1.view(MODE::BFS);
+//     cout << "\nDELETE TREE1\n";
+//     int del1[] = {1, 6, 4};
+//     for(int x : del1){
+//         cout << x << " (DELETE) --------\n";
+//         tree1.remove(x);
+//     }   tree1.view(MODE::BFS);
 
-    cout<<"-------------------\n";
-    AVLTREE<int> tree2;
-    int arr2[] = {9, 5, 11, 3, 7, 10, 12, 2, 4, 6, 8, 1};
-    for(int x : arr2) tree2.insert(x);
-    tree2.view(MODE::BFS);
-    cout << "\nDELETE TREE2\n";
-    int del2[] = {1, 7, 9};
-    for(int x : del2){
-        cout << x << " (DELETE) --------\n";
-        tree2.remove(x);
-    }   tree2.view(MODE::BFS);
+//     cout<<"-------------------\n";
+//     AVLTREE<int> tree2;
+//     int arr2[] = {9, 5, 11, 3, 7, 10, 12, 2, 4, 6, 8, 1};
+//     for(int x : arr2) tree2.insert(x);
+//     tree2.view(MODE::BFS);
+//     cout << "\nDELETE TREE2\n";
+//     int del2[] = {1, 7, 9};
+//     for(int x : del2){
+//         cout << x << " (DELETE) --------\n";
+//         tree2.remove(x);
+//     }   tree2.view(MODE::BFS);
 
-    cout<<"-------------------\n";
-    AVLTREE<int> tree3;
-    int arr3[] = {23, 20, 30, 10, 22, 25, 40, 24, 35};
-    for(int x : arr3) tree3.insert(x);
-    tree3.view(MODE::BFS);
-    cout << "\nDELETE TREE3\n";
-    int del3[] = {24, 30, 23};
-    for(int x : del3){
-        cout << x << " (DELETE) --------\n";
-        tree3.remove(x);
-    }   tree3.view(MODE::BFS);
-}
+//     cout<<"-------------------\n";
+//     AVLTREE<int> tree3;
+//     int arr3[] = {23, 20, 30, 10, 22, 25, 40, 24, 35};
+//     for(int x : arr3) tree3.insert(x);
+//     tree3.view(MODE::BFS);
+//     cout << "\nDELETE TREE3\n";
+//     int del3[] = {24, 30, 23};
+//     for(int x : del3){
+//         cout << x << " (DELETE) --------\n";
+//         tree3.remove(x);
+//     }   tree3.view(MODE::BFS);
+// }
 
 
 // int main(){

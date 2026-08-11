@@ -19,6 +19,10 @@ public:
 	
     bool operator!=(const LISTiterator& other) const noexcept;
     bool operator==(const LISTiterator& other) const noexcept;
+    bool operator<(const LISTiterator<D>& other) const noexcept;
+    bool operator<=(const LISTiterator<D>& other) const noexcept;
+    bool operator>(const LISTiterator<D>& other) const noexcept;
+    bool operator>=(const LISTiterator<D>& other) const noexcept;
 	
     D* operator->();
     const D* operator->() const;
@@ -59,6 +63,18 @@ template<typename D>
 bool LISTiterator<D>::operator==(const LISTiterator<D>& other) const noexcept{ return ptr == other.ptr; }
 
 template<typename D>
+bool LISTiterator<D>::operator<(const LISTiterator<D>& other) const noexcept{ return ptr < other.ptr; }
+
+template<typename D>
+bool LISTiterator<D>::operator>(const LISTiterator<D>& other) const noexcept{ return other < *this; }
+
+template<typename D>
+bool LISTiterator<D>::operator<=(const LISTiterator<D>& other) const noexcept{ return !(*this > other); }
+
+template<typename D>
+bool LISTiterator<D>::operator>=(const LISTiterator<D>& other) const noexcept{ return !(*this < other); }
+
+template<typename D>
 D* LISTiterator<D>::operator->(){ 
     if(!ptr) throw std::runtime_error("Null LISTiterator");
     return &(ptr->K); 
@@ -82,16 +98,16 @@ protected:
     size_t clear(LISTnode<D>*& p);
     size_t clearupto(LISTnode<D>*& head, LISTnode<D>*& tail);
 
+    LISTnode<D>* mergeSort(LISTnode<D>* head);
+    LISTnode<D>* merge(LISTnode<D>* left, LISTnode<D>* right);
+    LISTnode<D>* middle(LISTnode<D>* head);
+
 public:
+    LIST(std::initializer_list<D> init);
     LIST();
     LIST(const LIST<D>& other);
     LIST(LIST<D>&& other) noexcept;
     ~LIST();
-
-    D& operator[](const std::ptrdiff_t index);
-    const D& operator[](const std::ptrdiff_t index) const;
-    LIST<D>& operator=(const LIST<D>& other);
-    LIST<D>& operator=(LIST<D>&& other) noexcept;
 
     size_t size() const { return elem; }
     bool insert(D val, std::ptrdiff_t index = -1);
@@ -104,12 +120,31 @@ public:
     size_t index(D value) const;
     void reverse();
     void view(bool v = false) const;
+    void sort();
+
+    D& operator[](const std::ptrdiff_t index);
+    const D& operator[](const std::ptrdiff_t index) const;
+    LIST<D>& operator=(const LIST<D>& other);
+    LIST<D>& operator=(LIST<D>&& other) noexcept;
+
+    bool operator==(const LIST<D>& other) const noexcept;
+    bool operator!=(const LIST<D>& other) const noexcept;
+    bool operator<(const LIST<D>& other) const noexcept;
+    bool operator<=(const LIST<D>& other) const noexcept;
+    bool operator>(const LIST<D>& other) const noexcept;
+    bool operator>=(const LIST<D>& other) const noexcept;
 
     LISTiterator<D> begin() noexcept;
     LISTiterator<D> end() noexcept;
     LISTiterator<D> begin() const noexcept;
     LISTiterator<D> end() const noexcept;
 };
+
+template<typename D>
+LIST<D>::LIST(std::initializer_list<D> init) : LIST<D>()
+{
+    for(const D& v : init) insert(v);
+}
 
 template<typename D>
 LIST<D>::LIST(){ H=T=nullptr; elem=0; }
@@ -160,6 +195,45 @@ LIST<D>& LIST<D>::operator=(const LIST<D>& other){
     }
     return *this;
 }
+
+template<typename D>
+bool LIST<D>::operator==(const LIST<D>& other) const noexcept
+{
+    if(elem != other.elem) return false;
+    LISTnode<D>* a = H, *b = other.H;
+
+    while(a){
+        if(a->K != b->K) return false;
+        a=a->P; b=b->P;
+    }
+    return true;
+}
+
+template<typename D>
+bool LIST<D>::operator!=(const LIST<D>& other) const noexcept{ return !(*this == other); }
+
+template<typename D>
+bool LIST<D>::operator<(const LIST<D>& other) const noexcept
+{
+    LISTnode<D>* a = H, *b = other.H;
+    while(a && b)
+    {
+        if(a->K < b->K) return true;
+        if(a->K > b->K) return false;
+
+        a=a->P; b=b->P;
+    }
+    return elem < other.elem;
+}
+
+template<typename D>
+bool LIST<D>::operator>(const LIST<D>& other) const noexcept{ return other < *this; }
+
+template<typename D>
+bool LIST<D>::operator<=(const LIST<D>& other) const noexcept{ return !(*this > other); }
+
+template<typename D>
+bool LIST<D>::operator>=(const LIST<D>& other) const noexcept{ return !(*this < other); }
 
 template<typename D>
 bool LIST<D>::add(const LIST<D>& next){
@@ -371,6 +445,59 @@ template<typename D>
 void LIST<D>::reverse(){ rotate(H,T); }
 
 template<typename D>
+void LIST<D>::sort()  // Marge Sort
+{
+    if(elem < 2) return;
+
+    H = mergeSort(H);
+    T = H;
+    while(T->P) T = T->P;
+}
+
+template<typename D>
+LISTnode<D>* LIST<D>::middle(LISTnode<D>* head)
+{
+    if(!head) return nullptr;
+
+    LISTnode<D>* slow = head, *fast = head->P;
+    while(fast && fast->P)
+    {
+        slow = slow->P; fast = fast->P->P;
+    }
+    return slow;
+}
+
+template<typename D>
+LISTnode<D>* LIST<D>::mergeSort(LISTnode<D>* head)
+{
+    if(!head || !head->P) return head;
+
+    LISTnode<D>* mid = middle(head), *right = mid->P;
+    mid->P = nullptr;
+
+    LISTnode<D>* left = mergeSort(head);
+    right = mergeSort(right);
+
+    return merge(left, right);
+}
+
+template<typename D>
+LISTnode<D>* LIST<D>::merge(LISTnode<D>* left, LISTnode<D>* right)
+{
+    if(!left) return right;
+    if(!right) return left;
+
+    if(left->K <= right->K)
+    {
+        left->P = merge(left->P, right);
+        return left;
+    }
+
+    right->P = merge(left, right->P);
+    return right;
+}
+
+template<typename D>
 LISTiterator<D> LIST<D>::begin() noexcept{ return LISTiterator<D>(H); }
 
 template<typename D>
@@ -383,89 +510,236 @@ template<typename D>
 LISTiterator<D> LIST<D>::end() const noexcept{ return LISTiterator<D>(nullptr); }
 
 template<typename D>
-std::ostream& operator<<(std::ostream& out, const LIST<D>& l){  l.view(false); return out;  }
+std::ostream& operator<<(std::ostream& out, const LIST<D>& l){ l.view(false); return out; }
 
 
-#include <iostream>
+int main(){
+    LIST<int> L = {5,1,9,3,7,4,8,6,2};
 
-using namespace std;
+    std::cout << "Before : " << L << '\n';
+    L.sort();
+    std::cout << "After  : " << L << '\n';
 
-int main() {
-    LIST<int> list;
+    LIST<int> A = {};
+    LIST<int> B = {5};
+    LIST<int> C = {2,1};
+    LIST<int> D = {1,2};
+    LIST<int> E = {5,5,5,5};
+    LIST<int> F = {9,8,7,6,5,4,3,2,1};
 
-    std::cout << "=== INSERT TEST ===\n";
-    list.insert(10);
-    list.insert(20);
-    list.insert(30);
-    list.insert(40);
-    list.insert(50);
-    list.insert(60);
-int arr[10];
-    // cout<<list;
-    // std::cout << list <<"\n";
-    list.view(true);
-    std::cout << list[-1] <<"\n";
+    A.sort();
+    B.sort();
+    C.sort();
+    D.sort();
+    E.sort();
+    F.sort();
 
-    std::cout << "=== INDEX TEST (+ve) ===\n";
-    std::cout << "list[0] = " << list[0] << "\n";
-    std::cout << "list[2] = " << list[2] << "\n";
-    std::cout << "list[4] = " << list[4] << "\n\n";
-
-    std::cout << "=== INDEX TEST (-ve) ===\n";
-    std::cout << "list[-1] = " << list[-1] << "\n";
-    std::cout << "list[-2] = " << list[-2] << "\n";
-    std::cout << "list[-5] = " << list[-5] << "\n\n";
-
-    std::cout << "=== MODIFY TEST ===\n";
-    list.modify(999, 2);
-    std::cout << "After modify index 2 → ";
-    list.view();
-    std::cout << "\n\n";
-
-    std::cout << "=== UPDATE TEST ===\n";
-    int pos = list.update(40, 777);
-    std::cout << "Updated position: " << pos << "\n";
-    list.view();
-    std::cout << "\n\n";
-
-    std::cout << "=== DROP TEST ===\n";
-    int d = list.drop(20);
-    std::cout << "Dropped index: " << d << "\n";
-    list.view();
-    std::cout << "\n\n";
-
-    std::cout << "=== REMOVE TEST ===\n";
-    int removed = list.remove(0);
-    std::cout << "Removed value: " << removed << "\n";
-    list.view();
-    std::cout << "\n\n";
-
-    std::cout << "=== REVERSE TEST ===\n";
-    list.reverse();
-    list.view(true);
-    std::cout << "\n\n";
-
-    std::cout << "=== ITERATOR TEST ===\n";
-    for(auto it = list.begin(); it != list.end(); ++it) {
-        std::cout << *it << " ";
-    }
-    std::cout << "\n\n";
-
-    std::cout << "=== CONST RANGE FOR STYLE ===\n";
-    for(const auto x : list) {
-        std::cout << x << " ";
-    }
-    std::cout << "\n\n";
-
-    std::cout << "=== OUT OF BOUND TEST ===\n";
-    try {
-        std::cout << list[100];
-    } catch(const std::exception &e) {
-        std::cout << "Exception: " << e.what() << "\n";
-    }
-
-    return 0;
+    std::cout << A << '\n';
+    std::cout << B << '\n';
+    std::cout << C << '\n';
+    std::cout << D << '\n';
+    std::cout << E << '\n';
+    std::cout << F << '\n';
 }
+
+
+// int main()
+// {
+//     // ===================== 2D LIST =====================
+
+//     LIST<LIST<int>> mat =
+//     {
+//         {1, 2, 3},
+//         {4, 5, 6},
+//         {7, 8, 9}
+//     };
+
+//     std::cout << "2D List:\n";
+
+//     for(auto row = mat.begin(); row != mat.end(); ++row)
+//     {
+//         for(auto col = row->begin(); col != row->end(); ++col)
+//             std::cout << *col << ' ';
+
+//         std::cout << '\n';
+//     }
+
+//     std::cout << '\n' << mat << "\n\n";
+
+
+//     // ===================== 3D LIST =====================
+
+//     LIST<LIST<LIST<int>>> cube =
+//     {
+//         {
+//             {1, 2},
+//             {3, 4}
+//         },
+//         {
+//             {5, 6},
+//             {7, 8}
+//         }
+//     };
+
+//     std::cout << "3D List:\n";
+
+//     size_t layer = 0;
+
+//     for(auto plane = cube.begin(); plane != cube.end(); ++plane)
+//     {
+//         std::cout << "Layer " << layer++ << ":\n";
+
+//         for(auto row = plane->begin(); row != plane->end(); ++row)
+//         {
+//             for(auto col = row->begin(); col != row->end(); ++col)
+//                 std::cout << *col << ' ';
+
+//             std::cout << '\n';
+//         }
+
+//         std::cout << '\n';
+//     }
+
+//     std::cout << cube << '\n';
+
+//     return 0;
+// }
+
+
+// int main()
+// {
+//     // ===== Initializer List =====
+//     LIST<int> A = {1, 2, 3};
+//     LIST<int> B = {1, 2, 3};
+//     LIST<int> C = {1, 2, 4};
+//     LIST<int> D = {1, 2};
+//     LIST<int> E = {2, 1, 3};
+
+//     std::cout << "A = "; A.view();
+//     std::cout << "B = "; B.view();
+//     std::cout << "C = "; C.view();
+//     std::cout << "D = "; D.view();
+//     std::cout << "E = "; E.view();
+
+//     std::cout << "\n===== Equality =====\n";
+//     std::cout << "A == B : " << (A == B) << '\n';
+//     std::cout << "A != B : " << (A != B) << '\n';
+//     std::cout << "A == C : " << (A == C) << '\n';
+//     std::cout << "A != C : " << (A != C) << '\n';
+
+//     std::cout << "\n===== Less / Greater =====\n";
+//     std::cout << "A < C  : " << (A < C) << '\n';
+//     std::cout << "C > A  : " << (C > A) << '\n';
+
+//     std::cout << "D < A  : " << (D < A) << '\n';
+//     std::cout << "A > D  : " << (A > D) << '\n';
+
+//     std::cout << "E > A  : " << (E > A) << '\n';
+//     std::cout << "A < E  : " << (A < E) << '\n';
+
+//     std::cout << "\n===== Less/Greater Equal =====\n";
+//     std::cout << "A <= B : " << (A <= B) << '\n';
+//     std::cout << "A >= B : " << (A >= B) << '\n';
+
+//     std::cout << "A <= C : " << (A <= C) << '\n';
+//     std::cout << "A >= C : " << (A >= C) << '\n';
+
+//     std::cout << "\n===== Iterator =====\n";
+//     std::cout << "A : ";
+
+//     for(auto it = A.begin(); it != A.end(); ++it)
+//         std::cout << *it << ' ';
+
+//     std::cout << std::endl << std::endl;
+
+//     LIST<int> F = {1,2,3,4};
+//     LIST<int> G = {1,2,3};
+
+//     std::cout << "F < G : " << (F < G) << '\n';
+//     std::cout << "F > G : " << (F > G) << '\n';
+//     std::cout << "G < F : " << (G < F) << '\n';
+//     std::cout << "G > F : " << (G > F) << '\n';
+
+//     return 0;
+// }
+
+
+// int main() {
+//     LIST<int> list;
+
+//     std::cout << "=== INSERT TEST ===\n";
+//     list.insert(10);
+//     list.insert(20);
+//     list.insert(30);
+//     list.insert(40);
+//     list.insert(50);
+//     list.insert(60);
+// int arr[10];
+//     // cout<<list;
+//     // std::cout << list <<"\n";
+//     list.view(true);
+//     std::cout << list[-1] <<"\n";
+
+//     std::cout << "=== INDEX TEST (+ve) ===\n";
+//     std::cout << "list[0] = " << list[0] << "\n";
+//     std::cout << "list[2] = " << list[2] << "\n";
+//     std::cout << "list[4] = " << list[4] << "\n\n";
+
+//     std::cout << "=== INDEX TEST (-ve) ===\n";
+//     std::cout << "list[-1] = " << list[-1] << "\n";
+//     std::cout << "list[-2] = " << list[-2] << "\n";
+//     std::cout << "list[-5] = " << list[-5] << "\n\n";
+
+//     std::cout << "=== MODIFY TEST ===\n";
+//     list.modify(999, 2);
+//     std::cout << "After modify index 2 → ";
+//     list.view();
+//     std::cout << "\n\n";
+
+//     std::cout << "=== UPDATE TEST ===\n";
+//     int pos = list.update(40, 777);
+//     std::cout << "Updated position: " << pos << "\n";
+//     list.view();
+//     std::cout << "\n\n";
+
+//     std::cout << "=== DROP TEST ===\n";
+//     int d = list.drop(20);
+//     std::cout << "Dropped index: " << d << "\n";
+//     list.view();
+//     std::cout << "\n\n";
+
+//     std::cout << "=== REMOVE TEST ===\n";
+//     int removed = list.remove(0);
+//     std::cout << "Removed value: " << removed << "\n";
+//     list.view();
+//     std::cout << "\n\n";
+
+//     std::cout << "=== REVERSE TEST ===\n";
+//     list.reverse();
+//     list.view(true);
+//     std::cout << "\n\n";
+
+//     std::cout << "=== ITERATOR TEST ===\n";
+//     for(auto it = list.begin(); it != list.end(); ++it) {
+//         std::cout << *it << " ";
+//     }
+//     std::cout << "\n\n";
+
+//     std::cout << "=== CONST RANGE FOR STYLE ===\n";
+//     for(const auto x : list) {
+//         std::cout << x << " ";
+//     }
+//     std::cout << "\n\n";
+
+//     std::cout << "=== OUT OF BOUND TEST ===\n";
+//     try {
+//         std::cout << list[100];
+//     } catch(const std::exception &e) {
+//         std::cout << "Exception: " << e.what() << "\n";
+//     }
+
+//     return 0;
+// }
 
 // int main() {
     

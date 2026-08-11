@@ -1,5 +1,4 @@
 #include <iostream>
-
 #include <cmath>
 #include <cstdlib>
 
@@ -226,6 +225,7 @@ protected:
     void growth(GROWTH G);
     
 public:
+    ARRAY(std::initializer_list<D> init);
     ARRAY(size_t len=2);
     ARRAY(const ARRAY& other);
     ARRAY(ARRAY&& other) noexcept;
@@ -331,6 +331,15 @@ size_t ARRAY<D>::resize(bool f){ size_t len=C;
     }
     Gins>>=1; Gdel>>=1; Gsrc>>=1; 
     return capacity(len);
+}
+
+template<typename D>
+ARRAY<D>::ARRAY(std::initializer_list<D> init)
+    : C(std::max<size_t>(2, init.size())), S(init.size())
+{
+    DATA = new D[C];
+    size_t i=0;
+    for(const D& val : init) DATA[i++]=val;
 }
 
 template<typename D>
@@ -1796,49 +1805,211 @@ void ARRAY<D>::bitonicMerge(size_t low, size_t count, bool ascend)
     bitonicMerge(low+mid, count-mid, ascend);
 }
 
+template<typename D>
+std::ostream& operator<<(std::ostream& out, const ARRAY<D>& a){ a.view(); return out; }
 
 
-#include <iostream>
 
-int main()
-{
-    std::cout << "========== USER FIXED CAPACITY ==========\n";
+// int main()
+// {
+//     ARRAY<ARRAY<int>> mat =
+//     {
+//         {1, 2, 3},
+//         {4, 5, 6},
+//         {7, 8, 9}
+//     };
 
-    ARRAY<int> arr(200);   // User requests a large initial capacity
+//     std::cout << "2D Matrix:\n";
 
-    std::cout << "Initial\n";
-    std::cout << "Size = " << arr.size()
-              << "  Capacity = " << arr.capacity() << "\n\n";
+//     for(size_t i = 0; i < mat.size(); ++i)
+//     {
+//         for(size_t j = 0; j < mat[i].size(); ++j)
+//             std::cout << mat[i][j] << ' ';
 
-    // Fill 5x the initial capacity
-    for (int i = 1; i <= 20; i++)
-        arr.insert(i);
+//         std::cout << '\n';
+//     }
 
-    std::cout << "After inserting 20 elements\n";
-    std::cout << "Size = " << arr.size()
-              << "  Capacity = " << arr.capacity() << "\n\n";
+//     std::cout << '\n' << mat << "\n\n";
 
-    // Remove one element
-    arr.remove();
 
-    std::cout << "After removing ONE element\n";
-    std::cout << "Size = " << arr.size()
-              << "  Capacity = " << arr.capacity() << "\n";
+//     // ===================== 3D ARRAY =====================
 
-    std::cout << "\nCapacity should NOT shrink here.\n\n";
+//     ARRAY<ARRAY<ARRAY<int>>> cube =
+//     {
+//         {
+//             {1, 2},
+//             {3, 4}
+//         },
+//         {
+//             {5, 6},
+//             {7, 8}
+//         }
+//     };
 
-    for (int i = 1; i <= 70; i++)
-        arr.insert(i);
+//     std::cout << "3D Matrix:\n";
 
-    for (int i = 1; i <= 70; i++)
-        arr.remove();
+//     for(size_t i = 0; i < cube.size(); ++i)
+//     {
+//         std::cout << "Layer " << i << ":\n";
 
-    std::cout << "After one more deletion (shrink expected)\n";
-    std::cout << "Size = " << arr.size()
-              << "  Capacity = " << arr.capacity() << "\n";
+//         for(size_t j = 0; j < cube[i].size(); ++j)
+//         {
+//             for(size_t k = 0; k < cube[i][j].size(); ++k)
+//                 std::cout << cube[i][j][k] << ' ';
 
-    return 0;
-}
+//             std::cout << '\n';
+//         }
+
+//         std::cout << '\n';
+//     }
+
+//     std::cout << cube << '\n';
+
+//     return 0;
+// }
+
+
+// int main()
+// {
+//     std::cout << "========== INITIALIZER LIST ==========\n";
+
+//     ARRAY<int> A = {1,2,3,4,5};
+//     ARRAY<int> B{1,2,3,4,5};
+//     ARRAY<int> C = {1,2,3,4,6};
+//     ARRAY<int> D = {1,2,3};
+//     ARRAY<int> E = {2,1,3,4,5};
+//     ARRAY<int> F = {};
+
+//     std::cout << "A = "; A.view();
+//     std::cout << "B = "; B.view();
+//     std::cout << "C = "; C.view();
+//     std::cout << "D = "; D.view();
+//     std::cout << "E = "; E.view();
+//     std::cout << "F = "; F.view();
+
+//     std::cout << "\n========== SIZE / CAPACITY ==========\n";
+//     std::cout << "A : Size = " << A.size()
+//               << "  Capacity = " << A.capacity() << '\n';
+
+//     std::cout << "F : Size = " << F.size()
+//               << "  Capacity = " << F.capacity() << '\n';
+
+//     std::cout << "\n========== COMPARISON ==========\n";
+
+//     std::cout << "A == B : " << (A == B) << '\n';
+//     std::cout << "A != B : " << (A != B) << '\n';
+
+//     std::cout << "A == C : " << (A == C) << '\n';
+//     std::cout << "A != C : " << (A != C) << '\n';
+
+//     std::cout << "A < C  : " << (A < C) << '\n';
+//     std::cout << "C > A  : " << (C > A) << '\n';
+
+//     std::cout << "D < A  : " << (D < A) << '\n';
+//     std::cout << "A > D  : " << (A > D) << '\n';
+
+//     std::cout << "E > A  : " << (E > A) << '\n';
+//     std::cout << "A < E  : " << (A < E) << '\n';
+
+//     std::cout << "A <= B : " << (A <= B) << '\n';
+//     std::cout << "A >= B : " << (A >= B) << '\n';
+
+//     std::cout << "A <= C : " << (A <= C) << '\n';
+//     std::cout << "A >= C : " << (A >= C) << '\n';
+
+//     std::cout << "\n========== INDEX OPERATOR ==========\n";
+
+//     std::cout << "A[0]  = " << A[0] << '\n';
+//     std::cout << "A[2]  = " << A[2] << '\n';
+//     std::cout << "A[-1] = " << A[-1] << '\n';
+//     std::cout << "A[-2] = " << A[-2] << '\n';
+
+//     std::cout << "\n========== FORWARD ITERATOR ==========\n";
+
+//     for(auto it=A.begin(); it!=A.end(); ++it)
+//         std::cout << *it << ' ';
+//     std::cout << '\n';
+
+//     std::cout << "\n========== RANGE-BASED FOR ==========\n";
+
+//     for(const auto &x : A)
+//         std::cout << x << ' ';
+//     std::cout << '\n';
+
+//     std::cout << "\n========== REVERSE ITERATOR ==========\n";
+
+//     for(auto it=A.rbegin(); it!=A.rend(); ++it)
+//         std::cout << *it << ' ';
+    
+//     std::cout << "\n==========  ==========\n";
+
+//     ARRAY<int> G = {1,2,3,4};
+//     ARRAY<int> H = {1,2,3,4,5};
+
+//     std::cout << "G < H : " << (G < H) << '\n';
+//     std::cout << "H > G : " << (H > G) << '\n';
+
+//     ARRAY<int> I = {5};
+//     ARRAY<int> J = {5};
+
+//     std::cout << "I == J : " << (I == J) << '\n';
+
+//     ARRAY<int> K = {5};
+//     ARRAY<int> L = {4};
+
+//     std::cout << "K > L : " << (K > L) << '\n';
+//     std::cout << "K < L : " << (K < L) << '\n';
+
+//     ARRAY<int> M = {};
+
+//     std::cout << "M == F : " << (M == F) << '\n';
+//     std::cout << "M <= F : " << (M <= F) << '\n';
+//     std::cout << "M >= F : " << (M >= F) << '\n';
+
+
+//     return 0;
+// }
+
+
+// int main()
+// {
+//     std::cout << "========== USER FIXED CAPACITY ==========\n";
+
+//     ARRAY<int> arr(200);   // User requests a large initial capacity
+
+//     std::cout << "Initial\n";
+//     std::cout << "Size = " << arr.size()
+//               << "  Capacity = " << arr.capacity() << "\n\n";
+
+//     // Fill 5x the initial capacity
+//     for (int i = 1; i <= 20; i++)
+//         arr.insert(i);
+
+//     std::cout << "After inserting 20 elements\n";
+//     std::cout << "Size = " << arr.size()
+//               << "  Capacity = " << arr.capacity() << "\n\n";
+
+//     // Remove one element
+//     arr.remove();
+
+//     std::cout << "After removing ONE element\n";
+//     std::cout << "Size = " << arr.size()
+//               << "  Capacity = " << arr.capacity() << "\n";
+
+//     std::cout << "\nCapacity should NOT shrink here.\n\n";
+
+//     for (int i = 1; i <= 70; i++)
+//         arr.insert(i);
+
+//     for (int i = 1; i <= 70; i++)
+//         arr.remove();
+
+//     std::cout << "After one more deletion (shrink expected)\n";
+//     std::cout << "Size = " << arr.size()
+//               << "  Capacity = " << arr.capacity() << "\n";
+
+//     return 0;
+// }
 
 // template<typename D>
 // void printState(ARRAY<D>& arr, const char* name)

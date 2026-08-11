@@ -1,4 +1,3 @@
-drop(dup)->list
 
 R_IN ->bst
 

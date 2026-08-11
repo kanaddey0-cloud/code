@@ -2,7 +2,6 @@
 #include <stdexcept>
 #include <new>
 #include <gdsl_list>
-#include <gdsl_array>
 
 template<typename D>
 class QUEUE;
@@ -29,12 +28,13 @@ union FIFO
         void view(bool v) const;
         void clear();
 
-    Continuous(const Continuous&) = default;
-    Continuous& operator=(const Continuous&) = default;
+        Continuous(const Continuous&);
+        Continuous& operator=(const Continuous&);
 
-    Continuous(Continuous&&) noexcept = default;
-    Continuous& operator=(Continuous&&) noexcept = default;
-    } array;
+        Continuous(Continuous&&) noexcept;
+        Continuous& operator=(Continuous&&) noexcept;
+    } 
+    array;
 
     struct Linked { friend class QUEUE<D>;
     protected:
@@ -51,12 +51,13 @@ union FIFO
         void view(bool v) const;
         void clear();
 
-    Linked(const Linked&) = default;
-    Linked& operator=(const Linked&) = default;
+        Linked(const Linked&) = default;
+        Linked& operator=(const Linked&) = default;
 
-    Linked(Linked&&) noexcept = default;
-    Linked& operator=(Linked&&) noexcept = default;
-    } list;
+        Linked(Linked&&) noexcept = default;
+        Linked& operator=(Linked&&) noexcept = default;
+    } 
+    list;
 
     FIFO() {}
     ~FIFO() {}
@@ -67,6 +68,46 @@ union FIFO
     FIFO(FIFO&&)=delete;
     FIFO& operator=(FIFO&&)=delete;
 };
+
+template<typename D>
+FIFO<D>::Continuous::Continuous(const Continuous& other)
+    : C(other.C), S(other.S), f(other.f), r(other.r)
+{
+    Q=new D[C];
+    for(size_t i=0; i < C; ++i) Q[i]=other.Q[i];
+}
+
+template<typename D>
+typename FIFO<D>::Continuous& 
+FIFO<D>::Continuous::operator=(const Continuous& other)
+{
+    if(this != &other){
+        D* temp=new D[other.C];
+        for(size_t i=0; i < other.C; ++i) temp[i]=other.Q[i];
+
+        delete[] Q;
+        Q=temp; C=other.C; S=other.S; f=other.f; r=other.r;
+    }
+    return *this;
+}
+
+template<typename D>
+FIFO<D>::Continuous::Continuous(Continuous&& other) noexcept
+    : Q(other.Q), C(other.C), S(other.S), f(other.f), r(other.r)
+{
+    other.Q=nullptr; other.C=0; other.S=0; other.f=0; other.r=0;
+}
+
+template<typename D>
+typename FIFO<D>::Continuous& 
+FIFO<D>::Continuous::operator=(Continuous&& other) noexcept
+{
+    if(this != &other){ delete[] Q;
+        Q=other.Q;       C=other.C; S=other.S; f=other.f; r=other.r;
+        other.Q=nullptr; other.C=0; other.S=0; other.f=0; other.r=0;
+    }
+    return *this;
+}
 
 template<typename D>
 size_t FIFO<D>::Continuous::size(){ return S; }
@@ -136,7 +177,7 @@ D FIFO<D>::Continuous::rear(){
 template<typename D>
 D FIFO<D>::Linked::rear(){
 	if(empty())
-        throw std::runtime_error("Stack is empty");
+        throw std::runtime_error("Queue is empty");
 		
     return Q.value(-1);
 }
