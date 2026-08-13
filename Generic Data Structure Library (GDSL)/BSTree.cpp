@@ -238,10 +238,6 @@ protected:
     bool freelink(BSTnode<D>*& root);
     size_t addlink(BSTnode<D>*& root, const BSTnode<D>*& other);
 
-    void _viewIN(const BSTnode<D>* root) const;
-    void _viewR_IN(const BSTnode<D>* root) const;
-    void _viewPRE(const BSTnode<D>* root) const;
-    void _viewPOST(const BSTnode<D>* root) const;
     BSTnode<D>* pointer(std::ptrdiff_t index, MODE mode=MODE::DEF) const;
     BSTnode<D>* pointerBFS(size_t index, bool order=true) const;
     BSTnode<D>* pointerDFS(size_t index, bool order=true) const;
@@ -394,48 +390,84 @@ void BSTREE<D>::print_Key_L_C_R(const BSTnode<D>* tmp) const{
 }
 
 template<typename D>
-void BSTREE<D>::viewPRE() const{ _viewPRE(ROOT); }
+void BSTREE<D>::viewPRE() const{
+    if(!ROOT){ 
+        std::cout<<"NULL"; return;
+    }
+    BSTnode<D> *curr=ROOT;
+    STACK<BSTnode<D>*> S(elem);
+    do{
+        while(curr){ print_Key_L_C_R(curr); std::cout<<"\n";
 
-template<typename D>
-void BSTREE<D>::viewIN() const{ _viewIN(ROOT); }
-
-template<typename D>
-void BSTREE<D>::viewR_IN() const{ _viewR_IN(ROOT); }
-
-template<typename D>
-void BSTREE<D>::viewPOST() const{ _viewPOST(ROOT); }
-
-template<typename D>
-void BSTREE<D>::_viewIN(const BSTnode<D>* root) const{
-    if(!root) return;
-
-    _viewIN(root->LINK[L]);  print_Key_L_C_R(root); std::cout<<"\n";  _viewIN(root->LINK[R]);
+            if(curr->LINK[R]) S.push(curr->LINK[R]);
+            curr=curr->LINK[L];
+        }
+        if(!S.empty()) curr=S.pop();
+    } while(curr);
 }
 
 template<typename D>
-void BSTREE<D>::_viewR_IN(const BSTnode<D>* root) const{
-    if(!root) return;
+void BSTREE<D>::viewIN() const{
+    if(!ROOT){ 
+        std::cout<<"NULL"; return;
+    }
+    BSTnode<D>* curr = ROOT;
+    STACK<BSTnode<D>*> S(elem);
+    while(curr || !S.empty()){
+        while(curr){
+            S.push(curr); curr=curr->LINK[L];
+        }
+        curr=S.pop();
+        print_Key_L_C_R(curr); std::cout << "\n";
 
-    _viewR_IN(root->LINK[R]);  print_Key_L_C_R(root); std::cout<<"\n";  _viewR_IN(root->LINK[L]);
+        curr=curr->LINK[R];
+    }
 }
 
 template<typename D>
-void BSTREE<D>::_viewPRE(const BSTnode<D>* root) const{
-    if(!root) return;
+void BSTREE<D>::viewR_IN() const{
+    if(!ROOT){ 
+        std::cout<<"NULL"; return;
+    }
+    BSTnode<D>* curr = ROOT;
+    STACK<BSTnode<D>*> S(elem);
+    while(curr || !S.empty()){
+        while(curr){
+            S.push(curr); curr=curr->LINK[R];
+        }
+        curr=S.pop();
+        print_Key_L_C_R(curr); std::cout << "\n";
 
-    print_Key_L_C_R(root); std::cout<<"\n";  _viewPRE(root->LINK[L]);  _viewPRE(root->LINK[R]);
+        curr=curr->LINK[L];
+    }
 }
 
 template<typename D>
-void BSTREE<D>::_viewPOST(const BSTnode<D>* root) const{
-    if(!root) return;
-
-    _viewPOST(root->LINK[L]);  _viewPOST(root->LINK[R]);  print_Key_L_C_R(root); std::cout<<"\n";
+void BSTREE<D>::viewPOST() const{
+    if(!ROOT){ 
+        std::cout<<"NULL"; return; 
+    }
+    STACK<BSTnode<D>*> S(elem);
+    BSTnode<D>* curr=ROOT,*last=nullptr;
+    do{
+        while(curr){
+            S.push(curr); curr=curr->LINK[L];
+        }
+        curr=S.tos();
+        if(curr->LINK[R] && last!=curr->LINK[R])
+            curr=curr->LINK[R];
+        else{
+            print_Key_L_C_R(last=S.pop()); std::cout<<"\n";
+            curr=nullptr;
+        }
+    } while(!S.empty());
 }
 
 template<typename D>
 void BSTREE<D>::viewBFS(bool order) const{
-    if(!ROOT){ std::cout<<"Tree is empty"; return; }
+    if(!ROOT){ 
+        std::cout<<"NULL"; return; 
+    }
     QUEUE<BSTnode<D>*> Q(elem); 
     BSTnode<D>* tmp;
     Q.enqueue(ROOT);
@@ -454,7 +486,9 @@ void BSTREE<D>::viewBFS(bool order) const{
 
 template<typename D>
 void BSTREE<D>::viewDFS(bool order) const{
-    if(!ROOT){ std::cout<<"Tree is empty"; return; }
+    if(!ROOT){ 
+        std::cout<<"NULL"; return; 
+    }
     STACK<BSTnode<D>*> S(elem); 
     BSTnode<D>* tmp;
     S.push(ROOT);
@@ -493,39 +527,65 @@ void BSTREE<D>::view(MODE mode) const{
 }
 
 template<typename D>
-BSTnode<D>* BSTREE<D>::pointerIN(BSTnode<D>* root, const size_t index, size_t& count) const{
-    if(!root) return nullptr;
-
-    BSTnode<D>* left=pointerIN(root->LINK[L], index, count);  if(left) return left;
-    if(count == index) return root;  count++;
-    return pointerIN(root->LINK[R], index, count);
+BSTnode<D>* BSTREE<D>::pointerIN(BSTnode<D>* root,const size_t index,size_t& count) const{
+    STACK<BSTnode<D>*> S(elem);
+    BSTnode<D>* curr=root;
+    while(curr || !S.empty()){
+        while(curr){ S.push(curr); curr=curr->LINK[L]; }
+        curr=S.pop();
+        if(count==index) return curr; count++;
+        curr=curr->LINK[R];
+    }
+    return nullptr;
 }
 
 template<typename D>
-BSTnode<D>* BSTREE<D>::pointerR_IN(BSTnode<D>* root, const size_t index, size_t& count) const{
-    if(!root) return nullptr;
-
-    BSTnode<D>* right=pointerR_IN(root->LINK[R], index, count);  if(right) return right;
-    if(count == index) return root;  count++;
-    return pointerR_IN(root->LINK[L], index, count);
+BSTnode<D>* BSTREE<D>::pointerR_IN(BSTnode<D>* root,const size_t index,size_t& count) const{
+    STACK<BSTnode<D>*> S(elem);
+    BSTnode<D>* curr=root;
+    while(curr || !S.empty()){
+        while(curr){ S.push(curr); curr=curr->LINK[R]; }
+        curr=S.pop();
+        if(count==index) return curr; count++;
+        curr=curr->LINK[L];
+    }
+    return nullptr;
 }
 
 template<typename D>
-BSTnode<D>* BSTREE<D>::pointerPRE(BSTnode<D>* root, const size_t index, size_t& count) const{
+BSTnode<D>* BSTREE<D>::pointerPRE(BSTnode<D>* root,const size_t index,size_t& count) const{
     if(!root) return nullptr;
+    BSTnode<D>* curr=root;
+    STACK<BSTnode<D>*> S(elem);
+    do{
+        while(curr){ if(count==index) return curr; count++;
 
-    if(count == index) return root;  count++;
-    BSTnode<D>* left = pointerPRE(root->LINK[L], index, count);  if(left) return left;
-    return pointerPRE(root->LINK[R], index, count);
+            if(curr->LINK[R]) S.push(curr->LINK[R]);
+            curr=curr->LINK[L];
+        }
+        if(!S.empty()) curr=S.pop();
+    }while(curr);
+    return nullptr;
 }
 
 template<typename D>
-BSTnode<D>* BSTREE<D>::pointerPOST(BSTnode<D>* root, const size_t index, size_t& count) const{
+BSTnode<D>* BSTREE<D>::pointerPOST(BSTnode<D>* root,const size_t index,size_t& count) const{
     if(!root) return nullptr;
+    STACK<BSTnode<D>*> S(elem);
+    BSTnode<D>* curr=root,*last=nullptr;
+    do{
+        while(curr){
+            S.push(curr); curr=curr->LINK[L]; 
+        }
+        curr=S.tos();
 
-    BSTnode<D>* left = pointerPOST(root->LINK[L], index, count);  if(left) return left;
-    BSTnode<D>* right = pointerPOST(root->LINK[R], index, count);  if(right) return right;
-    if(count == index) return root;  count++;  return nullptr;
+        if(curr->LINK[R] && last!=curr->LINK[R]) 
+            curr=curr->LINK[R];
+        else{
+            if(count==index) return curr;
+            count++; last=S.pop(); curr=nullptr;
+        }
+    } while(!S.empty()); return nullptr;
 }
 
 template<typename D>
@@ -782,148 +842,148 @@ int main() {
     // BFS
     // =========================================================
 
-    tree.M = MODE::BFS;
+    tree.M = MODE::POST; std::cout<<tree;
 
-    std::cout << "\n========== BFS VIEW ==========\n";
+    // std::cout << "\n========== BFS VIEW ==========\n";
 
-    // Default: order = true
-    std::cout << "\n--- viewBFS() [default / true] ---\n";
-    tree.viewBFS();
+    // // Default: order = true
+    // std::cout << "\n--- viewBFS() [default / true] ---\n";
+    // tree.viewBFS();
 
-    // Explicit false
-    std::cout << "\n--- viewBFS(false) ---\n";
-    tree.viewBFS(false);
-
-
-    std::cout << "\n========== BFS INDEXING ==========\n";
-
-    std::cout << "tree[0] = " << tree[0] << '\n';
-    std::cout << "tree[1] = " << tree[1] << '\n';
-    std::cout << "tree[2] = " << tree[2] << '\n';
-    std::cout << "tree[6] = " << tree[6] << '\n';
-
-    std::cout << "tree[-1] = " << tree[-1] << '\n';
-    std::cout << "tree[-2] = " << tree[-2] << '\n';
-    std::cout << "tree[-3] = " << tree[-3] << '\n';
-
-    std::cout << "BFS range: ";
-
-    for (const auto& x : tree) {
-        std::cout << x << ' ';
-    }
-
-    std::cout << '\n';
+    // // Explicit false
+    // std::cout << "\n--- viewBFS(false) ---\n";
+    // tree.viewBFS(false);
 
 
-    // =========================================================
-    // BFS_RL
-    // =========================================================
+    // std::cout << "\n========== BFS INDEXING ==========\n";
 
-    tree.M = MODE::BFS_RL;
+    // std::cout << "tree[0] = " << tree[0] << '\n';
+    // std::cout << "tree[1] = " << tree[1] << '\n';
+    // std::cout << "tree[2] = " << tree[2] << '\n';
+    // std::cout << "tree[6] = " << tree[6] << '\n';
 
-    std::cout << "\n========== BFS_RL VIEW ==========\n";
+    // std::cout << "tree[-1] = " << tree[-1] << '\n';
+    // std::cout << "tree[-2] = " << tree[-2] << '\n';
+    // std::cout << "tree[-3] = " << tree[-3] << '\n';
 
-    // Explicit false
-    std::cout << "\n--- viewBFS(false) ---\n";
-    tree.viewBFS(false);
+    // std::cout << "BFS range: ";
 
-    // Default: order = true
-    std::cout << "\n--- viewBFS() [default / true] ---\n";
-    tree.viewBFS();
+    // for (const auto& x : tree) {
+    //     std::cout << x << ' ';
+    // }
 
-
-    std::cout << "\n========== BFS_RL INDEXING ==========\n";
-
-    std::cout << "tree[0] = " << tree[0] << '\n';
-    std::cout << "tree[1] = " << tree[1] << '\n';
-    std::cout << "tree[2] = " << tree[2] << '\n';
-    std::cout << "tree[6] = " << tree[6] << '\n';
-
-    std::cout << "tree[-1] = " << tree[-1] << '\n';
-    std::cout << "tree[-2] = " << tree[-2] << '\n';
-    std::cout << "tree[-3] = " << tree[-3] << '\n';
-
-    std::cout << "BFS_RL range: ";
-
-    for (const auto& x : tree) {
-        std::cout << x << ' ';
-    }
-
-    std::cout << '\n';
+    // std::cout << '\n';
 
 
-    // =========================================================
-    // DFS
-    // =========================================================
+    // // =========================================================
+    // // BFS_RL
+    // // =========================================================
 
-    tree.M = MODE::DFS;
+    // tree.M = MODE::BFS_RL;
 
-    std::cout << "\n========== DFS VIEW ==========\n";
+    // std::cout << "\n========== BFS_RL VIEW ==========\n";
 
-    // Default: order = true
-    std::cout << "\n--- viewDFS() [default / true] ---\n";
-    tree.viewDFS();
+    // // Explicit false
+    // std::cout << "\n--- viewBFS(false) ---\n";
+    // tree.viewBFS(false);
 
-    // Explicit false
-    std::cout << "\n--- viewDFS(false) ---\n";
-    tree.viewDFS(false);
-
-
-    std::cout << "\n========== DFS INDEXING ==========\n";
-
-    std::cout << "tree[0] = " << tree[0] << '\n';
-    std::cout << "tree[1] = " << tree[1] << '\n';
-    std::cout << "tree[2] = " << tree[2] << '\n';
-    std::cout << "tree[6] = " << tree[6] << '\n';
-
-    std::cout << "tree[-1] = " << tree[-1] << '\n';
-    std::cout << "tree[-2] = " << tree[-2] << '\n';
-    std::cout << "tree[-3] = " << tree[-3] << '\n';
-
-    std::cout << "DFS range: ";
-
-    for (const auto& x : tree) {
-        std::cout << x << ' ';
-    }
-
-    std::cout << '\n';
+    // // Default: order = true
+    // std::cout << "\n--- viewBFS() [default / true] ---\n";
+    // tree.viewBFS();
 
 
-    // =========================================================
-    // DFS_RL
-    // =========================================================
+    // std::cout << "\n========== BFS_RL INDEXING ==========\n";
 
-    tree.M = MODE::DFS_RL;
+    // std::cout << "tree[0] = " << tree[0] << '\n';
+    // std::cout << "tree[1] = " << tree[1] << '\n';
+    // std::cout << "tree[2] = " << tree[2] << '\n';
+    // std::cout << "tree[6] = " << tree[6] << '\n';
 
-    std::cout << "\n========== DFS_RL VIEW ==========\n";
+    // std::cout << "tree[-1] = " << tree[-1] << '\n';
+    // std::cout << "tree[-2] = " << tree[-2] << '\n';
+    // std::cout << "tree[-3] = " << tree[-3] << '\n';
 
-    // Explicit false
-    std::cout << "\n--- viewDFS(false) ---\n";
-    tree.viewDFS(false);
+    // std::cout << "BFS_RL range: ";
 
-    // Default: order = true
-    std::cout << "\n--- viewDFS() [default / true] ---\n";
-    tree.viewDFS();
+    // for (const auto& x : tree) {
+    //     std::cout << x << ' ';
+    // }
+
+    // std::cout << '\n';
 
 
-    std::cout << "\n========== DFS_RL INDEXING ==========\n";
+    // // =========================================================
+    // // DFS
+    // // =========================================================
 
-    std::cout << "tree[0] = " << tree[0] << '\n';
-    std::cout << "tree[1] = " << tree[1] << '\n';
-    std::cout << "tree[2] = " << tree[2] << '\n';
-    std::cout << "tree[6] = " << tree[6] << '\n';
+    // tree.M = MODE::DFS;
 
-    std::cout << "tree[-1] = " << tree[-1] << '\n';
-    std::cout << "tree[-2] = " << tree[-2] << '\n';
-    std::cout << "tree[-3] = " << tree[-3] << '\n';
+    // std::cout << "\n========== DFS VIEW ==========\n";
 
-    std::cout << "DFS_RL range: ";
+    // // Default: order = true
+    // std::cout << "\n--- viewDFS() [default / true] ---\n";
+    // tree.viewDFS();
 
-    for (const auto& x : tree) {
-        std::cout << x << ' ';
-    }
+    // // Explicit false
+    // std::cout << "\n--- viewDFS(false) ---\n";
+    // tree.viewDFS(false);
 
-    std::cout << '\n';
+
+    // std::cout << "\n========== DFS INDEXING ==========\n";
+
+    // std::cout << "tree[0] = " << tree[0] << '\n';
+    // std::cout << "tree[1] = " << tree[1] << '\n';
+    // std::cout << "tree[2] = " << tree[2] << '\n';
+    // std::cout << "tree[6] = " << tree[6] << '\n';
+
+    // std::cout << "tree[-1] = " << tree[-1] << '\n';
+    // std::cout << "tree[-2] = " << tree[-2] << '\n';
+    // std::cout << "tree[-3] = " << tree[-3] << '\n';
+
+    // std::cout << "DFS range: ";
+
+    // for (const auto& x : tree) {
+    //     std::cout << x << ' ';
+    // }
+
+    // std::cout << '\n';
+
+
+    // // =========================================================
+    // // DFS_RL
+    // // =========================================================
+
+    // tree.M = MODE::DFS_RL;
+
+    // std::cout << "\n========== DFS_RL VIEW ==========\n";
+
+    // // Explicit false
+    // std::cout << "\n--- viewDFS(false) ---\n";
+    // tree.viewDFS(false);
+
+    // // Default: order = true
+    // std::cout << "\n--- viewDFS() [default / true] ---\n";
+    // tree.viewDFS();
+
+
+    // std::cout << "\n========== DFS_RL INDEXING ==========\n";
+
+    // std::cout << "tree[0] = " << tree[0] << '\n';
+    // std::cout << "tree[1] = " << tree[1] << '\n';
+    // std::cout << "tree[2] = " << tree[2] << '\n';
+    // std::cout << "tree[6] = " << tree[6] << '\n';
+
+    // std::cout << "tree[-1] = " << tree[-1] << '\n';
+    // std::cout << "tree[-2] = " << tree[-2] << '\n';
+    // std::cout << "tree[-3] = " << tree[-3] << '\n';
+
+    // std::cout << "DFS_RL range: ";
+
+    // for (const auto& x : tree) {
+    //     std::cout << x << ' ';
+    // }
+
+    // std::cout << '\n';
 
 
     return 0;

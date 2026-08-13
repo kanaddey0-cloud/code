@@ -250,9 +250,6 @@ protected:
     char balanceH(char leftH, char rightH) const noexcept;
     AVLnode<D>* balance(AVLnode<D>* AVL);
 	
-    void _viewIN(const AVLnode<D>* root) const;
-    void _viewR_IN(const AVLnode<D>* root) const;
-    void _viewPRE(const AVLnode<D>* root) const;
     void _viewPOST(const AVLnode<D>* root) const;
     AVLnode<D>* pointer(std::ptrdiff_t index, MODE mode=MODE::DEF) const;
     AVLnode<D>* pointerBFS(const size_t index, bool order=true) const;
@@ -406,8 +403,82 @@ void AVLTREE<D>::print_Key_L_C_R(const AVLnode<D>* tmp) const{
 }
 
 template<typename D>
+void AVLTREE<D>::viewPRE() const{
+    if(!ROOT){ 
+        std::cout<<"NULL"; return;
+    }
+    AVLnode<D> *curr=ROOT;
+    STACK<AVLnode<D>*> S(elem);
+    do{
+        while(curr){ print_Key_L_C_R(curr); std::cout<<"\n";
+
+            if(curr->LINK[R]) S.push(curr->LINK[R]);
+            curr=curr->LINK[L];
+        }
+        if(!S.empty()) curr=S.pop();
+    } while(curr);
+}
+
+template<typename D>
+void AVLTREE<D>::viewIN() const{
+    if(!ROOT){ 
+        std::cout<<"NULL"; return;
+    }
+    AVLnode<D>* curr = ROOT;
+    STACK<AVLnode<D>*> S(elem);
+    while(curr || !S.empty()){
+        while(curr){
+            S.push(curr); curr=curr->LINK[L];
+        }
+        curr=S.pop();
+        print_Key_L_C_R(curr); std::cout << "\n";
+        curr=curr->LINK[R];
+    }
+}
+
+template<typename D>
+void AVLTREE<D>::viewR_IN() const{
+    if(!ROOT){ 
+        std::cout<<"NULL"; return;
+    }
+    AVLnode<D>* curr = ROOT;
+    STACK<AVLnode<D>*> S(elem);
+    while(curr || !S.empty()){
+        while(curr){
+            S.push(curr); curr=curr->LINK[R];
+        }
+        curr=S.pop();
+        print_Key_L_C_R(curr); std::cout << "\n";
+        curr=curr->LINK[L];
+    }
+}
+
+template<typename D>
+void AVLTREE<D>::viewPOST() const{
+    if(!ROOT){ 
+        std::cout<<"NULL"; return; 
+    }
+    STACK<AVLnode<D>*> S(elem);
+    AVLnode<D>* curr=ROOT,*last=nullptr;
+    do{
+        while(curr){
+            S.push(curr); curr=curr->LINK[L];
+        }
+        curr=S.tos();
+        if(curr->LINK[R] && last!=curr->LINK[R])
+            curr=curr->LINK[R];
+        else{
+            print_Key_L_C_R(last=S.pop()); std::cout<<"\n";
+            curr=nullptr;
+        }
+    } while(!S.empty());
+}
+
+template<typename D>
 void AVLTREE<D>::viewBFS(bool order) const{
-    if(!ROOT){ std::cout<<"Tree is empty"; return; }
+    if(!ROOT){ 
+        std::cout<<"NULL"; return; 
+    }
     QUEUE<AVLnode<D>*> Q(elem); 
     AVLnode<D>* tmp;
     Q.enqueue(ROOT);
@@ -426,7 +497,9 @@ void AVLTREE<D>::viewBFS(bool order) const{
 
 template<typename D>
 void AVLTREE<D>::viewDFS(bool order) const{
-    if(!ROOT){ std::cout<<"Tree is empty"; return; }
+    if(!ROOT){ 
+        std::cout<<"NULL"; return; 
+    }
     STACK<AVLnode<D>*> S(elem); 
     AVLnode<D>* tmp;
     S.push(ROOT);
@@ -441,46 +514,6 @@ void AVLTREE<D>::viewDFS(bool order) const{
         }
         print_Key_L_C_R(tmp); std::cout<<"\n";
     }
-}
-
-template<typename D>
-void AVLTREE<D>::viewPRE() const{ _viewPRE(ROOT); }
-
-template<typename D>
-void AVLTREE<D>::viewIN() const{ _viewIN(ROOT); }
-
-template<typename D>
-void AVLTREE<D>::viewR_IN() const{ _viewR_IN(ROOT); }
-
-template<typename D>
-void AVLTREE<D>::viewPOST() const{ _viewPOST(ROOT); }
-
-template<typename D>
-void AVLTREE<D>::_viewPRE(const AVLnode<D>* root) const{
-    if(!root) return;
-
-    print_Key_L_C_R(root); std::cout<<"\n";  _viewPRE(root->LINK[L]);  _viewPRE(root->LINK[R]);
-}
-
-template<typename D>
-void AVLTREE<D>::_viewIN(const AVLnode<D>* root) const{
-    if(!root) return;
-
-    _viewIN(root->LINK[L]);  print_Key_L_C_R(root); std::cout<<"\n";  _viewIN(root->LINK[R]);
-}
-
-template<typename D>
-void AVLTREE<D>::_viewR_IN(const AVLnode<D>* root) const{
-    if(!root) return;
-
-    _viewR_IN(root->LINK[R]);  print_Key_L_C_R(root); std::cout<<"\n";  _viewR_IN(root->LINK[L]);
-}
-
-template<typename D>
-void AVLTREE<D>::_viewPOST(const AVLnode<D>* root) const{
-    if(!root) return;
-
-    _viewPOST(root->LINK[L]);  _viewPOST(root->LINK[R]);  print_Key_L_C_R(root); std::cout<<"\n";
 }
 
 template<typename D>
@@ -505,39 +538,64 @@ void AVLTREE<D>::view(MODE mode) const{
 }
 
 template<typename D>
-AVLnode<D>* AVLTREE<D>::pointerIN(AVLnode<D>* root, const size_t index, size_t& count) const{
-    if(!root) return nullptr;
-
-    AVLnode<D>* left=pointerIN(root->LINK[L], index, count);  if(left) return left;
-    if(count == index) return root;  count++;
-    return pointerIN(root->LINK[R], index, count);
+AVLnode<D>* AVLTREE<D>::pointerIN(AVLnode<D>* root,const size_t index,size_t& count) const{
+    STACK<AVLnode<D>*> S(elem); AVLnode<D>* curr=root;
+    while(curr || !S.empty()){
+        while(curr){ 
+            S.push(curr); curr=curr->LINK[L]; 
+        }
+        curr=S.pop(); if(count==index) return curr; count++;
+        curr=curr->LINK[R];
+    }
+    return nullptr;
 }
 
 template<typename D>
-AVLnode<D>* AVLTREE<D>::pointerR_IN(AVLnode<D>* root, const size_t index, size_t& count) const{
-    if(!root) return nullptr;
-
-    AVLnode<D>* right=pointerR_IN(root->LINK[R], index, count);  if(right) return right;
-    if(count == index) return root;  count++;
-    return pointerR_IN(root->LINK[L], index, count);
+AVLnode<D>* AVLTREE<D>::pointerR_IN(AVLnode<D>* root,const size_t index,size_t& count) const{
+    STACK<AVLnode<D>*> S(elem); AVLnode<D>* curr=root;
+    while(curr || !S.empty()){
+        while(curr){ 
+            S.push(curr); curr=curr->LINK[R]; 
+        }
+        curr=S.pop(); if(count==index) return curr; count++;
+        curr=curr->LINK[L];
+    }
+    return nullptr;
 }
 
 template<typename D>
-AVLnode<D>* AVLTREE<D>::pointerPRE(AVLnode<D>* root, const size_t index, size_t& count) const{
+AVLnode<D>* AVLTREE<D>::pointerPRE(AVLnode<D>* root,const size_t index,size_t& count) const{
     if(!root) return nullptr;
-
-    if(count == index) return root;  count++;
-    AVLnode<D>* left = pointerPRE(root->LINK[L], index, count);  if(left) return left;
-    return pointerPRE(root->LINK[R], index, count);
+    AVLnode<D>* curr=root; STACK<AVLnode<D>*> S(elem);
+    do{
+        while(curr){ if(count==index) return curr; count++;
+            
+            if(curr->LINK[R]) S.push(curr->LINK[R]);
+            curr=curr->LINK[L];
+        }
+        if(!S.empty()) curr=S.pop();
+    }while(curr);
+    return nullptr;
 }
 
 template<typename D>
-AVLnode<D>* AVLTREE<D>::pointerPOST(AVLnode<D>* root, const size_t index, size_t& count) const{
+AVLnode<D>* AVLTREE<D>::pointerPOST(AVLnode<D>* root,const size_t index,size_t& count) const{
     if(!root) return nullptr;
+    STACK<AVLnode<D>*> S(elem);
+    AVLnode<D>* curr=root,*last=nullptr;
+    do{
+        while(curr){
+            S.push(curr); curr=curr->LINK[L]; 
+        }
+        curr=S.tos();
 
-    AVLnode<D>* left = pointerPOST(root->LINK[L], index, count);  if(left) return left;
-    AVLnode<D>* right = pointerPOST(root->LINK[R], index, count);  if(right) return right;
-    if(count == index) return root;  count++;  return nullptr;
+        if(curr->LINK[R] && last!=curr->LINK[R]) 
+            curr=curr->LINK[R];
+        else{
+            if(count==index) return curr;
+            count++; last=S.pop(); curr=nullptr;
+        }
+    } while(!S.empty()); return nullptr;
 }
 
 template<typename D>
@@ -665,55 +723,6 @@ char AVLTREE<D>::balanceH(char leftH, char rightH) const noexcept{
     if(balance<2 && balance>-2) return (leftH > rightH ? leftH : rightH);
     return -1;
 }
-
-// template<typename D>
-// AVLnode<D>* AVLTREE<D>::balance(AVLnode<D>* AVL){ 
-//     AVLnode<D>* node[3]={nullptr};
-//     AVLnode<D>* link[4]={nullptr};
-    
-//     if(subH(AVL->LINK[L]) > subH(AVL->LINK[R])){  // if(AVL->H > 0)
-//         node[2]=AVL; link[3]=AVL->LINK[R]; 
-//         AVLnode<D>* left=AVL->LINK[L];
-//         if(subH(left->LINK[L]) < subH(left->LINK[R])){  // if(left->H > 0)
-//             node[0]=left; link[0]=left->LINK[L];
-//             node[1]=left->LINK[R];
-//             link[1]=node[1]->LINK[L]; link[2]=node[1]->LINK[R];  //1
-//         }
-//         else if(subH(left->LINK[L]) >= subH(left->LINK[R])){  // else if(left->H < 0)
-//             node[1]=left; link[2]=left->LINK[R];
-//             node[0]=left->LINK[L];
-//             link[0]=node[0]->LINK[L]; link[1]=node[0]->LINK[R];  //2
-//         }
-//     }
-//     else if(subH(AVL->LINK[L]) < subH(AVL->LINK[R])){  // else if(AVL->H < 0)
-//         node[0]=AVL; link[0]=AVL->LINK[L];  
-//         AVLnode<D>* right=AVL->LINK[R];
-//         if(subH(right->LINK[L]) < subH(right->LINK[R])){  // if(right->H > 0)
-//             node[1]=right; link[1]=right->LINK[L];  
-//             node[2]=right->LINK[R];
-//             link[2]=node[2]->LINK[L]; link[3]=node[2]->LINK[R];  //3
-//         }
-//         else if(subH(right->LINK[L]) >= subH(right->LINK[R])){  // else if(right->H < 0)
-//             node[2]=right; link[3]=right->LINK[R];
-//             node[1]=right->LINK[L];
-//             link[1]=node[1]->LINK[L]; link[2]=node[1]->LINK[R];  //4
-//         } 
-//     }
-//     node[1]->LINK[L]=node[0];   node[1]->LINK[R]=node[2];
-
-//     node[0]->LINK[L]=link[0];   node[2]->LINK[L]=link[2];
-//     node[0]->LINK[R]=link[1];   node[2]->LINK[R]=link[3];
-
-//     node[0]->H=balanceH(subH(node[0]->LINK[L]), subH(node[0]->LINK[R]));
-//     node[2]->H=balanceH(subH(node[2]->LINK[L]), subH(node[2]->LINK[R]));
-
-//     if(node[0]->H == -1) node[1]->LINK[L] = balance(node[0]);
-//     if(node[2]->H == -1) node[1]->LINK[R] = balance(node[2]);
-    
-//     node[1]->H=balanceH(subH(node[1]->LINK[L]), subH(node[1]->LINK[R]));
-
-//     return node[1];
-// }
 
 template<typename D>
 AVLnode<D>* AVLTREE<D>::balance(AVLnode<D>* AVL){ 
@@ -980,7 +989,7 @@ int main() {
     // BFS
     // =========================================================
 
-    tree.M = MODE::BFS;
+    tree.M = MODE::POST; std::cout<<tree;
 
     std::cout << "\n========== BFS VIEW ==========\n";
 
