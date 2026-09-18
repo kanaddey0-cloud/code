@@ -12,6 +12,514 @@
 
 int main(){ std::cout<<"\nLibrary Compile Successfully\n\n"; }
 
+
+// using namespace std;
+
+// int main()
+// {
+//     AVLTREE<int> tree;
+
+//     //              50
+//     //            /    \
+//     //          30      70
+//     //         /  \    /  \
+//     //       20   40  60   80
+//     //
+//     // Insert order creates this BST.
+//     int data[] = {50, 30, 70, 20, 40, 60, 80};
+
+//     for(int i=0; i<7; i++) tree.insert(data[i]);
+
+//     cout << "========================================\n";
+//     cout << "           VIEW FUNCTIONS\n";
+//     cout << "========================================\n";
+
+//     cout << "\nIN:\n";
+//     tree.viewIN();
+
+//     cout << "\nR_IN:\n";
+//     tree.viewR_IN();
+
+//     cout << "\nPRE:\n";
+//     tree.viewPRE();
+
+//     cout << "\nPOST:\n";
+//     tree.viewPOST();
+
+//     cout << "\nDFS LR:\n";
+//     tree.viewDFS(false);
+
+//     cout << "\nDFS RL:\n";
+//     tree.viewDFS(true);
+
+//     cout << "\nBFS LR:\n";
+//     tree.viewBFS(false);
+
+//     cout << "\nBFS RL:\n";
+//     tree.viewBFS(true);
+
+
+//     cout << "\n========================================\n";
+//     cout << "        RANGE-BASED FOR LOOP\n";
+//     cout << "========================================\n";
+
+//     MODE modes[] =
+//     {
+//         MODE::DFS,
+//         MODE::BFS,
+//         MODE::DFS_RL,
+//         MODE::BFS_RL,
+//         MODE::IN,
+//         MODE::R_IN,
+//         MODE::PRE,
+//         MODE::POST,
+//     };
+
+//     const char* names[] =
+//     {
+//         "DFS",
+//         "BFS",
+//         "DFS_RL",
+//         "BFS_RL",
+//         "IN",
+//         "R_IN",
+//         "PRE",
+//         "POST",
+//     };
+
+//     for(int m = 0; m < 8; ++m)
+//     {
+//         tree.M = modes[m];
+
+//         cout << "\n" << names[m] << " : ";
+
+//         for(const auto& x : tree)
+//             cout << x << ' ';
+
+//         cout << '\n';
+//     }
+
+
+//     cout << "\n========================================\n";
+//     cout << "          POSITIVE INDEXING\n";
+//     cout << "========================================\n";
+
+//     for(int m = 0; m < 8; ++m)
+//     {
+//         tree.M = modes[m];
+
+//         cout << "\n" << names[m] << ":\n";
+
+//         for(long int i = 0; i < tree.size(); ++i)
+//             cout << "tree[" << i << "] = " << tree[i] << '\n';
+//     }
+
+
+//     cout << "\n========================================\n";
+//     cout << "          NEGATIVE INDEXING\n";
+//     cout << "========================================\n";
+
+//     for(int m = 0; m < 8; ++m)
+//     {
+//         tree.M = modes[m];
+
+//         cout << "\n" << names[m] << ":\n";
+
+//         for(long int i = -1; i >= -tree.size(); --i)
+//             cout << "tree[" << i << "] = " << tree[i] << '\n';
+//     }
+
+
+//     cout << "\n========================================\n";
+//     cout << "          view(MODE)\n";
+//     cout << "========================================\n";
+
+//     for(int m = 0; m < 8; ++m)
+//     {
+//         cout << "\n" << names[m] << ":\n";
+//         tree.view(modes[m]);
+//     }
+
+//     return 0;
+// }
+
+
+// int main()
+// {
+//     // ===================== JAGGED ARRAY =====================
+
+//     ARRAY<ARRAY<int>> jaggedArray =
+//     {
+//         {1, 2},
+//         {3, 4, 5, 6},
+//         {7},
+//         {8, 9, 10},
+//         {},
+//         {11, 12, 13, 14, 15}
+//     };
+
+//     std::cout << "========== JAGGED ARRAY ==========\n";
+
+//     for(size_t i = 0; i < jaggedArray.size(); ++i)
+//     {
+//         std::cout << "Row " << i << " : ";
+
+//         for(size_t j = 0; j < jaggedArray[i].size(); ++j)
+//             std::cout << jaggedArray[i][j] << ' ';
+
+//         std::cout << '\n';
+//     }
+
+//     std::cout << "\nRecursive Print:\n";
+//     std::cout << jaggedArray << '\n';
+
+
+//     // ===================== JAGGED LIST =====================
+
+//     LIST<LIST<int>> jaggedList =
+//     {
+//         {1, 2},
+//         {3, 4, 5, 6},
+//         {7},
+//         {8, 9, 10},
+//         {},
+//         {11, 12, 13, 14, 15}
+//     };
+
+//     std::cout << "\n========== JAGGED LIST ==========\n";
+
+//     size_t row = 0;
+//     for(size_t i = 0; i < jaggedList.size(); ++i)
+//     {
+//         std::cout << "Row " << i << " : ";
+
+//         for(size_t j = 0; j < jaggedList[i].size(); ++j)
+//             std::cout << jaggedList[i][j] << ' ';
+
+//         std::cout << '\n';
+//     }
+
+//     std::cout << "\nRecursive Print:\n";
+//     std::cout << jaggedList << '\n';
+
+//     return 0;
+// }
+
+
+// int main(){
+//     LIST<int> L = {5,1,9,3,7,4,8,6,2};
+
+//     std::cout << "Before : " << L << '\n';
+//     L.sort();
+//     std::cout << "After  : " << L << '\n';
+
+//     LIST<int> A = {};
+//     LIST<int> B = {5};
+//     LIST<int> C = {2,1};
+//     LIST<int> D = {1,2};
+//     LIST<int> E = {5,5,5,5};
+//     LIST<int> F = {9,8,7,6,5,4,3,2,1};
+
+//     A.sort();
+//     B.sort();
+//     C.sort();
+//     D.sort();
+//     E.sort();
+//     F.sort();
+
+//     std::cout << A << '\n';
+//     std::cout << B << '\n';
+//     std::cout << C << '\n';
+//     std::cout << D << '\n';
+//     std::cout << E << '\n';
+//     std::cout << F << '\n';
+// }
+
+
+// int main()
+// {
+//     ARRAY<ARRAY<int>> mat =
+//     {
+//         {1, 2, 3},
+//         {4, 5, 6},
+//         {7, 8, 9}
+//     };
+
+//     std::cout << "2D Matrix:\n";
+
+//     for(size_t i = 0; i < mat.size(); ++i)
+//     {
+//         for(size_t j = 0; j < mat[i].size(); ++j)
+//             std::cout << mat[i][j] << ' ';
+
+//         std::cout << '\n';
+//     }
+
+//     std::cout << '\n' << mat << "\n\n";
+
+
+//     // ===================== 3D ARRAY =====================
+
+//     ARRAY<ARRAY<ARRAY<int>>> cube =
+//     {
+//         {
+//             {1, 2},
+//             {3, 4}
+//         },
+//         {
+//             {5, 6},
+//             {7, 8}
+//         }
+//     };
+
+//     std::cout << "3D Matrix:\n";
+
+//     for(size_t i = 0; i < cube.size(); ++i)
+//     {
+//         std::cout << "Layer " << i << ":\n";
+
+//         for(size_t j = 0; j < cube[i].size(); ++j)
+//         {
+//             for(size_t k = 0; k < cube[i][j].size(); ++k)
+//                 std::cout << cube[i][j][k] << ' ';
+
+//             std::cout << '\n';
+//         }
+
+//         std::cout << '\n';
+//     }
+
+//     std::cout << cube << '\n';
+
+//     return 0;
+// }
+
+
+// int main()
+// {
+//     std::cout << "========== INITIALIZER LIST ==========\n";
+
+//     ARRAY<int> A = {1,2,3,4,5}; 
+//     ARRAY<int> B{1,2,3,4,5};
+//     ARRAY<int> C = {1,2,3,4,6};
+//     ARRAY<int> D = {1,2,3};
+//     ARRAY<int> E = {2,1,3,4,5};
+//     ARRAY<int> F = {};
+
+//     std::cout << "A = "; A.view();  std::cout << "\n";
+//     std::cout << "B = "; B.view();  std::cout << "\n";
+//     std::cout << "C = "; C.view();  std::cout << "\n";
+//     std::cout << "D = "; D.view();  std::cout << "\n";
+//     std::cout << "E = "; E.view();  std::cout << "\n";
+//     std::cout << "F = "; F.view();
+
+//     std::cout << "\n========== SIZE / CAPACITY ==========\n";
+//     std::cout << "A : Size = " << A.size()
+//               << "  Capacity = " << A.capacity() << '\n';
+
+//     std::cout << "F : Size = " << F.size()
+//               << "  Capacity = " << F.capacity() << '\n';
+
+//     std::cout << "\n========== COMPARISON ==========\n";
+
+//     std::cout << "A == B : " << (A == B) << '\n';
+//     std::cout << "A != B : " << (A != B) << '\n';
+
+//     std::cout << "A == C : " << (A == C) << '\n';
+//     std::cout << "A != C : " << (A != C) << '\n';
+
+//     std::cout << "A < C  : " << (A < C) << '\n';
+//     std::cout << "C > A  : " << (C > A) << '\n';
+
+//     std::cout << "D < A  : " << (D < A) << '\n';
+//     std::cout << "A > D  : " << (A > D) << '\n';
+
+//     std::cout << "E > A  : " << (E > A) << '\n';
+//     std::cout << "A < E  : " << (A < E) << '\n';
+
+//     std::cout << "A <= B : " << (A <= B) << '\n';
+//     std::cout << "A >= B : " << (A >= B) << '\n';
+
+//     std::cout << "A <= C : " << (A <= C) << '\n';
+//     std::cout << "A >= C : " << (A >= C) << '\n';
+
+//     std::cout << "\n========== INDEX OPERATOR ==========\n";
+
+//     std::cout << "A[0]  = " << A[0] << '\n';
+//     std::cout << "A[2]  = " << A[2] << '\n';
+//     std::cout << "A[-1] = " << A[-1] << '\n';
+//     std::cout << "A[-2] = " << A[-2] << '\n';
+
+//     std::cout << "\n========== FORWARD ITERATOR ==========\n";
+
+//     for(auto it=A.begin(); it!=A.end(); ++it)
+//         std::cout << *it << ' ';
+//     std::cout << '\n';
+
+//     std::cout << "\n========== RANGE-BASED FOR ==========\n";
+
+//     for(const auto &x : A)
+//         std::cout << x << ' ';
+//     std::cout << '\n';
+
+//     std::cout << "\n========== REVERSE ITERATOR ==========\n";
+
+//     for(auto it=A.rbegin(); it!=A.rend(); ++it)
+//         std::cout << *it << ' ';
+    
+//     std::cout << "\n==========  ==========\n";
+
+//     ARRAY<int> G = {1,2,3,4};
+//     ARRAY<int> H = {1,2,3,4,5};
+
+//     std::cout << "G < H : " << (G < H) << '\n';
+//     std::cout << "H > G : " << (H > G) << '\n';
+
+//     ARRAY<int> I = {5};
+//     ARRAY<int> J = {5};
+
+//     std::cout << "I == J : " << (I == J) << '\n';
+
+//     ARRAY<int> K = {5};
+//     ARRAY<int> L = {4};
+
+//     std::cout << "K > L : " << (K > L) << '\n';
+//     std::cout << "K < L : " << (K < L) << '\n';
+
+//     ARRAY<int> M = {};
+
+//     std::cout << "M == F : " << (M == F) << '\n';
+//     std::cout << "M <= F : " << (M <= F) << '\n';
+//     std::cout << "M >= F : " << (M >= F) << '\n';
+
+//     return 0;
+// }
+
+
+
+// int main()
+// {
+//     // ===================== 2D LIST =====================
+
+//     LIST<LIST<int>> mat =
+//     {
+//         {1, 2, 3},
+//         {4, 5, 6},
+//         {7, 8, 9}
+//     };
+
+//     std::cout << "2D List:\n";
+
+//     for(auto row = mat.begin(); row != mat.end(); ++row)
+//     {
+//         for(auto col = row->begin(); col != row->end(); ++col)
+//             std::cout << *col << ' ';
+
+//         std::cout << '\n';
+//     }
+
+//     std::cout << '\n' << mat << "\n\n";
+
+
+//     // ===================== 3D LIST =====================
+
+//     LIST<LIST<LIST<int>>> cube =
+//     {
+//         {
+//             {1, 2},
+//             {3, 4}
+//         },
+//         {
+//             {5, 6},
+//             {7, 8}
+//         }
+//     };
+
+//     std::cout << "3D List:\n";
+
+//     size_t layer = 0;
+
+//     for(auto plane = cube.begin(); plane != cube.end(); ++plane)
+//     {
+//         std::cout << "Layer " << layer++ << ":\n";
+
+//         for(auto row = plane->begin(); row != plane->end(); ++row)
+//         {
+//             for(auto col = row->begin(); col != row->end(); ++col)
+//                 std::cout << *col << ' ';
+
+//             std::cout << '\n';
+//         }
+
+//         std::cout << '\n';
+//     }
+
+//     std::cout << cube << '\n';
+
+//     return 0;
+// }
+
+
+// int main()
+// {
+//     // ===== Initializer List =====
+//     LIST<int> A = {1, 2, 3};
+//     LIST<int> B = {1, 2, 3};
+//     LIST<int> C = {1, 2, 4};
+//     LIST<int> D = {1, 2};
+//     LIST<int> E = {2, 1, 3};
+
+//     std::cout << "A = "; A.view();  std::cout << "\n";
+//     std::cout << "B = "; B.view();  std::cout << "\n";
+//     std::cout << "C = "; C.view();  std::cout << "\n";
+//     std::cout << "D = "; D.view();  std::cout << "\n";
+//     std::cout << "E = "; E.view();  std::cout << "\n";
+
+//     std::cout << "\n===== Equality =====\n";
+//     std::cout << "A == B : " << (A == B) << '\n';
+//     std::cout << "A != B : " << (A != B) << '\n';
+//     std::cout << "A == C : " << (A == C) << '\n';
+//     std::cout << "A != C : " << (A != C) << '\n';
+
+//     std::cout << "\n===== Less / Greater =====\n";
+//     std::cout << "A < C  : " << (A < C) << '\n';
+//     std::cout << "C > A  : " << (C > A) << '\n';
+
+//     std::cout << "D < A  : " << (D < A) << '\n';
+//     std::cout << "A > D  : " << (A > D) << '\n';
+
+//     std::cout << "E > A  : " << (E > A) << '\n';
+//     std::cout << "A < E  : " << (A < E) << '\n';
+
+//     std::cout << "\n===== Less/Greater Equal =====\n";
+//     std::cout << "A <= B : " << (A <= B) << '\n';
+//     std::cout << "A >= B : " << (A >= B) << '\n';
+
+//     std::cout << "A <= C : " << (A <= C) << '\n';
+//     std::cout << "A >= C : " << (A >= C) << '\n';
+
+//     std::cout << "\n===== Iterator =====\n";
+//     std::cout << "A : ";
+
+//     for(auto it = A.begin(); it != A.end(); ++it)
+//         std::cout << *it << ' ';
+
+//     std::cout << std::endl << std::endl;
+
+//     LIST<int> F = {1,2,3,4};
+//     LIST<int> G = {1,2,3};
+
+//     std::cout << "F < G : " << (F < G) << '\n';
+//     std::cout << "F > G : " << (F > G) << '\n';
+//     std::cout << "G < F : " << (G < F) << '\n';
+//     std::cout << "G > F : " << (G > F) << '\n';
+
+//     return 0;
+// }
+
+
+
+
 // template<typename D>
 // std::ostream& operator<<(std::ostream& out, const LISTnode<D>& n){
 //     return out << n.K;

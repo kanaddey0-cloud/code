@@ -1810,63 +1810,63 @@ std::ostream& operator<<(std::ostream& out, const ARRAY<D>& a){ a.view(); return
 
 
 
-// int main()
-// {
-//     ARRAY<ARRAY<int>> mat =
-//     {
-//         {1, 2, 3},
-//         {4, 5, 6},
-//         {7, 8, 9}
-//     };
+int main()
+{
+    ARRAY<ARRAY<int>> mat =
+    {
+        {1, 2, 3},
+        {4, 5, 6},
+        {7, 8, 9}
+    };
 
-//     std::cout << "2D Matrix:\n";
+    std::cout << "2D Matrix:\n";
 
-//     for(size_t i = 0; i < mat.size(); ++i)
-//     {
-//         for(size_t j = 0; j < mat[i].size(); ++j)
-//             std::cout << mat[i][j] << ' ';
+    for(size_t i = 0; i < mat.size(); ++i)
+    {
+        for(size_t j = 0; j < mat[i].size(); ++j)
+            std::cout << mat[i][j] << ' ';
 
-//         std::cout << '\n';
-//     }
+        std::cout << '\n';
+    }
 
-//     std::cout << '\n' << mat << "\n\n";
+    std::cout << '\n' << mat << "\n\n";
 
 
-//     // ===================== 3D ARRAY =====================
+    // ===================== 3D ARRAY =====================
 
-//     ARRAY<ARRAY<ARRAY<int>>> cube =
-//     {
-//         {
-//             {1, 2},
-//             {3, 4}
-//         },
-//         {
-//             {5, 6},
-//             {7, 8}
-//         }
-//     };
+    ARRAY<ARRAY<ARRAY<int>>> cube =
+    {
+        {
+            {1, 2},
+            {3, 4}
+        },
+        {
+            {5, 6},
+            {7, 8}
+        }
+    };
 
-//     std::cout << "3D Matrix:\n";
+    std::cout << "3D Matrix:\n";
 
-//     for(size_t i = 0; i < cube.size(); ++i)
-//     {
-//         std::cout << "Layer " << i << ":\n";
+    for(size_t i = 0; i < cube.size(); ++i)
+    {
+        std::cout << "Layer " << i << ":\n";
 
-//         for(size_t j = 0; j < cube[i].size(); ++j)
-//         {
-//             for(size_t k = 0; k < cube[i][j].size(); ++k)
-//                 std::cout << cube[i][j][k] << ' ';
+        for(size_t j = 0; j < cube[i].size(); ++j)
+        {
+            for(size_t k = 0; k < cube[i][j].size(); ++k)
+                std::cout << cube[i][j][k] << ' ';
 
-//             std::cout << '\n';
-//         }
+            std::cout << '\n';
+        }
 
-//         std::cout << '\n';
-//     }
+        std::cout << '\n';
+    }
 
-//     std::cout << cube << '\n';
+    std::cout << cube << '\n';
 
-//     return 0;
-// }
+    return 0;
+}
 
 
 // int main()

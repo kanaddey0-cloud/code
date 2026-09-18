@@ -35,9 +35,19 @@ class BTREE{
 protected:
     size_t N=0;
     unsigned short O;
+    bool s=false;
     BTnode<D>* ROOT=nullptr;
+    BTnode<D>* shift=nullptr;
+
     BTnode<D>* create();
+    void fit_key(BTnode<D>* node, D key);
     void split(BTnode<D>* curr, D item, BTnode<D>* child);
+    int Shift_Search(BTnode<D>* node);
+    void Desc_Shift(BTnode<D>* node, D &val);
+    void R_IN_Shift(BTnode<D>* node, D &val);
+    void Asc_Shift(BTnode<D>* node, D &val);
+    void IN_Shift(BTnode<D>* node, D &val);
+
     void borrowLeftSibling(NTYPE NT, BTnode<D>* left, BTnode<D>* parent, BTnode<D>* node, unsigned short l, unsigned short i=0);
     void borrowRightSibling(NTYPE NT, BTnode<D>* node, BTnode<D>* parent, BTnode<D>* right, unsigned short l, unsigned short i=0);
     void mergeLeftSibling(NTYPE NT, BTnode<D>* left, BTnode<D>* parent, BTnode<D>* node, unsigned short l, unsigned short i=0);
@@ -62,7 +72,7 @@ public:
     void viewBFS(PRINT print=PRINT::M_ADD);
     void viewDFS(PRINT print=PRINT::M_ADD);
     bool search(D item);
-    bool insert(D item);
+    bool insert(D item); bool insert2(D item);
     bool remove(D item);
 };
 
@@ -102,8 +112,159 @@ bool BTREE<D>::search(D item){
     return false;
 }
 
+int x;
 template<typename D>
-bool BTREE<D>::insert(D item){
+void BTREE<D>::Desc_Shift(BTnode<D>* node, D &val){ s=false;
+    int j=node->K-1;
+    while(j>=0 && node->KEY[j]>val) j--;
+    for(;j>=0;j--) std::swap(node->KEY[j],val);
+    node=node->P;
+    int i;
+    // if(x==70) std::cout<<"  \n"<<val<<"  \n";
+    while(1){ 
+        i=(node->K-1);
+        while(i>=0 && node->KEY[i]>val) i--;
+    // if(x==70) std::cout<<"  \n"<<i<<" "<<val<<" "<<node->KEY[i]<<"  \n";
+
+        for(; i>=0; i--){ 
+            if(s) return;
+            std::swap(node->KEY[i],val);
+                // if(x==70) std::cout<<"  \n"<<i<<" "<<val<<" "<<node->KEY[i]<<"  \n";
+
+            if(node->LINK[i] == shift) return; 
+            R_IN_Shift(node->LINK[i],val);
+        }
+        if(s) return;
+        if(node!=ROOT) node=node->P; else return;
+    }
+}
+
+template<typename D>
+void BTREE<D>::R_IN_Shift(BTnode<D>* node, D &val){  // if(x==71){ std::cout<<"\n-- "; print_BTnode(node); std::cout<<" "<<val<<" --\n";}
+
+    int i;
+    if(node->LINK[0]) for(i=node->K; i>=0; i--){  // if(x==71) std::cout<<"  \n"<<" "<<val<<" "<<node->KEY[i]<<"  \n";
+
+            if(s) return;
+            if(node->LINK[i] == shift){ s=true; return; }
+                // if(x==71) std::cout<<"  \n"<<" "<<i<<" "<<val<<" "<<node->KEY[i]<<"  \n";
+
+            R_IN_Shift(node->LINK[i],val);
+                // if(x==71) std::cout<<"  \n"<<" "<<val<<" "<<node->KEY[i]<<"  \n";
+
+            if(s) return;
+            if((i-1)>=0) std::swap(node->KEY[i-1],val);
+                // if(x==71) std::cout<<"  \n"<<" "<<val<<" "<<node->KEY[i]<<"  \n";
+
+    }else{
+        i=(node->K-1);
+        while(i>=0 && node->KEY[i]>val) i--;
+        for(;i>=0;i--) std::swap(node->KEY[i],val);
+    }
+}
+
+template<typename D>
+void BTREE<D>::IN_Shift(BTnode<D>* node, D &val){ 
+    int i=0;
+    while(i<node->K && node->KEY[i]<val) i++;
+    
+    if(node->LINK[0]){
+        for(;i<node->K;i++){
+            std::swap(node->KEY[i],val);
+            if(node->LINK[i+1] == shift) return;
+            IN_Shift(node->LINK[i+1],val);
+        }
+        // IN_Shift(node->P,val);
+    }else 
+        for(;i<node->K;i++) std::swap(node->KEY[i],val);
+}
+ 
+template<typename D>
+int BTREE<D>::Shift_Search(BTnode<D>* node){ shift=nullptr;
+    QUEUE<BTnode<D>*> Q; 
+    BTnode<D>* tmp;
+    Q.enqueue(ROOT); 
+    while(!Q.empty()){ 
+        tmp=Q.dequeue(); 
+        for(int i=0; i<=tmp->K; i++) 
+            if(tmp->LINK[i]) Q.enqueue(tmp->LINK[i]);
+        if(tmp->K < O) shift=tmp;
+    }    
+    if(!shift){ return 0; }
+    else if(node->KEY[0] > shift->KEY[shift->K-1]) { while(shift->LINK[0]) shift=shift->LINK[0]; return -1; }
+    else if(node->KEY[node->K-1] < shift->KEY[0]) { while(shift->LINK[0]) shift=shift->LINK[shift->K-1]; return 1; }
+    return 0;
+}
+
+template<typename D>
+void BTREE<D>::fit_key(BTnode<D>* node, D key){
+    int n=0;
+
+    while(n<node->K && key>node->KEY[n]) n++;
+    for(;n<node->K;n++) 
+        std::swap(node->KEY[n],key);
+
+    node->KEY[node->K++]=key;
+}
+
+template<typename D>
+bool BTREE<D>::insert(D item){ bool e=false;
+    if(!ROOT){
+        ROOT=create(); N++; 
+        ROOT->KEY[0]=item; ROOT->K++;
+        return true;
+    }
+    BTnode<D>* ptr=ROOT; int i;
+    while(ptr){
+        i=0;
+        while(i<ptr->K && item>ptr->KEY[i]) i++;
+        if(i<ptr->K && item==ptr->KEY[i]) return false;
+        if(!ptr->LINK[i]) break;
+        if(ptr->K<O) e=true;
+        ptr=ptr->LINK[i];
+    }
+    
+    if(ptr->K==O){ 
+        if(N<(O+2) || e) split(ptr,item,nullptr);
+        else{ 
+            int Side_S=Shift_Search(ptr); 
+// if(x==70){ std::cout<<"\n-- "; print_BTnode(shift); std::cout<<" "<<item<<" --\n";}
+
+            if(Side_S<0){ 
+                Desc_Shift(ptr,item);
+                if(shift->K<O) fit_key(shift,item);
+                else
+                    { split(shift,item,nullptr); return true; }
+
+            }else if(Side_S>0){
+                int j=0;
+                while(j<ptr->K && ptr->KEY[j]<item) j++;
+                for(;j<ptr->K;j++) std::swap(ptr->KEY[j],item);
+                IN_Shift(ptr->P,item);
+
+                if(shift->K<O){
+                    int n=0;
+                    while(n<shift->K && item>shift->KEY[n]) n++;
+                    for(;n<shift->K;n++) std::swap(shift->KEY[n],item);
+                    shift->KEY[shift->K++]=item;
+                    return true;
+                }else{
+                    split(shift,item,nullptr); return true;
+                } 
+            }else{ split(ptr,item,nullptr); return true; }
+        }
+    }else{
+        unsigned short n=ptr->K;
+        while(n-- && n>=i){
+            ptr->KEY[n+1]=ptr->KEY[n];
+        }
+        ptr->KEY[i]=item; ptr->K++;
+    }
+    return true;
+}
+
+template<typename D>
+bool BTREE<D>::insert2(D item){
     if(!ROOT){
         ROOT=create(); N++; 
         ROOT->KEY[0]=item; ROOT->K++;
@@ -117,7 +278,9 @@ bool BTREE<D>::insert(D item){
         if(!ptr->LINK[i]) break;
         ptr=ptr->LINK[i];
     }
-    if(ptr->K==O){ split(ptr,item,nullptr);
+    if(ptr->K==O){ 
+        if(x==1){std::cout<<"\n-- "; print_BTnode(ptr); std::cout<<"  "<<item<<" --\n";}  
+        split(ptr,item,nullptr);
     }else{
         unsigned short n=ptr->K;
         while(n-- && n>=i){
@@ -142,6 +305,9 @@ void BTREE<D>::split(BTnode<D>* curr, D item, BTnode<D>* child){
                                     std::swap(tmpL,curr->LINK[j+1]); }
     else if(i>n) for(int j=i-1; j>=n; j--){ std::swap(tmpK,curr->KEY[j]);
                                             std::swap(tmpL,curr->LINK[j+1]); } 
+    for(int j=0; j<=curr->K; j++)
+        if(curr->LINK[j]) curr->LINK[j]->P=curr;
+    
     int k=0;
     node->LINK[k]=tmpL;  if(tmpL) tmpL->P = node;
     while(n<O){
@@ -499,8 +665,10 @@ bool BTREE<D>::remove(D item){
 
 template<typename D>
 void BTREE<D>::print_BTnode(BTnode<D>* ptr, PRINT print){
-    int i;
+    if(!ptr){ std::cout << "NULL"; return; }
 
+    int i;
+    bool ln=ptr->LINK[0]? 1:0;
     switch(print){
     case PRINT::IN_V:
         for(i=0; i<ptr->K; i++) std::cout<<ptr->KEY[i]<<" ";
@@ -523,13 +691,15 @@ void BTREE<D>::print_BTnode(BTnode<D>* ptr, PRINT print){
         std::cout<<"]\n";
 
         std::cout<<"L [";
-        if(ptr->LINK[0]) std::cout<<ptr->LINK[0];
-        else std::cout<<"NULL";
-
-        for(i=1; i<=ptr->K; i++){
-            std::cout<<"|";
-            if(ptr->LINK[i]) std::cout<<ptr->LINK[i];
-            else std::cout<<"NULL";
+        if(ln){
+            std::cout<<ptr->LINK[0];
+            for(i=1; i<=ptr->K; i++)
+                std::cout<<"|"<<ptr->LINK[i];
+        }
+        else{
+            std::cout<<"NULL";
+            for(i=1; i<=ptr->K; i++)
+                std::cout<<"|NULL";
         }
         std::cout<<"]\n";
 
@@ -550,13 +720,15 @@ void BTREE<D>::print_BTnode(BTnode<D>* ptr, PRINT print){
         std::cout<<"]\n";
 
         std::cout<<"L [";
-        if(ptr->LINK[0]) std::cout<<(std::uintptr_t)ptr->LINK[0];
-        else std::cout<<"NULL";
-
-        for(i=1; i<=ptr->K; i++){
-            std::cout<<"|";
-            if(ptr->LINK[i]) std::cout<<(std::uintptr_t)ptr->LINK[i];
-            else std::cout<<"NULL";
+        if(ln){
+            std::cout<<(std::uintptr_t)ptr->LINK[0];
+            for(i=1; i<=ptr->K; i++)
+                std::cout<<"|"<<(std::uintptr_t)ptr->LINK[i];
+        }
+        else{
+            std::cout<<"NULL";
+            for(i=1; i<=ptr->K; i++)
+                std::cout<<"|NULL";
         }
         std::cout<<"]\n";
 
@@ -656,98 +828,148 @@ using namespace std;
 
 int main() {
 
-    BTREE<int> T(4);
+    cout << "\n===== ASCENDING =====\n";
+    BTREE<int> T1(4);
 
-    // =========================
-    // PHASE 1: COMPLEX INSERT
-    // =========================
-    cout << "\n===== COMPLEX INSERT PHASE =====\n";
-
-    int insertPhase[] = { 
-        50, 20, 70, 10, 30, 60, 80,
-        5, 15, 25, 35, 55, 65, 75, 85,
-        // 2, 7, 12, 18, 22, 28, 32, 38,
-        // 52, 58, 62, 68, 72, 78, 82, 88,
-        // 90, 95, 98, 100
-    };
-
-    for(int x : insertPhase) {
-        cout << "insert " << x << endl;
-        T.insert(x);
+    for (x=1; x<=24; x++) {
+        // cout << "\n------------- " << x << endl;
+        // if(x>=76 && x<=80) cout << "\n\n------------- " << x << endl;
+        T1.insert(x);
+        // if(x>=81 && x<=80) T1.viewBFS();
     }
+    // T1.insert2(25);
+    T1.viewBFS();
 
-    cout << endl;
-    T.viewBFS();
 
-    cout << endl << endl;
-    T.viewIN();
+    // cout << "\n\n\n===== DESCENDING 24 -> 1 =====\n";
+    // BTREE<int> T2(4);
 
-    cout << endl << endl;
-    T.viewR_IN();
-
-    cout << endl << endl;
-
-    // // =========================
-    // // PHASE 2: COMPLEX DELETE
-    // // =========================
-    // cout << "\n\n===== COMPLEX DELETE PHASE =====\n";
-
-    // int deletePhase[] = {
-    //     5, 7, 12, 15, 18, 22, 25, 28,
-    //     30, 32, 35, 38,
-    //     50, 52, 55, 58,
-    //     60, 62, 65, 68,
-    //     70, 72, 75, 78,
-    //     80, 82, 85, 88,
-    //     90, 95, 98, 100
-    // };
-
-    // for(int x : deletePhase) {
-    //     cout << "delete " << x << endl;
-    //     T.remove(x);
+    // for (x = 25; x > 1; x--) {
+    //     // cout << "insert " << x << endl;
+    //     T2.insert(x); 
     // }
-    // T.viewBFS();
+    // T2.insert2(1);
+    // std::cout<<"\n_-_-_-_\n";
 
-
-    // // =========================
-    // // PHASE 3: REBUILD TREE
-    // // =========================
-    // cout << "\n\n===== REBUILD AFTER COLLAPSE =====\n";
-
-    // int rebuild[] = {
-    //     40, 45, 42, 44, 41,
-    //     46, 47, 43, 49,
-    //     39, 37, 36, 34, 33
-    // };
-
-    // for(int x : rebuild) {
-    //     cout << "insert " << x << endl;
-    //     T.insert(x);
-    // }
-    // T.viewBFS();
-
-
-    // // =========================
-    // // PHASE 4: FINAL WIPE
-    // // =========================
-    // cout << "\n\n===== FINAL CASCADE WIPE =====\n";
-
-    // int finalWipe[] = {
-    //     41, 42, 43, 44, 45,
-    //     46, 47, 49, 40,
-    //     39, 37, 36, 34, 33
-    // };
-
-    // for(int x : finalWipe) {
-    //     cout << "delete " << x << endl;
-    //     T.remove(x);
-    // }
-    // T.viewBFS(true);
-
-    // cout << "\n\n===== TEST COMPLETE =====\n";
+    // T2.viewBFS();
 
     return 0;
 }
+
+// int main() {
+
+//     BTREE<int> T(6);
+
+//     cout << "\n===== INSERT PHASE =====\n";
+//     int insertPhase[] = { 
+//         50, 20, 70, 10, 30, 60, 80,
+//         5, 15, 25, 35, 55, 65, 75, 85,
+//         2, 7, 12, 18, 22, 28, 32, 38,
+//         52, 58, 62, 68, 72, 78, 82, 88,
+//         90, 95, 98, 100
+//     };
+
+//     for(int x : insertPhase) {
+//         cout << "insert " << x << endl;
+//         T.insert(x);
+//     }
+
+//     cout << endl;  T.viewBFS();
+    
+//     cout << "\n\n";  T.viewIN();
+
+//     cout << "\n\n";  T.viewR_IN();
+
+//     cout << "\n\n";
+//     return 0;
+// }
+
+// int main() {
+
+//     BTREE<int> T(4);
+
+//     // =========================
+//     // PHASE 1: COMPLEX INSERT
+//     // =========================
+//     cout << "\n===== COMPLEX INSERT PHASE =====\n";
+
+//     int insertPhase[] = { 
+//         50, 20, 70, 10, 30, 60, 80,
+//         5, 15, 25, 35, 55, 65, 75, 85,
+//         2, 7, 12, 18, 22, 28, 32, 38,
+//         52, 58, 62, 68, 72, 78, 82, 88,
+//         90, 95, 98, 100
+//     };
+
+//     for(int x : insertPhase) {
+//         cout << "insert " << x << endl;
+//         T.insert(x);
+//     }
+
+//     cout << endl;
+//     T.viewBFS();
+
+//     // =========================
+//     // PHASE 2: COMPLEX DELETE
+//     // =========================
+//     cout << "\n\n===== COMPLEX DELETE PHASE =====\n";
+
+//     int deletePhase[] = {
+//         5, 7, 12, 15, 18, 22, 25, 28,
+//         30, 32, 35, 38,
+//         50, 52, 55, 58,
+//         60, 62, 65, 68,
+//         70, 72, 75, 78,
+//         80, 82, 85, 88,
+//         90, 95, 98, 100
+//     };
+
+//     for(int x : deletePhase) {
+//         cout << "delete " << x << endl;
+//         T.remove(x);
+//     }
+//     T.viewBFS();
+
+
+//     // =========================
+//     // PHASE 3: REBUILD TREE
+//     // =========================
+//     cout << "\n\n===== REBUILD AFTER COLLAPSE =====\n";
+
+//     int rebuild[] = {
+//         40, 45, 42, 44, 41,
+//         46, 47, 43, 49,
+//         39, 37, 36, 34, 33
+//     };
+
+//     for(int x : rebuild) {
+//         cout << "insert " << x << endl;
+//         T.insert(x);
+//     }
+//     T.viewBFS();
+
+
+//     // =========================
+//     // PHASE 4: FINAL WIPE
+//     // =========================
+//     cout << "\n\n===== FINAL CASCADE WIPE =====\n";
+
+//     int finalWipe[] = {
+//         41, 42, 43, 44, 45,
+//         46, 47, 49, 40,
+//         39, 37, 36, 34, 33
+//     };
+
+//     for(int x : finalWipe) {
+//         cout << "delete " << x << endl;
+//         T.remove(x);
+//     }
+//     T.viewBFS(true);
+
+//     cout << "\n\n===== TEST COMPLETE =====\n";
+
+//     return 0;
+// }
 
 // int main(){
 
