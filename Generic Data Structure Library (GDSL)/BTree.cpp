@@ -115,22 +115,17 @@ bool BTREE<D>::search(D item){
 int x;
 template<typename D>
 void BTREE<D>::Desc_Shift(BTnode<D>* node, D &val){ s=false;
-    int j=node->K-1;
-    while(j>=0 && node->KEY[j]>val) j--;
-    for(;j>=0;j--) std::swap(node->KEY[j],val);
-    node=node->P;
-    int i;
-    // if(x==70) std::cout<<"  \n"<<val<<"  \n";
-    while(1){ 
-        i=(node->K-1);
-        while(i>=0 && node->KEY[i]>val) i--;
-    // if(x==70) std::cout<<"  \n"<<i<<" "<<val<<" "<<node->KEY[i]<<"  \n";
+    int i=node->K-1;
+    while(i>=0 && node->KEY[i]>val) i--;
+    for(;i>=0;i--) std::swap(node->KEY[i],val);
 
+    node=node->P;
+    while(1){ 
+        i=node->K-1;
+        while(i>=0 && node->KEY[i]>val) i--;
         for(; i>=0; i--){ 
             if(s) return;
             std::swap(node->KEY[i],val);
-                // if(x==70) std::cout<<"  \n"<<i<<" "<<val<<" "<<node->KEY[i]<<"  \n";
-
             if(node->LINK[i] == shift) return; 
             R_IN_Shift(node->LINK[i],val);
         }
@@ -140,22 +135,14 @@ void BTREE<D>::Desc_Shift(BTnode<D>* node, D &val){ s=false;
 }
 
 template<typename D>
-void BTREE<D>::R_IN_Shift(BTnode<D>* node, D &val){  // if(x==71){ std::cout<<"\n-- "; print_BTnode(node); std::cout<<" "<<val<<" --\n";}
-
+void BTREE<D>::R_IN_Shift(BTnode<D>* node, D &val){
     int i;
-    if(node->LINK[0]) for(i=node->K; i>=0; i--){  // if(x==71) std::cout<<"  \n"<<" "<<val<<" "<<node->KEY[i]<<"  \n";
-
+    if(node->LINK[0]) for(i=node->K; i>=0; i--){  
             if(s) return;
             if(node->LINK[i] == shift){ s=true; return; }
-                // if(x==71) std::cout<<"  \n"<<" "<<i<<" "<<val<<" "<<node->KEY[i]<<"  \n";
-
             R_IN_Shift(node->LINK[i],val);
-                // if(x==71) std::cout<<"  \n"<<" "<<val<<" "<<node->KEY[i]<<"  \n";
-
             if(s) return;
             if((i-1)>=0) std::swap(node->KEY[i-1],val);
-                // if(x==71) std::cout<<"  \n"<<" "<<val<<" "<<node->KEY[i]<<"  \n";
-
     }else{
         i=(node->K-1);
         while(i>=0 && node->KEY[i]>val) i--;
@@ -164,19 +151,41 @@ void BTREE<D>::R_IN_Shift(BTnode<D>* node, D &val){  // if(x==71){ std::cout<<"\
 }
 
 template<typename D>
-void BTREE<D>::IN_Shift(BTnode<D>* node, D &val){ 
+void BTREE<D>::Asc_Shift(BTnode<D>* node, D &val){ s=false;
     int i=0;
     while(i<node->K && node->KEY[i]<val) i++;
-    
-    if(node->LINK[0]){
-        for(;i<node->K;i++){
+    for(;i<node->K;i++) std::swap(node->KEY[i],val);
+
+    node=node->P;
+    while(1){
+        i=0;
+        while(i<node->K && node->KEY[i]<val) i++;
+        for(; i<node->K; i++){
+            if(s) return;
             std::swap(node->KEY[i],val);
-            if(node->LINK[i+1] == shift) return;
+            if(node->LINK[i+1] == shift) return; 
             IN_Shift(node->LINK[i+1],val);
         }
-        // IN_Shift(node->P,val);
-    }else 
+        if(s) return;
+        if(node!=ROOT) node=node->P; else return;
+    }
+}
+
+template<typename D>
+void BTREE<D>::IN_Shift(BTnode<D>* node, D &val){ 
+    
+    int i;
+    if(node->LINK[0]) for(i=0;i<=node->K;i++){
+            if(s) return;
+            if(node->LINK[i] == shift){ s=true; return; }
+            IN_Shift(node->LINK[i],val);
+            if(s) return;
+            if(i<node->K) std::swap(node->KEY[i],val);
+    }else{
+        i=0;
+        while(i<node->K && node->KEY[i]<val) i++;
         for(;i<node->K;i++) std::swap(node->KEY[i],val);
+    }    
 }
  
 template<typename D>
@@ -228,7 +237,6 @@ bool BTREE<D>::insert(D item){ bool e=false;
         if(N<(O+2) || e) split(ptr,item,nullptr);
         else{ 
             int Side_S=Shift_Search(ptr); 
-// if(x==70){ std::cout<<"\n-- "; print_BTnode(shift); std::cout<<" "<<item<<" --\n";}
 
             if(Side_S<0){ 
                 Desc_Shift(ptr,item);
@@ -237,20 +245,11 @@ bool BTREE<D>::insert(D item){ bool e=false;
                     { split(shift,item,nullptr); return true; }
 
             }else if(Side_S>0){
-                int j=0;
-                while(j<ptr->K && ptr->KEY[j]<item) j++;
-                for(;j<ptr->K;j++) std::swap(ptr->KEY[j],item);
-                IN_Shift(ptr->P,item);
+                Asc_Shift(ptr,item);
+                if(shift->K<O) fit_key(shift,item);
+                else
+                    { split(shift,item,nullptr); return true; } 
 
-                if(shift->K<O){
-                    int n=0;
-                    while(n<shift->K && item>shift->KEY[n]) n++;
-                    for(;n<shift->K;n++) std::swap(shift->KEY[n],item);
-                    shift->KEY[shift->K++]=item;
-                    return true;
-                }else{
-                    split(shift,item,nullptr); return true;
-                } 
             }else{ split(ptr,item,nullptr); return true; }
         }
     }else{
@@ -828,29 +827,51 @@ using namespace std;
 
 int main() {
 
-    cout << "\n===== ASCENDING =====\n";
-    BTREE<int> T1(4);
+BTREE<int> T(4);
 
-    for (x=1; x<=24; x++) {
-        // cout << "\n------------- " << x << endl;
-        // if(x>=76 && x<=80) cout << "\n\n------------- " << x << endl;
-        T1.insert(x);
-        // if(x>=81 && x<=80) T1.viewBFS();
-    }
-    // T1.insert2(25);
-    T1.viewBFS();
+int arr[] = {
+    73, 12, 98, 41, 5, 116, 27, 84, 63, 19,
+    109, 2, 56, 91, 34, 121, 8, 76, 45, 103,
+    16, 67, 30, 118, 52, 7, 87, 23, 95, 39,
+    61, 14, 110, 70, 43, 100, 4, 82, 25, 115,
+    58, 31, 92, 10, 72, 120, 36, 65, 18, 107,
+    49, 78, 1, 88, 54, 113, 21, 69, 102, 6,
+    47, 86, 29, 119, 60, 33, 96, 11, 75, 44,
+    81, 15, 105, 38, 90, 24, 112, 57, 68, 101,
+    20, 35, 83, 9, 62, 117, 46, 79, 28, 94,
+    55, 17, 108, 42, 71, 114, 3, 89, 26, 66,
+    37, 122, 53, 13, 97, 59, 85, 48, 104, 22,
+    74, 111, 32, 93, 50, 123, 64, 80, 40, 106,
+    51, 77, 99, 124
+};
+
+for (x=0; x<124; x++) {
+    // cout << "\n------------- " << arr[x] << endl;
+    T.insert(arr[x]);
+}
+
+    T.viewBFS();
+
+    // cout << "\n===== ASCENDING =====\n";
+    // BTREE<int> T1(4);
+
+    // for (x=1; x<=24; x++) {
+    //     // cout << "\n------------- " << x << endl;
+    //     // if(x>=76 && x<=80) cout << "\n\n------------- " << x << endl;
+    //     T1.insert(x);
+    //     // if(x>=81 && x<=80) T1.viewBFS();
+    // }
+    // // T1.insert2(25);
+    // T1.viewBFS();
 
 
     // cout << "\n\n\n===== DESCENDING 24 -> 1 =====\n";
     // BTREE<int> T2(4);
 
-    // for (x = 25; x > 1; x--) {
+    // for (x = 625; x >= 1; x--) {
     //     // cout << "insert " << x << endl;
     //     T2.insert(x); 
     // }
-    // T2.insert2(1);
-    // std::cout<<"\n_-_-_-_\n";
-
     // T2.viewBFS();
 
     return 0;
